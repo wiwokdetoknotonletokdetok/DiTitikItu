@@ -1,6 +1,6 @@
 import type { RegisterUserRequest } from '@/dto/RegisterUserRequest.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
-import {ApiError} from '@/exception/ApiError.ts'
+import { ApiError } from '@/exception/ApiError.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -13,11 +13,10 @@ export async function registerUser(registerUserRequest: RegisterUserRequest): Pr
     body: JSON.stringify(registerUserRequest)
   })
 
-  const data: WebResponse<string> = await res.json()
-
   if (!res.ok) {
+    const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
   }
 
-  return data
+  return res.json()
 }

@@ -1,24 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { registerUser } from '@/api/registerUser.ts'
+import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
+import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 
-function RegisterUser() {
+function LoginUser() {
   const navigate = useNavigate()
-  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
-      const res: WebResponse<string> = await registerUser({ name, email, password, confirmPassword })
-      setMessage('Register berhasil: ' + res.data)
-      navigate('/login')
+      const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
+      setMessage('Login berhasil: ' + res.data.token)
+      navigate('/')
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)
@@ -30,15 +29,6 @@ function RegisterUser() {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
         <div>
           <label>Username:</label>
           <input
@@ -57,15 +47,6 @@ function RegisterUser() {
           />
         </div>
 
-        <div>
-          <label>Confirm Password:</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-
         <button type="submit">Login</button>
       </form>
 
@@ -74,4 +55,4 @@ function RegisterUser() {
   )
 }
 
-export default RegisterUser
+export default LoginUser
