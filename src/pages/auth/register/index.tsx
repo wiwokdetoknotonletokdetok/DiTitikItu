@@ -68,7 +68,7 @@ function RegisterUser() {
 
         <button type="submit">Register</button>
       </form>
-
+      <p>Sudah punya akun? <a href="/auth/login"><strong>Login</strong></a> sekarang!</p>
       {message && <p>{message}</p>}
     </div>
   )

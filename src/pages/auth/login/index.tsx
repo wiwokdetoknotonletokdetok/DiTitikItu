@@ -16,9 +16,10 @@ function LoginUser() {
 
     try {
       const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
-      setMessage('Login berhasil: ' + res.data.token)
-      navigate('/')
+      console.log('Login sukses:', res.data.token)
+      navigate('/books')
     } catch (err) {
+      console.error('Login error:', err)
       if (err instanceof ApiError) {
         setMessage(err.message)
       }
@@ -49,7 +50,8 @@ function LoginUser() {
 
         <button type="submit">Login</button>
       </form>
-
+      
+      <p>Belum punya akun? <a href="/auth/register"><strong>Register</strong></a> sekarang!</p>
       {message && <p>{message}</p>}
     </div>
   )
