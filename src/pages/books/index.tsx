@@ -6,19 +6,23 @@ import BookCard from '@/components/BookCard'
 import MapView from '@/components/MapView'
 
 export default function BookList() {
+  const userId = localStorage.getItem('userId') 
+  console.log('User ID from localStorage:', userId || 'tidak ditemukan')
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const navigate = useNavigate()
   const dummyBooks = [
     { id: '1', title: 'Pemrograman Java', lat: -6.2, lng: 106.8 },
     { id: '2', title: 'Spring Boot', lat: -6.21, lng: 106.83 }
   ]
-  
+
   useEffect(() => {
     fetchBooks()
       .then(data => setBooks(data))
       .catch(err => console.error('Error:', err))
   }, [])
-  
+
+  if (books.length === 0) return <p>Tidak ada buku yang ditemukan.</p>
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Daftar Buku</h1>
