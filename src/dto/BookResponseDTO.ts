@@ -3,7 +3,9 @@ export interface BookResponseDTO {
   isbn: string
   title: string
   synopsis: string
-  rating: number
+  totalPages: number
+  publishedYear: number
+  totalRatings: number
   bookPicture: string
   publisherName: string
   authorNames: string[]
