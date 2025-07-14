@@ -28,6 +28,7 @@ export async function loginUser(loginUserRequest: LoginUserRequest): Promise<Web
 
   const token = json.data.token
   localStorage.setItem("token", token)
+  console.log('Token saved to localStorage Login:', token)
 
   const decoded = jwtDecode<JwtPayload>(token)
   localStorage.setItem("userId", decoded.sub)
