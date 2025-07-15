@@ -6,23 +6,28 @@ import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL_LOCAL
 
-export async function fetchBooks(
-  title?: string,
-  isbn?: string,
-  author?: string,
-  genre?: string,
+export async function fetchBooks(params: {
+  title?: string
+  isbn?: string
+  author?: string
+  genre?: string
   publisher?: string
-): Promise<BookSummaryDTO[]> {
+} = {}): Promise<BookSummaryDTO[]> {
+  const searchParams = new URLSearchParams()
   
-  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value) searchParams.append(key, value)
+  }
 
-  if (title) params.append('title', title)
-  if (isbn) params.append('isbn', isbn)
-  if (author) params.append('author', author)
-  if (genre) params.append('genre', genre)
-  if (publisher) params.append('publisher', publisher)
+  const url = `${BASE_URL}/books?${searchParams.toString()}`
+  console.log('Fetching books from:', url)
+  const res = await fetch(`${BASE_URL}/books?${searchParams.toString()}`)
 
-  const res = await fetch(`${BASE_URL}/books?${params.toString()}`)
+  console.log('Content-Type:', res.headers.get('content-type'))
+
+  if (!res.headers.get('content-type')?.includes('application/json')) {
+    throw new Error("Server tidak mengembalikan JSON")
+  }
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
@@ -37,8 +42,8 @@ export async function fetchBookById(id: string): Promise<BookResponseDTO> {
   const res = await fetch(`${BASE_URL}/books/${id}`)
 
   if (!res.ok) {
-    const errText = await res.text()
-    throw new Error(`Gagal fetch detail buku: ${res.status} - ${errText}`)
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)
   }
 
   const json: WebResponse<BookResponseDTO> = await res.json()
@@ -56,8 +61,8 @@ export async function createBook(data: BookRequestDTO): Promise<WebResponse<stri
   })
 
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.errors || 'Gagal membuat buku')
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)
   }
 
   return res.json()

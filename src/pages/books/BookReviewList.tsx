@@ -1,9 +1,9 @@
-import type { ReviewResponseDTO } from '@/dto/ReviewResponseDTO'
+import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { deleteReview, updateReview } from '@/api/reviews'
 import { useState } from 'react'
 
 interface BookReviewListProps {
-  reviews: ReviewResponseDTO[]
+  reviews: ReviewWithUserDTO[]
   bookId: string
   onUpdate: () => void
 }
@@ -45,10 +45,27 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
     <div className="mt-6">
       <h2 className="text-xl font-semibold mb-2">Review Pembaca</h2>
 
+      {reviews.length === 0 && (
+          <p className="text-gray-500">Belum ada review untuk buku ini.</p>
+        )
+      }
+
       {/* --- Review Milik Sendiri --- */}
       {myReview && (
         <div className="border rounded p-4 mb-4 bg-gray-50">
-          <h3 className="text-md font-semibold mb-2">Review Kamu</h3>
+          <div className="flex items-center mb-2 gap-2">
+            <img 
+                src={myReview.profilePicture} 
+                alt="Foto Profil" 
+                style={{
+                  width: '200px', 
+                  height: '200px', 
+                  borderRadius: '50%', 
+                  overflow: 'hidden'
+                }} 
+              />
+            <h3 className="text-md font-semibold">{myReview.name} </h3>
+          </div>
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-2">
               <textarea
@@ -87,12 +104,13 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
       )}
 
       {/* --- Review Orang Lain --- */}
-      {otherReviews.length === 0 ? (
-        <p className="text-sm text-gray-500">Belum ada review dari pengguna lain.</p>
-      ) : (
         <div className="space-y-4">
           {otherReviews.map((r, i) => (
             <div key={i} className="border-t pt-2 mt-2">
+              <div className="flex items-center gap-2 mb-1">
+                <img src={r.profilePicture} alt={r.name} className="w-8 h-8 rounded-full" />
+                <span className="text-sm font-semibold">{r.name}</span>
+              </div>
               <p className="text-sm italic">"{r.message}"</p>
               <p className="text-xs text-gray-600">
                 Rating: {r.rating} | {new Date(r.createdAt).toLocaleString()}
@@ -100,7 +118,6 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
             </div>
           ))}
         </div>
-      )}
     </div>
   )
 }
