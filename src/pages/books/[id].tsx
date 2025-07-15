@@ -1,23 +1,23 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { fetchBookById } from '@/api/books'
-import { fetchReviews } from '@/api/reviews'
 import { fetchBookLocations } from '@/api/bookLocation'
 
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
-import type { ReviewResponseDTO } from '@/dto/ReviewResponseDTO'
+import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 
 import BookReviewForm from './AddBookReviewForm'
 import BookReviewList from './BookReviewList'
 import AddBookLocationForm from './AddBookLocationForm'
 import BookLocationList from './BookLocationList'
+import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
 
 export default function BookDetailPage() {
   const { id } = useParams()
   const [book, setBook] = useState<BookResponseDTO | null>(null)
   const [loading, setLoading] = useState(true)
-  const [reviews, setReviews] = useState<ReviewResponseDTO[]>([])
+  const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
   const [locations, setLocations] = useState<BookLocationResponse[]>([])
   
   const fetchLocations = async () => {
@@ -28,12 +28,12 @@ export default function BookDetailPage() {
   const fetchData = async () => {
     if (!id) return
     try {
-      const [bookData, reviewData] = await Promise.all([
+      const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviews(id)
+        fetchReviewsWithUser(id)
       ])
       setBook(bookData)
-      setReviews(reviewData)
+      setReviews(reviewDataWithUser)
       await fetchLocations()
     } catch (err) {
       console.error('Gagal fetch data:', err)
@@ -69,7 +69,7 @@ export default function BookDetailPage() {
       <BookReviewForm
         bookId={id!}
         onSuccess={async () => {
-          const updated = await fetchReviews(id!)
+          const updated = await fetchReviewsWithUser(id!)
           setReviews(updated)
         }}
       />
@@ -77,8 +77,9 @@ export default function BookDetailPage() {
       <BookReviewList
         reviews={reviews}
         bookId={id!}
-        onUpdate={() => fetchReviews(id!).then(setReviews)}
+        onUpdate={() => fetchReviewsWithUser(id!).then(setReviews)}
       />
+
     </div>
   )
 }

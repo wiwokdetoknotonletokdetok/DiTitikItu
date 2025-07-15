@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { postReview } from '@/api/reviews'
+import { ApiError } from '@/exception/ApiError'
 
 interface AddBookReviewFormProps {
   bookId: string
@@ -9,16 +10,21 @@ interface AddBookReviewFormProps {
 export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormProps) {
   const [message, setMessage] = useState('')
   const [rating, setRating] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
     try {
       await postReview(bookId, { message, rating })
       setMessage('')
       setRating(0)
       onSuccess()
     } catch (err) {
-      console.error('Gagal kirim review:', err)
+      if (err instanceof ApiError) {
+        setError(err.message || err.errors?.[0] || "Terjadi kesalahan.")
+      }
     }
   }
 
@@ -49,6 +55,7 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
         >
           Kirim Review
         </button>
+        {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
       </form>
     </div>
   )

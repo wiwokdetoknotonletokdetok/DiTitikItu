@@ -29,8 +29,8 @@ export async function postReview(bookId: string, review: ReviewRequestDTO): Prom
   })
 
   if (!res.ok) {
-    const errText = await res.text()
-    throw new Error(`Gagal kirim review: ${res.status} - ${errText}`)
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)
   }
 }
 
