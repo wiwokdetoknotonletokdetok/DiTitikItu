@@ -18,7 +18,7 @@ function RegisterUser() {
     try {
       const res: WebResponse<string> = await registerUser({ name, email, password, confirmPassword })
       setMessage('Register berhasil: ' + res.data)
-      navigate('/login')
+      navigate('/books')
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)
