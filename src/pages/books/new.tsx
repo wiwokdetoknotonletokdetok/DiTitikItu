@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createBook } from '@/api/books'
+import { ApiError } from '@/exception/ApiError'
 
 export default function NewBookPage() {
   const [form, setForm] = useState({
@@ -47,7 +48,9 @@ export default function NewBookPage() {
       setMessage('Buku berhasil ditambahkan!')
     } catch (err) {
       console.error(err)
-      setMessage('Gagal menambahkan buku.')
+      if (err instanceof ApiError) {
+        setMessage(err.message)
+      }
     }
   }
 
