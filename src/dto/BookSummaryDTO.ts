@@ -2,7 +2,7 @@ export interface BookSummaryDTO {
   id: string
   title: string
   isbn: string
-  rating: number
+  totalRatings: number
   bookPicture: string
   publisherName: string
   authorNames: string[]
