@@ -1,8 +1,17 @@
 import {useRoutes} from 'react-router-dom'
 import routes from '~react-pages'
+import MainLayout from './layouts/MainLayout';
 
 function App() {
-  return useRoutes(routes)
+  const element = useRoutes([
+    {
+      path: '/',
+      element: <MainLayout />,
+      children: routes,
+    },
+  ]);
+
+  return element;
 }
 
 export default App
