@@ -37,11 +37,24 @@ export default function BookDetailPage() {
       setBook(bookData)
       setReviews(reviewDataWithUser)
       await fetchLocations()
-      console.log('Book data fetched:', bookData)
     } catch (err) {
       console.error('Gagal fetch data:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchBookAndReviews = async () => {
+    if (!id) return
+    try {
+      const [bookData, reviewDataWithUser] = await Promise.all([
+        fetchBookById(id),
+        fetchReviewsWithUser(id),
+      ])
+      setBook(bookData)
+      setReviews(reviewDataWithUser)
+    } catch (err) {
+      console.error('Gagal fetch data:', err)
     }
   }
 
@@ -80,7 +93,6 @@ export default function BookDetailPage() {
               <p><strong>🏷️ Genre:</strong> {book.genreNames.join(', ')}</p>
               <p><strong>📚 Halaman:</strong> {book.totalPages}</p>
               <p><strong>📅 Terbit:</strong> {book.publishedYear}</p>
-              <p><strong>🌐 Bahasa:</strong> {book.language}</p>
           </div>
       </div>
       
@@ -117,18 +129,8 @@ export default function BookDetailPage() {
 
       <div>
         <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2">💬 Ulasan Pengguna</h2>
-        <BookReviewForm
-          bookId={id!}
-          onSuccess={async () => {
-            const updated = await fetchReviewsWithUser(id!)
-            setReviews(updated)
-          }}
-        />
-        <BookReviewList
-          reviews={reviews}
-          bookId={id!}
-          onUpdate={() => fetchReviewsWithUser(id!).then(setReviews)}
-        />
+        <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+        <BookReviewList reviews={reviews} bookId={id!} onUpdate={fetchBookAndReviews} />
       </div>
     </div>
   )
