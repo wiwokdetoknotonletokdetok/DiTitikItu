@@ -16,7 +16,7 @@ function UserProfile() {
 
   const handleLogout = () => {
     logout()
-    navigate('/auth/login')
+    navigate('/books')
   }
 
   useEffect(() => {
