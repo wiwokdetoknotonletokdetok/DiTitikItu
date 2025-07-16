@@ -5,6 +5,7 @@ export interface BookResponseDTO {
   synopsis: string
   totalPages: number
   publishedYear: number
+  language: string
   totalRatings: number
   bookPicture: string
   publisherName: string

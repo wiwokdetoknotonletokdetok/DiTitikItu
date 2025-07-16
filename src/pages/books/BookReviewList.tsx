@@ -103,21 +103,20 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         </div>
       )}
 
-      {/* --- Review Orang Lain --- */}
-        <div className="space-y-4">
-          {otherReviews.map((r, i) => (
-            <div key={i} className="border-t pt-2 mt-2">
-              <div className="flex items-center gap-2 mb-1">
-                <img src={r.profilePicture} alt={r.name} className="w-8 h-8 rounded-full" />
-                <span className="text-sm font-semibold">{r.name}</span>
-              </div>
-              <p className="text-sm italic">"{r.message}"</p>
-              <p className="text-xs text-gray-600">
-                Rating: {r.rating} | {new Date(r.createdAt).toLocaleString()}
-              </p>
+      <div className="space-y-4">
+        {otherReviews.map((r, i) => (
+          <div key={i} className="border-t pt-2 mt-2">
+            <div className="flex items-center gap-2 mb-1">
+              <img src={r.profilePicture} alt={r.name} className="w-8 h-8 rounded-full" />
+              <span className="text-sm font-semibold">{r.name}</span>
             </div>
-          ))}
-        </div>
+            <p className="text-sm italic">"{r.message}"</p>
+            <p className="text-xs text-gray-600">
+              Rating: {r.rating} | {new Date(r.createdAt).toLocaleString()}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

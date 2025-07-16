@@ -6,7 +6,6 @@ export interface BookRequestDTO {
   totalPages: number
   publishedYear: number
   language: string
-  rating: number
   publisherName: string
   authorNames: string[]
   genreIds: number[] 

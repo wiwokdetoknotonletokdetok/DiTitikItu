@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { postBookLocation } from '@/api/bookLocation' 
+import { ApiError } from '@/exception/ApiError'
 
 type AddBookLocationFormProps = {
   bookId: string
@@ -27,13 +28,14 @@ export default function AddBookLocationForm({ bookId, onSuccess }: AddBookLocati
       onSuccess()
     } catch (err) {
       console.error(err)
-      setMessage('Gagal menambahkan lokasi.')
+      if (err instanceof ApiError) {
+        setMessage(err.message)
+      }
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2 mt-4">
-      <h3 className="font-medium">Tambah Lokasi Buku</h3>
       <input
         type="text"
         placeholder="Nama Lokasi"
@@ -60,7 +62,7 @@ export default function AddBookLocationForm({ bookId, onSuccess }: AddBookLocati
           className="border rounded p-1 w-1/2"
         />
       </div> <br />
-      <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded">
+      <button type="submit" className="bg-[#1E497C] text-white px-3 py-1 rounded hover:bg-[#5C8BC1]">
         Tambah Lokasi
       </button>
       {message && <p className="text-sm text-gray-600">{message}</p>}
