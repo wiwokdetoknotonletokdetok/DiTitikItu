@@ -3,21 +3,12 @@ import { useParams } from 'react-router-dom'
 import { userProfile } from '@/api/userProfile.ts'
 import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { logout } from '@/api/userProfile.ts'
-import { useNavigate } from 'react-router-dom'
 
 function UserProfile() {
   const { userId } = useParams<{ userId: string }>()
   const [profile, setProfile] = useState<UserProfileResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/auth/login')
-  }
 
   useEffect(() => {
     if (!userId) return
@@ -58,7 +49,6 @@ function UserProfile() {
       <p><strong>Followers:</strong> {profile.followers}</p>
       <p><strong>Followings:</strong> {profile.followings}</p>
       <p><strong>Points:</strong> {profile.points}</p>
-      <button onClick={handleLogout}>Logout</button>
     </div>
   )
 }

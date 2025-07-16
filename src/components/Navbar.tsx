@@ -1,41 +1,26 @@
-import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { jwtDecode } from "jwt-decode"
-
-type JwtPayload = {
-  sub: string;
-};
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId, logout } = useAuth();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        setUserId(decoded.sub);
-      } catch (error) {
-        console.error('Token invalid', error);
-        setUserId(null);
-      }
-    } else {
-      setUserId(null);
-    }
-  }, []);
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login');
+  };
 
   return (
     <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-      <Link to="/" style={{ marginRight: '1rem' }}>
-        Beranda
-      </Link>
+      <Link to="/" style={{ marginRight: '1rem' }}>Beranda</Link>
       {userId ? (
-        <Link to={`/profile/${userId}`}>Profil</Link>
+        <>
+          <Link to={`/profile/${userId}`} style={{ marginRight: '1rem' }}>Profil</Link>
+          <button onClick={handleLogout}>Logout</button>
+        </>
       ) : (
         <>
-          <Link to="/auth/login" style={{ marginRight: '1rem' }}>
-            Login
-          </Link>
+          <Link to="/auth/login" style={{ marginRight: '1rem' }}>Login</Link>
           <Link to="/auth/register">Register</Link>
         </>
       )}

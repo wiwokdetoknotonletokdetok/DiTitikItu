@@ -5,6 +5,9 @@ import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { jwtDecode } from 'jwt-decode'
+
 
 function LoginUser() {
   const navigate = useNavigate()
@@ -12,13 +15,23 @@ function LoginUser() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const { setUserId } = useAuth()
+
 
   const handleSubmit = async (e: React.MouseEvent | React.FormEvent) => {
     e.preventDefault()
 
     try {
       const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
-      console.log('Login sukses:', res.data.token)
+
+      const token = res.data.token
+      localStorage.setItem('token', token)
+
+      const decoded = jwtDecode<{ sub: string }>(token)
+      setUserId(decoded.sub)
+
+      console.log('Login sukses:', token)
+
       navigate('/books')
     } catch (err) {
       console.error('Login error:', err)
