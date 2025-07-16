@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
-  const { userId, logout } = useAuth();
+  const { userId, name, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,6 +18,7 @@ export default function Navbar() {
       {userId ? (
         <>
           <Link to={`/profile/${userId}`} style={{ marginRight: '1rem' }}>Profil</Link>
+          <span style={{ marginRight: '1rem' }}>Hi, {name}!</span>
           <button onClick={handleLogout}>Logout</button>
         </>
       ) : (

@@ -7,7 +7,7 @@ import { ApiError } from '@/exception/ApiError.ts'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { jwtDecode } from 'jwt-decode'
-
+import { userProfile } from '@/api/userProfile.ts'
 
 function LoginUser() {
   const navigate = useNavigate()
@@ -15,7 +15,7 @@ function LoginUser() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const { setUserId } = useAuth()
+  const { setUserId, setName } = useAuth()
 
 
   const handleSubmit = async (e: React.MouseEvent | React.FormEvent) => {
@@ -29,6 +29,9 @@ function LoginUser() {
 
       const decoded = jwtDecode<{ sub: string }>(token)
       setUserId(decoded.sub)
+
+      const profile = await userProfile(decoded.sub);
+      setName(profile.data.name);
 
       console.log('Login sukses:', token)
 
