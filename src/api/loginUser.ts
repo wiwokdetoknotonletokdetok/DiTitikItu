@@ -19,6 +19,7 @@ export async function loginUser(loginUserRequest: LoginUserRequest): Promise<Web
     body: JSON.stringify(loginUserRequest)
   })
 
+  console.log('Token', localStorage.getItem('token'))
   const json: WebResponse<LoginUserResponse> = await res.json()
 
   if (!res.ok) {

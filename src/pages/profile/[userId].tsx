@@ -16,7 +16,7 @@ function UserProfile() {
 
   const handleLogout = () => {
     logout()
-    navigate('/login') // Redirect ke halaman login
+    navigate('/auth/login')
   }
 
   useEffect(() => {
