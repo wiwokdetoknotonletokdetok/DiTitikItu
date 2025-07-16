@@ -10,7 +10,6 @@ export async function fetchBookLocations(bookId: string): Promise<BookLocationRe
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
-    console.error('Error fetching book locations:', data.errors)
     throw new ApiError(data.errors, res.status, data.errors)
   }
   
@@ -32,4 +31,34 @@ export async function postBookLocation(bookId: string, location: BookLocationReq
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
   }
+}
+
+export async function updateBookLocation(bookId: string, locationId: string, location: BookLocationRequest): Promise<void> {
+  const res = await fetch(`${BASE_URL}/books/${bookId}/locations/${locationId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(location)
+  })
+
+  if (!res.ok) {
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)
+  }
+}
+
+export async function deleteBookLocation(bookId: string, locationId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/books/${bookId}/locations/${locationId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })  
+
+  if (!res.ok) {
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)    
+  } 
 }

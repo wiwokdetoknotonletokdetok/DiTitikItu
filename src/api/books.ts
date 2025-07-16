@@ -19,15 +19,7 @@ export async function fetchBooks(params: {
     if (value) searchParams.append(key, value)
   }
 
-  const url = `${BASE_URL}/books?${searchParams.toString()}`
-  console.log('Fetching books from:', url)
   const res = await fetch(`${BASE_URL}/books?${searchParams.toString()}`)
-
-  console.log('Content-Type:', res.headers.get('content-type'))
-
-  if (!res.headers.get('content-type')?.includes('application/json')) {
-    throw new Error("Server tidak mengembalikan JSON")
-  }
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
@@ -50,8 +42,8 @@ export async function fetchBookById(id: string): Promise<BookResponseDTO> {
   return json.data
 }
 
-export async function createBook(data: BookRequestDTO): Promise<WebResponse<string>> {
-  const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/books`, {
+export async function createBook(data: BookRequestDTO): Promise<void> {
+  const res = await fetch(`${BASE_URL}/books`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -60,10 +52,27 @@ export async function createBook(data: BookRequestDTO): Promise<WebResponse<stri
     body: JSON.stringify(data)
   })
 
+  console.log('createBook response:', res)
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
   }
+}
 
-  return res.json()
+export async function updateBook(id: string, data: BookRequestDTO): Promise<void> {
+  console.log('updateBook payload:', data)
+  const res = await fetch(`${BASE_URL}/books/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(data)
+  })
+
+  console.log('updateBook response:', res)
+  if (!res.ok) {
+    const data: WebResponse<string> = await res.json()
+    throw new ApiError(data.errors, res.status, data.errors)
+  }
 }

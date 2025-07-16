@@ -1,9 +1,17 @@
-import { useState } from 'react'
-import { createBook } from '@/api/books'
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { fetchBookById, updateBook } from '@/api/books'
 import { ApiError } from '@/exception/ApiError'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 
-export default function NewBookPage() {
-  const [form, setForm] = useState({
+export default function EditBookPage() {
+  const { bookId: id } = useParams()
+  const navigate = useNavigate()
+
+  const [book, setBook] = useState<BookResponseDTO | null>(null)
+  const [message, setMessage] = useState('')
+  const [form, setForm] = useState<BookRequestDTO>({
     isbn: '',
     title: '',
     synopsis: '',
@@ -11,11 +19,12 @@ export default function NewBookPage() {
     totalPages: 0,
     publishedYear: 0,
     language: '',
-    rating: 0,
     publisherName: '',
-    authorNames: '',
-    genreIds: [] as number[],
+    authorNames: [],
+    genreIds: [],
   })
+
+  const [authorInput, setAuthorInput] = useState('')
 
   const GENRE_OPTIONS = [
     'horror',
@@ -27,24 +36,53 @@ export default function NewBookPage() {
     'Sains',
     'Biografi',
   ]
-  
-  const [message, setMessage] = useState('')
-  
+
+  useEffect(() => {
+    if (!id) return
+    const fetchData = async () => {
+      try {
+        const data = await fetchBookById(id)
+        setBook(data)
+        setForm({
+          isbn: data.isbn,
+          title: data.title,
+          synopsis: data.synopsis,
+          bookPicture: data.bookPicture,
+          totalPages: data.totalPages,
+          publishedYear: data.publishedYear,
+          language: data.language,
+          publisherName: data.publisherName,
+          authorNames: data.authorNames,
+          genreIds: data.genreNames.map(name => GENRE_OPTIONS.findIndex(opt => opt.toLowerCase() === name.toLowerCase()) + 1),
+        })
+        console.log('Book data fetched:', data)
+        setAuthorInput(data.authorNames.join(', '))
+      } catch (err) {
+        console.error(err)
+        if (err instanceof ApiError) {
+          setMessage(err.message)
+        }
+      }
+    }
+
+    fetchData()
+  }, [id])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!id) return
     try {
-      await createBook({
+      await updateBook(id, {
         ...form,
-        authorNames: form.authorNames.split(',').map(name => name.trim()),
-        genreIds: form.genreIds, 
+        authorNames: authorInput.split(',').map(name => name.trim()),
         totalPages: Number(form.totalPages),
         publishedYear: Number(form.publishedYear),
       })
-      setMessage('Buku berhasil ditambahkan!')
+      navigate('/books')
     } catch (err) {
       console.error(err)
       if (err instanceof ApiError) {
@@ -53,9 +91,11 @@ export default function NewBookPage() {
     }
   }
 
+  if (!book) return <p className="p-6 text-[#1C2C4C]">Memuat data buku...</p>
+
   return (
     <div className="p-6 bg-[#FAFAFA] min-h-screen">
-      <h1 className="text-2xl font-bold mb-4 text-[#1C2C4C]">📖 Tambah Buku Baru</h1>
+      <h1 className="text-2xl font-bold mb-4 text-[#1C2C4C]">✏️ Edit Buku</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow-md border border-[#A5D6A7]">
         {/* Title */}
@@ -66,17 +106,6 @@ export default function NewBookPage() {
             value={form.title}
             onChange={handleChange}
             className="w-full border border-[#1E497C] rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#1E497C]"
-          />
-        </div>
-
-        {/* ISBN */}
-        <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">ISBN:</label>
-          <input
-            name="isbn"
-            value={form.isbn}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
           />
         </div>
 
@@ -126,31 +155,6 @@ export default function NewBookPage() {
           </div>
         </div>
 
-        {/* Bahasa */}
-        <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">Bahasa:</label>
-          <input
-            name="language"
-            value={form.language}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
-        </div>
-
-        {/* Rating */}
-        <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">Rating (0-5):</label>
-          <input
-            name="rating"
-            type="number"
-            min={0}
-            max={5}
-            value={form.rating}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
-        </div>
-
         {/* Penerbit */}
         <div>
           <label className="block text-sm text-[#1C2C4C] mb-1">Nama Penerbit:</label>
@@ -167,8 +171,8 @@ export default function NewBookPage() {
           <label className="block text-sm text-[#1C2C4C] mb-1">Penulis (pisahkan dengan koma):</label>
           <input
             name="authorNames"
-            value={form.authorNames}
-            onChange={handleChange}
+            value={authorInput}
+            onChange={(e) => setAuthorInput(e.target.value)}
             className="w-full border border-[#1E497C] rounded p-2"
           />
         </div>
@@ -179,11 +183,13 @@ export default function NewBookPage() {
           <div className="grid grid-cols-2 gap-2">
             {GENRE_OPTIONS.map((genre, index) => {
               const value = index + 1
+              const isChecked = form.genreIds.includes(value)
               return (
                 <label key={index} className="flex items-center text-sm text-[#1C2C4C]">
                   <input
                     type="checkbox"
                     value={value}
+                    checked={isChecked}
                     onChange={(e) => {
                       const checked = e.target.checked
                       setForm((prev) => ({
@@ -202,9 +208,9 @@ export default function NewBookPage() {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button type="submit" className="bg-[#1E497C] hover:bg-[#1C2C4C] text-white px-6 py-2 rounded shadow transition">
-          + Tambah Buku
+          💾 Simpan Perubahan
         </button>
       </form>
 
