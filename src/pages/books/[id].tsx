@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { fetchBookById } from '@/api/books'
 import { fetchBookLocations } from '@/api/bookLocation'
+import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
 
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
@@ -11,7 +12,7 @@ import BookReviewForm from './AddBookReviewForm'
 import BookReviewList from './BookReviewList'
 import AddBookLocationForm from './AddBookLocationForm'
 import BookLocationList from './BookLocationList'
-import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
+import { Plus } from 'lucide-react'
 
 export default function BookDetailPage() {
   const { id } = useParams()
@@ -19,7 +20,8 @@ export default function BookDetailPage() {
   const [loading, setLoading] = useState(true)
   const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
   const [locations, setLocations] = useState<BookLocationResponse[]>([])
-  
+  const [showAddLocation, setShowAddLocation] = useState(false)
+
   const fetchLocations = async () => {
     const data = await fetchBookLocations(id!)
     setLocations(data)
@@ -30,11 +32,12 @@ export default function BookDetailPage() {
     try {
       const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviewsWithUser(id)
+        fetchReviewsWithUser(id),
       ])
       setBook(bookData)
       setReviews(reviewDataWithUser)
       await fetchLocations()
+      console.log('Book data fetched:', bookData)
     } catch (err) {
       console.error('Gagal fetch data:', err)
     } finally {
@@ -46,40 +49,87 @@ export default function BookDetailPage() {
     fetchData()
   }, [id])
 
-  console.log('BookDetailPage loaded with book:', book)
-
-  if (loading) return <p>Loading detail buku...</p>
-  if (!book) return <p>Buku tidak ditemukan</p>
+  if (loading) return <p className="p-6 text-gray-500">Loading detail buku...</p>
+  if (!book) return <p className="p-6 text-red-500">Buku tidak ditemukan</p>
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{book.title}</h1>
-      <img src={book.bookPicture} alt={book.title} className="w-64 h-96 object-cover rounded my-4" />
-      <AddBookLocationForm bookId={id!} onSuccess={fetchLocations} />
-      <BookLocationList locations={locations} />
-      <p><strong>ISBN:</strong> {book.isbn}</p>
-      <p><strong>Penerbit:</strong> {book.publisherName}</p>
-      <p><strong>Rating:</strong> {book.totalRatings}</p>
-      <p><strong>Penulis:</strong> {book.authorNames.join(', ')}</p>
-      <p><strong>Genre:</strong> {book.genreNames.join(', ')}</p>
-      <p><strong>Sinopsis:</strong> {book.synopsis}</p>
-      <p><strong>Jumlah Halaman:</strong> {book.totalPages}</p>
-      <p><strong>Tahun Terbit:</strong> {book.publishedYear}</p>
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
+      <div className="grid md:grid-cols-2 gap-8 items-start">
+        <img src={book.bookPicture} alt={book.title} 
+        onError={(e) => { 
+            e.currentTarget.onerror = null 
+            e.currentTarget.src = 'https://placehold.co/300x450?text=Book'
+          }} 
+          className="w-full max-w-sm aspect-[2/3] object-cover rounded shadow" 
+        />
 
-      <BookReviewForm
-        bookId={id!}
-        onSuccess={async () => {
-          const updated = await fetchReviewsWithUser(id!)
-          setReviews(updated)
-        }}
-      />
+        <div>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-[#1C2C4C]">{book.title}</h1>
+              <button onClick={() => setShowAddLocation(true)} className="flex items-center px-4 py-2 text-lg font-bold">
+                <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-600 hover-bg-blue-700 mr-2">
+                  <Plus className="h-5 w-5" color="white" />
+                </span>
+                Tambah Lokasi
+              </button>
+            </div>            
+              <p><strong>📘 ISBN:</strong> {book.isbn}</p>
+              <p><strong>🏢 Penerbit:</strong> {book.publisherName}</p>
+              <p><strong>⭐ Rating:</strong> {book.totalRatings}</p>
+              <p><strong>✍️ Penulis:</strong> {book.authorNames.join(', ')}</p>
+              <p><strong>🏷️ Genre:</strong> {book.genreNames.join(', ')}</p>
+              <p><strong>📚 Halaman:</strong> {book.totalPages}</p>
+              <p><strong>📅 Terbit:</strong> {book.publishedYear}</p>
+              <p><strong>🌐 Bahasa:</strong> {book.language}</p>
+          </div>
+      </div>
+      
 
-      <BookReviewList
-        reviews={reviews}
-        bookId={id!}
-        onUpdate={() => fetchReviewsWithUser(id!).then(setReviews)}
-      />
+      <div>
+        <p className='text-xl font-semibold text-[#1C2C4C] mb-2'>📍 Lokasi:</p>
+        <BookLocationList bookId={id!} onRefresh={fetchLocations} locations={locations} />
+        {showAddLocation && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded shadow-md w-full max-w-md relative">
+              <button
+                onClick={() => setShowAddLocation(false)}
+                className="absolute top-2 right-2 text-gray-600 hover:text-black"
+              >
+                ✕
+              </button>
+              <h2 className="text-lg font-bold mb-4">Tambah Lokasi Buku</h2>
+              <AddBookLocationForm
+                bookId={id!}
+                onSuccess={() => {
+                  fetchLocations()
+                  setShowAddLocation(false)
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
+      <div>
+        <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2">📖 Sinopsis</h2>
+        <p className="text-gray-800">{book.synopsis}</p>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2">💬 Ulasan Pengguna</h2>
+        <BookReviewForm
+          bookId={id!}
+          onSuccess={async () => {
+            const updated = await fetchReviewsWithUser(id!)
+            setReviews(updated)
+          }}
+        />
+        <BookReviewList
+          reviews={reviews}
+          bookId={id!}
+          onUpdate={() => fetchReviewsWithUser(id!).then(setReviews)}
+        />
+      </div>
     </div>
   )
 }
