@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { registerUser } from '@/api/registerUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { Eye, EyeOff } from 'lucide-react'
+import TextInput from '@/components/TextInput'
+import PasswordInput from '@/components/PasswordInput'
+import SubmitButton from '@/components/SubmitButton'
+import FormRedirectLink from '@/components/FormRedirectLink'
 
 function RegisterUser() {
   const navigate = useNavigate()
@@ -12,8 +15,7 @@ function RegisterUser() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isPasswordTouched, setIsPasswordTouched] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,95 +33,67 @@ function RegisterUser() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
-      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-md">
-        <img src="/logo.png" alt="Logo DiTitikItu" className="mx-auto mb-6 w-32 h-auto" />
-        <h2 className="text-2xl font-bold text-[#1C2C4C] text-center mb-4">Register</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nama:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full border border-gray-300 rounded-md p-2"
-              placeholder="Nama Lengkap"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full border border-gray-300 rounded-md p-2"
-              placeholder="example@example.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password:</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md p-2 pr-10"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Konfirmasi Password:</label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full border border-gray-300 rounded-md p-2 pr-10"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <button
+      <div className="bg-white shadow-xl rounded-lg px-6 py-8 w-full max-w-md">
+        <h1 className="mb-2 text-2xl font-bold text-[#1C2C4C]">Daftar</h1>
+        <FormRedirectLink
+          className="mb-5"
+          question="Sudah punya akun?"
+          linkText="Masuk"
+          to="/auth/login"
+        />
+        <form onSubmit={handleSubmit}>
+          <TextInput
+            label="Nama"
+            name="name"
+            placeholder="Masukkan nama lengkap Anda"
+            value={name}
+            className="mb-4"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextInput
+            label="Alamat email"
+            name="email"
+            placeholder="Contoh: email@domain.com"
+            value={email}
+            className="mb-4"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <PasswordInput
+            label="Kata sandi"
+            name="password"
+            placeholder="Minimal 8 karakter, kombinasi huruf & angka"
+            value={password}
+            className="mb-4"
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setIsPasswordTouched(true)}
+            validation={isPasswordTouched && (
+              <ul className="text-xs text-gray-600 mt-3 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="mt-[7px] inline-block w-[3px] h-[3px] bg-[#1E497C] rounded-full"></span>
+                  Minimal 8 karakter
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-[7px] inline-block w-[3px] h-[3px] bg-[#1E497C] rounded-full"></span>
+                  Gunakan kombinasi huruf dan angka
+                </li>
+              </ul>
+            )}
+          />
+          <PasswordInput
+            label="Konfirmasi kata sandi"
+            name="confirmPassword"
+            placeholder="Ulangi kata sandi yang sama"
+            value={confirmPassword}
+            className="mb-4"
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <SubmitButton
             type="submit"
-            className="w-full bg-[#1E497C] text-white py-2 rounded-md hover:bg-[#5C8BC1]"
           >
-            Register
-          </button>
+            Daftar
+          </SubmitButton>
         </form>
-
-        <p className="mt-4 text-sm text-center">
-          Sudah punya akun?{' '}
-          <a href="/auth/login" className="text-[#1E497C] font-medium hover:underline">
-            Login sekarang!
-          </a>
-        </p>
-
-        {message && <p className="mt-2 text-sm text-red-500 text-center">{message}</p>}
+        {message && <p>{message}</p>}
       </div>
     </div>
   )
