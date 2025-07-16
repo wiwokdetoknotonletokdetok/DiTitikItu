@@ -3,7 +3,7 @@ import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import type { WebResponse } from '@/dto/WebResponse'
 import { ApiError } from '@/exception/ApiError.ts'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL_LOCAL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function fetchBookLocations(bookId: string): Promise<BookLocationResponse[]> {
   const res = await fetch(`${BASE_URL}/books/${bookId}/locations`)

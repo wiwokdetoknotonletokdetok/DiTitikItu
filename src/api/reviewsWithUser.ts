@@ -1,5 +1,5 @@
 import { fetchReviews } from './reviews'
-import { userProfile } from './userProfile'
+import { getUserProfile } from './getUserProfile'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 
 export async function fetchReviewsWithUser(bookId: string): Promise<ReviewWithUserDTO[]> {
@@ -9,7 +9,7 @@ export async function fetchReviewsWithUser(bookId: string): Promise<ReviewWithUs
 
   await Promise.all(
     uniqueUserIds.map(async (userId) => {
-      const res = await userProfile(userId)
+      const res = await getUserProfile(userId)
       profileMap[userId] = {
         name: res.data.name,
         profilePicture: res.data.profilePicture,
