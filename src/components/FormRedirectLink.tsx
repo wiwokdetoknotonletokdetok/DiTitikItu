@@ -4,11 +4,12 @@ interface FormRedirectLinkProps {
   question: string
   linkText: string
   to: string
+  className?: string
 }
 
-const FormRedirectLink: React.FC<FormRedirectLinkProps> = ({ question, linkText, to }) => {
+const FormRedirectLink: React.FC<FormRedirectLinkProps> = ({ question, linkText, to, className }) => {
   return (
-    <p className="mb-5 text-sm">
+    <p className={`text-sm ${className}`}>
       {question}{' '}
       <Link to={to} className="text-[#1E497C] font-medium hover:underline">
         {linkText}
