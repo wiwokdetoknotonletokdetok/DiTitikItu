@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
@@ -10,84 +10,105 @@ import SubmitButton from '@/components/SubmitButton'
 import FormRedirectLink from '@/components/FormRedirectLink'
 import { useAuth } from '@/context/AuthContext'
 import { X } from 'lucide-react'
-import TextInputValidation from '@/components/TextInputError'
+import TextInputError from '@/components/TextInputError'
 
-function LoginUser() {
+export default function LoginUser() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loginFailedMessage, setloginFailedMessage] = useState('')
-  const [showErrors, setShowErrors] = useState(false)
 
-  const handleSubmit = async (e: React.MouseEvent | React.FormEvent) => {
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [touched, setTouched] = useState({ email: false, password: false })
+  const [apiError, setApiError] = useState('')
+
+  const errors = useMemo(() => ({
+    email: !form.email && touched.email ? 'Anda belum mengisi alamat email' : '',
+    password: !form.password && touched.password ? 'Anda belum mengisi kata sandi' : '',
+  }), [form, touched])
+
+  const isValid = useMemo(
+    () => Boolean(form.email && form.password),
+    [form]
+  )
+
+  const handleChange = useCallback((key: 'email' | 'password') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(prev => ({ ...prev, [key]: e.target.value }))
+    setTouched(prev => ({ ...prev, [key]: true }))
+    setApiError('')
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    setloginFailedMessage('')
-    setShowErrors(true)
 
-    if (email && password) {
-      try {
-        const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
-        login(res.data.token)
-        navigate('/books')
-      } catch (err) {
-        if (err instanceof ApiError && err.statusCode == 401) {
-          setloginFailedMessage(err.message)
-        }
+    setTouched({ email: true, password: true })
+
+    if (!isValid) return
+
+    try {
+      const response: WebResponse<LoginUserResponse> = await loginUser(form)
+      login(response.data.token)
+      navigate('/books')
+    } catch (err) {
+      if (err instanceof ApiError && err.statusCode === 401) {
+        setApiError(err.message)
+      } else {
+        console.error(err)
+        setApiError('Terjadi kesalahan. Silakan coba lagi.')
       }
     }
-  }
+  }, [form, isValid, login, navigate])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
       <div className="bg-white shadow-xl rounded-lg px-6 py-8 w-full max-w-md">
-        <img src="/logo.png" alt="Logo DiTitikItu" className="mx-auto mb-6 w-32 h-auto"/>
-        <h2 className="text-2xl font-bold text-[#1C2C4C] text-center mb-4">Masuk</h2>
-        {loginFailedMessage && (
-          <div
-            className="mb-4 relative bg-red-100 text-red-700 pl-3 pr-8 py-[11px] rounded text-sm">
-            <span>{loginFailedMessage}</span>
+        <img
+          src="/logo.png"
+          alt="Logo DiTitikItu"
+          className="mx-auto mb-6 w-32 h-auto"
+        />
+        <h1 className="text-2xl font-bold text-[#1C2C4C] text-center mb-4">
+          Masuk
+        </h1>
+
+        {apiError && (
+          <div className="mb-4 relative bg-red-100 text-red-700 pl-3 pr-8 py-[11px] rounded text-sm">
+            <span>{apiError}</span>
             <button
               type="button"
-              onClick={() => setloginFailedMessage('')}
-              className="text-red-700 hover:text-red-900 font-bold text-lg leading-none absolute right-3 inset-y-0 transform text-gray-500"
+              onClick={() => setApiError('')}
+              className="absolute right-3 inset-y-0 text-lg leading-none hover:text-red-900"
               aria-label="Tutup pesan kesalahan"
             >
               <X size={16} />
             </button>
           </div>
         )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <TextInput
             label="Alamat email"
             name="email"
             placeholder="Masukkan email Anda"
-            value={email}
-            className="mb-4"
-            onChange={(e) => setEmail(e.target.value)}
-            hasError={!email && showErrors}
-            validation={!email && showErrors ? (
-              <TextInputValidation message="Anda belum mengisi alamat email" />
-            ) : null}
+            value={form.email}
+            onChange={handleChange('email')}
+            hasError={!!errors.email}
+            validation={errors.email ? <TextInputError message={errors.email} /> : null}
           />
+
           <PasswordInput
             label="Kata sandi"
             name="password"
             placeholder="Masukkan kata sandi Anda"
-            value={password}
-            className="mb-4"
-            onChange={(e) => setPassword(e.target.value)}
-            hasError={!password && showErrors}
-            validation={!password && showErrors ? (
-              <TextInputValidation message="Anda belum mengisi kata sandi" />
-            ) : null}
+            value={form.password}
+            onChange={handleChange('password')}
+            hasError={!!errors.password}
+            validation={errors.password ? <TextInputError message={errors.password} /> : null}
           />
-          <SubmitButton
-            type="submit"
-          >
+
+          <SubmitButton type="submit">
             Masuk
           </SubmitButton>
         </form>
+
         <FormRedirectLink
           className="mt-4 text-center"
           question="Belum punya akun?"
@@ -98,5 +119,3 @@ function LoginUser() {
     </div>
   )
 }
-
-export default LoginUser
