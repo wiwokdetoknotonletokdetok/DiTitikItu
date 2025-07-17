@@ -4,6 +4,8 @@ import { fetchBookById, updateBook } from '@/api/books'
 import { ApiError } from '@/exception/ApiError'
 import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
+import { uploadBookPicture } from '@/api/uploadBookPicture'
+import BookImageUploader from '@/components/BookImageUploader'
 
 export default function EditBookPage() {
   const { bookId: id } = useParams()
@@ -36,7 +38,9 @@ export default function EditBookPage() {
     'Sains',
     'Biografi',
   ]
-
+  
+  const [newImage, setNewImage] = useState<File | null>(null)
+  
   useEffect(() => {
     if (!id) return
     const fetchData = async () => {
@@ -55,7 +59,6 @@ export default function EditBookPage() {
           authorNames: data.authorNames,
           genreIds: data.genreNames.map(name => GENRE_OPTIONS.findIndex(opt => opt.toLowerCase() === name.toLowerCase()) + 1),
         })
-        console.log('Book data fetched:', data)
         setAuthorInput(data.authorNames.join(', '))
       } catch (err) {
         console.error(err)
@@ -76,6 +79,10 @@ export default function EditBookPage() {
     e.preventDefault()
     if (!id) return
     try {
+      if (newImage) {
+        await uploadBookPicture(id, newImage)
+      }
+
       await updateBook(id, {
         ...form,
         authorNames: authorInput.split(',').map(name => name.trim()),
@@ -122,59 +129,36 @@ export default function EditBookPage() {
 
         {/* Gambar */}
         <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">URL Gambar:</label>
-          <input
-            name="bookPicture"
-            value={form.bookPicture}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
+          <label className="block text-sm text-[#1C2C4C] mb-1">Gambar Buku (opsional):</label>
+          <BookImageUploader
+            initialUrl={book.bookPicture}
+            onUpload={(file) => setNewImage(file)}
           />
         </div>
+
 
         {/* Halaman & Tahun */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-[#1C2C4C] mb-1">Jumlah Halaman:</label>
-            <input
-              name="totalPages"
-              type="number"
-              value={form.totalPages}
-              onChange={handleChange}
-              className="w-full border border-[#1E497C] rounded p-2"
-            />
+            <input name="totalPages" type="number" value={form.totalPages} onChange={handleChange} className="w-full border border-[#1E497C] rounded p-2"/>
           </div>
           <div>
             <label className="block text-sm text-[#1C2C4C] mb-1">Tahun Terbit:</label>
-            <input
-              name="publishedYear"
-              type="number"
-              value={form.publishedYear}
-              onChange={handleChange}
-              className="w-full border border-[#1E497C] rounded p-2"
-            />
+            <input name="publishedYear" type="number" value={form.publishedYear} onChange={handleChange} className="w-full border border-[#1E497C] rounded p-2"/>
           </div>
         </div>
 
         {/* Penerbit */}
         <div>
           <label className="block text-sm text-[#1C2C4C] mb-1">Nama Penerbit:</label>
-          <input
-            name="publisherName"
-            value={form.publisherName}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
+          <input name="publisherName" value={form.publisherName} onChange={handleChange} className="w-full border border-[#1E497C] rounded p-2"/>
         </div>
 
         {/* Penulis */}
         <div>
           <label className="block text-sm text-[#1C2C4C] mb-1">Penulis (pisahkan dengan koma):</label>
-          <input
-            name="authorNames"
-            value={authorInput}
-            onChange={(e) => setAuthorInput(e.target.value)}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
+          <input name="authorNames" value={authorInput} onChange={(e) => setAuthorInput(e.target.value)} className="w-full border border-[#1E497C] rounded p-2"/>
         </div>
 
         {/* Genre Checkboxes */}

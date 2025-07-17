@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { createBook } from '@/api/books'
 import { ApiError } from '@/exception/ApiError'
+import { useNavigate } from 'react-router-dom'
 
 export default function NewBookPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     isbn: '',
     title: '',
     synopsis: '',
-    bookPicture: '',
+    bookPicture: 'https://placehold.co/300x450?text=Book',
     totalPages: 0,
     publishedYear: 0,
     language: '',
-    rating: 0,
     publisherName: '',
     authorNames: '',
     genreIds: [] as number[],
@@ -44,7 +45,7 @@ export default function NewBookPage() {
         totalPages: Number(form.totalPages),
         publishedYear: Number(form.publishedYear),
       })
-      setMessage('Buku berhasil ditambahkan!')
+      navigate('/books')
     } catch (err) {
       console.error(err)
       if (err instanceof ApiError) {
@@ -57,6 +58,8 @@ export default function NewBookPage() {
     <div className="p-6 bg-[#FAFAFA] min-h-screen">
       <h1 className="text-2xl font-bold mb-4 text-[#1C2C4C]">📖 Tambah Buku Baru</h1>
 
+      {message && <p className="mt-4 text-[#E53935] font-semibold">{message}</p>}
+      
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow-md border border-[#A5D6A7]">
         {/* Title */}
         <div>
@@ -91,16 +94,6 @@ export default function NewBookPage() {
           />
         </div>
 
-        {/* Gambar */}
-        <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">URL Gambar:</label>
-          <input
-            name="bookPicture"
-            value={form.bookPicture}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
-        </div>
 
         {/* Halaman & Tahun */}
         <div className="grid grid-cols-2 gap-4">
@@ -132,20 +125,6 @@ export default function NewBookPage() {
           <input
             name="language"
             value={form.language}
-            onChange={handleChange}
-            className="w-full border border-[#1E497C] rounded p-2"
-          />
-        </div>
-
-        {/* Rating */}
-        <div>
-          <label className="block text-sm text-[#1C2C4C] mb-1">Rating (0-5):</label>
-          <input
-            name="rating"
-            type="number"
-            min={0}
-            max={5}
-            value={form.rating}
             onChange={handleChange}
             className="w-full border border-[#1E497C] rounded p-2"
           />
@@ -208,7 +187,6 @@ export default function NewBookPage() {
         </button>
       </form>
 
-      {message && <p className="mt-4 text-[#E53935] font-semibold">{message}</p>}
     </div>
   )
 }
