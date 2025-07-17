@@ -80,7 +80,7 @@ export default function BookDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-3xl font-bold text-[#1C2C4C]">{book.title}</h1>
               <button onClick={() => setShowAddLocation(true)} className="flex items-center px-4 py-2 text-lg font-bold">
-                <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-600 hover-bg-blue-700 mr-2">
+                <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-[#1E497C] hover:bg-[#5C8BC1]  mr-2">
                   <Plus className="h-5 w-5" color="white" />
                 </span>
                 Tambah Lokasi

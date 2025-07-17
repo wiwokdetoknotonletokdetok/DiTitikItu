@@ -1,6 +1,7 @@
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { deleteReview, updateReview } from '@/api/reviews'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import StarRatingInput from '@/components/StarRatingInput'
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -13,6 +14,13 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
 
   const myReview = reviews.find((r) => r.userId === userId)
   const otherReviews = reviews.filter((r) => r.userId !== userId)
+
+  useEffect(() => {
+    if (myReview) {
+      setEditMessage(myReview.message)
+      setEditRating(myReview.rating)
+    }
+  }, [myReview])
 
   const [editing, setEditing] = useState(false)
   const [editMessage, setEditMessage] = useState(myReview?.message || '')
@@ -49,30 +57,45 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         <p className="text-gray-500 italic">Belum ada review untuk buku ini.</p>
       )}
 
-      {/* --- Review Milik Sendiri --- */}
       {myReview && (
         <div className="border border-[#2E7D32] rounded-lg p-4 mb-6 bg-[#A5D6A7]/20">
-          <div className="flex items-center mb-3 gap-4">
-            <img  src={myReview.profilePicture} alt="Foto Profil" className="w-[100px] h-[100px] rounded-full object-cover border-2 border-[#1E497C]"/>
-            <h3 className="text-lg font-semibold text-[#1C2C4C]">{myReview.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <img src={myReview.profilePicture} alt={myReview.name} className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"/>
+            <span>
+              <p className="text-sm font-semibold text-[#1C2C4C]">{myReview.name}</p>
+              <p className="text-xs text-gray-600">
+                {getFormattedReviewDate(myReview.createdAt, myReview.updatedAt)}
+              </p>
+            </span>
           </div>
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-2">
-              <textarea className="w-full border border-[#1E497C] rounded-md p-2 text-sm" value={editMessage} onChange={(e) => setEditMessage(e.target.value)} required/>
-              <input type="number" min={0} max={5} value={editRating} onChange={(e) => setEditRating(Number(e.target.value))} className="w-24 border border-[#1E497C] p-1 rounded-md text-sm" required/>
+              <StarRatingInput value={editRating} onChange={setEditRating} />
+              <textarea className="w-full border border-[#1E497C] rounded-md p-2 text-sm resize-none" value={editMessage} onChange={(e) => setEditMessage(e.target.value)} required/>
               <div className="space-x-2">
-                <button type="submit" className="bg-[#2E7D32] hover:bg-[#1e5e26] text-white px-3 py-1 rounded-md text-sm"> Simpan </button>
-                <button type="button" onClick={() => setEditing(false)} className="text-gray-600 text-sm">
+                <button type="submit" className="bg-[#1E497C] hover:bg-[#5C8BC1] text-white px-3 py-1 rounded-md text-sm"> Simpan </button>
+                <button type="button" onClick={() => {
+                    setEditing(false)
+                    setEditMessage(myReview.message)
+                    setEditRating(myReview.rating)
+                  }} 
+                  className="text-gray-600 text-sm"> 
                   Batal
                 </button>
               </div>
             </form>
           ) : (
             <>
-              <p className="italic text-sm text-[#1C2C4C]">"{myReview.message}"</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Rating: {myReview.rating} | {new Date(myReview.createdAt).toLocaleString()}
+              <p className="text-xs text-yellow-600">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <span key={index}>
+                    {index < myReview.rating ? '★' : '☆'}
+                  </span>
+                ))}
               </p>
+
+              <p className="text-sm italic text-[#1C2C4C]">{myReview.message}</p>
+
               <div className="space-x-3 mt-2">
                 <button
                   onClick={() => setEditing(true)}
@@ -92,7 +115,6 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         </div>
       )}
 
-      {/* --- Review Orang Lain --- */}
       <div className="space-y-4">
         {otherReviews.map((r, i) => (
           <div key={i} className="border-t pt-3 mt-3 border-[#2E7D32]/50">
@@ -102,15 +124,32 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
                 alt={r.name}
                 className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
               />
-              <span className="text-sm font-semibold text-[#1C2C4C]">{r.name}</span>
+              <span>
+                <p className="text-sm font-semibold text-[#1C2C4C]">
+                  {r.name}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {getFormattedReviewDate(r.createdAt, r.updatedAt)}
+                </p>
+              </span>
             </div>
-            <p className="text-sm italic text-[#1C2C4C]">"{r.message}"</p>
-            <p className="text-xs text-gray-600">
-              Rating: {r.rating} | {new Date(r.createdAt).toLocaleString()}
+            <p className="text-xs text-yellow-600">
+              {Array.from({ length: 5 }, (_, index) => (
+                <span key={index}>
+                  {index < r.rating ? '★' : '☆'}
+                </span>
+              ))}
             </p>
+            <p className="text-sm italic text-[#1C2C4C]">{r.message}</p>
           </div>
         ))}
       </div>
     </div>
       )
+}
+
+function getFormattedReviewDate(createdAt: string, updatedAt?: string) {
+  const date = new Date(updatedAt || createdAt)
+  const label = updatedAt ? 'Diedit pada' : ''
+  return `${label} ${date.toLocaleString()}`
 }
