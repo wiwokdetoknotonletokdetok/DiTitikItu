@@ -1,6 +1,7 @@
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { deleteReview, updateReview } from '@/api/reviews'
 import { useState } from 'react'
+import { Link } from 'react-router-dom';
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -107,10 +108,10 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         <div className="space-y-4">
           {otherReviews.map((r, i) => (
             <div key={i} className="border-t pt-2 mt-2">
-              <div className="flex items-center gap-2 mb-1">
+              <Link to={`/profile/${r.userId}`} className="flex items-center gap-2 mb-1 hover:underline">
                 <img src={r.profilePicture} alt={r.name} className="w-8 h-8 rounded-full" />
                 <span className="text-sm font-semibold">{r.name}</span>
-              </div>
+              </Link>
               <p className="text-sm italic">"{r.message}"</p>
               <p className="text-xs text-gray-600">
                 Rating: {r.rating} | {new Date(r.createdAt).toLocaleString()}
