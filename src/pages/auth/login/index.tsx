@@ -8,8 +8,10 @@ import TextInput from '@/components/TextInput'
 import PasswordInput from '@/components/PasswordInput'
 import SubmitButton from '@/components/SubmitButton'
 import FormRedirectLink from '@/components/FormRedirectLink'
+import { useAuth } from '@/context/AuthContext'
 
 function LoginUser() {
+  const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,7 +22,7 @@ function LoginUser() {
 
     try {
       const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
-      console.log('Login sukses:', res.data.token)
+      login(res.data.token)
       navigate('/books')
     } catch (err) {
       console.error('Login error:', err)
