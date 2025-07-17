@@ -21,6 +21,9 @@ export default function BookDetailPage() {
   const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
   const [locations, setLocations] = useState<BookLocationResponse[]>([])
   const [showAddLocation, setShowAddLocation] = useState(false)
+  
+  const userId = localStorage.getItem("userId")
+  const existingReview = reviews.find((r) => r.userId === userId)
 
   const fetchLocations = async () => {
     const data = await fetchBookLocations(id!)
@@ -138,7 +141,9 @@ export default function BookDetailPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2 text-left">Ulasan Pengguna</h2>
-        <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+        {!existingReview && (
+          <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+        )}
         <BookReviewList reviews={reviews} bookId={id!} onUpdate={fetchBookAndReviews} />
       </div>
     </div>
