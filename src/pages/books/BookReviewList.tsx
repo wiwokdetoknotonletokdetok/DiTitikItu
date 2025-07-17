@@ -54,19 +54,22 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
       {/* --- Review Milik Sendiri --- */}
       {myReview && (
         <div className="border rounded p-4 mb-4 bg-gray-50">
-          <div className="flex items-center mb-2 gap-2">
-            <img 
-                src={myReview.profilePicture} 
-                alt="Foto Profil" 
-                style={{
-                  width: '200px', 
-                  height: '200px', 
-                  borderRadius: '50%', 
-                  overflow: 'hidden'
-                }} 
-              />
-            <h3 className="text-md font-semibold">{myReview.name} </h3>
-          </div>
+          <Link 
+          to={`/profile/${myReview.userId}`} 
+          className="flex items-center mb-2 gap-2 hover:underline"
+        >
+          <img 
+            src={myReview.profilePicture} 
+            alt="Foto Profil" 
+            style={{
+              width: '200px', 
+              height: '200px', 
+              borderRadius: '50%', 
+              overflow: 'hidden'
+            }} 
+          />
+          <h3 className="text-md font-semibold">{myReview.name}</h3>
+        </Link>
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-2">
               <textarea
