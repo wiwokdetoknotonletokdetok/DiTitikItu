@@ -4,15 +4,18 @@ import { fetchUserBooks, removeBookFromUser, countUserBooks } from '@/api/collec
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
+import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
+import { userProfile } from '@/api/userProfile'
 
 export default function UserCollection() {
   const { userId: paramUserId } = useParams<{ userId: string }>()
   const { userId: authUserId } = useAuth()
-
   const userId = paramUserId
   const navigate = useNavigate()
+
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [total, setTotal] = useState<number>(0)
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null)
 
   useEffect(() => {
     if (userId) {
@@ -23,8 +26,15 @@ export default function UserCollection() {
         countUserBooks(userId)
         .then(setTotal)
         .catch(err => console.error('Gagal hitung koleksi:', err))
+
+        userProfile(userId)
+        .then(res => setProfile(res.data))
+        .catch(err => {
+            console.error('Gagal fetch nama user:', err)
+            setProfile(null)
+        })
     }
-    }, [userId])
+}, [userId])
 
   const handleRemove = async (bookId: string, bookTitle: string) => {
     const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus "${bookTitle}" dari koleksi?`)
@@ -46,7 +56,7 @@ export default function UserCollection() {
 
   return (
     <div className="p-6">
-        <h2 className="text-2xl font-bold mb-2">Koleksi Buku Saya</h2>
+        <h2 className="text-2xl font-bold mb-2">Koleksi Buku {profile?.name || ''}</h2>
         <p className="mb-4 text-gray-600">Total koleksi: {total} buku</p>
 
         {books.length === 0 ? (
