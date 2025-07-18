@@ -16,6 +16,4 @@ export async function logoutUser(): Promise<void> {
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
   }
-
-  localStorage.removeItem('token')
 }

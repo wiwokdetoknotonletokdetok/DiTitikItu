@@ -9,10 +9,12 @@ interface PasswordInputProps {
   placeholder: string
   className?: string;
   onFocus?: () => void
+  onBlur?: () => void
   validation?: React.ReactNode
+  hasError?: boolean
 }
 
-const PasswordInput: React.FC<PasswordInputProps> = ({ label, name, value, onChange, placeholder, className, onFocus, validation }) => {
+const PasswordInput: React.FC<PasswordInputProps> = ({ onBlur, label, name, value, onChange, placeholder, className, onFocus, validation, hasError }) => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -24,10 +26,12 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ label, name, value, onCha
           name={name}
           id={name}
           placeholder={placeholder}
-          className="h-[42px] text-sm w-full border border-gray-300 rounded-md py-2 px-3 pr-8 outline-none focus:border-[#1E497C] placeholder:text-sm"
+          className={`h-[42px] text-sm w-full border rounded-md py-2 px-3 outline-none placeholder:text-sm
+          ${hasError ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-[#1E497C]'}`}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
+          onBlur={onBlur}
         />
         <button
           type="button"
