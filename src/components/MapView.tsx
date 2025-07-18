@@ -1,53 +1,79 @@
-import { MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
-import { useEffect, useState } from 'react'
-import L from 'leaflet'
-
-const defaultIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-  iconSize: [35, 35],
-})
+import type {UserPosition} from '@/dto/UserPosition.ts'
 
 interface MapViewProps {
-  userLocation?: { lat: number; lng: number }
-  books?: { id: string; lat: number; lng: number; title: string }[]
+  userPosition: UserPosition
 }
 
-export default function MapView({ userLocation, books = [] }: MapViewProps) {
-  const [position, setPosition] = useState<[number, number] | null>(null)
-
+function SetViewTo({ position }) {
+  const map = useMap()
   useEffect(() => {
-    if (userLocation) {
-      setPosition([userLocation.lat, userLocation.lng])
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setPosition([pos.coords.latitude, pos.coords.longitude]),
-        (err) => {
-          console.warn('Lokasi tidak bisa diakses:', err)
-          setPosition([-6.2, 106.8])
-        }
-      )
+    if (position) {
+      map.setView(position, 13)
     }
-  }, [userLocation])
+  }, [position])
+  return null
+}
 
-  if (!position) return <p>Memuat lokasi...</p>
+function GoToUserButton({ position }) {
+  const map = useMap()
+
+  const handleClick = () => {
+    if (position) {
+      map.flyTo([position.latitude, position.longitude], 13)
+    }
+  }
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height: '400px', width: '100%' }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <button
+      onClick={handleClick}
+      style={{
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 1000,
+        padding: '8px 12px',
+        backgroundColor: '#fff',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        cursor: 'pointer'
+      }}
+    >
+      Ke Lokasi Saya
+    </button>
+  )
+}
 
-      <Marker position={position} icon={defaultIcon}>
-        <Popup>Kamu di sini</Popup>
-      </Marker>
+export default function MapView({ books, userPosition } : MapViewProps) {
+  const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
 
-      {books.map((book) => (
-        <Marker key={book.id} position={[book.lat, book.lng]}>
-          <Popup>{book.title}</Popup>
-        </Marker>
-      ))}
-      
-    </MapContainer>
+  return (
+    <div style={{position: 'relative'}}>
+      <MapContainer center={center} zoom={userPosition ? 13 : 2} style={{height: '450px', width: '100%'}}>
+        <TileLayer
+          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+
+        {userPosition && (
+          <>
+            <Marker position={[userPosition.latitude, userPosition.longitude]}>
+              <Popup>Lokasi Anda</Popup>
+            </Marker>
+            <SetViewTo position={[userPosition.latitude, userPosition.longitude]} />
+          </>
+        )}
+
+        {books.map(book => (
+          <Marker key={book.id} position={[book.lat, book.lng]}>
+            <Popup>{book.title}</Popup>
+          </Marker>
+        ))}
+
+        {userPosition && <GoToUserButton position={userPosition}/>}
+      </MapContainer>
+    </div>
   )
 }
