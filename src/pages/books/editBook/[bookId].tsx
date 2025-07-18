@@ -45,7 +45,9 @@ export default function EditBookPage() {
     if (!id) return
     const fetchData = async () => {
       try {
+        console.log('Fetching book with id:', id)
         const data = await fetchBookById(id)
+        console.log(data)
         setBook(data)
         setForm({
           isbn: data.isbn,
