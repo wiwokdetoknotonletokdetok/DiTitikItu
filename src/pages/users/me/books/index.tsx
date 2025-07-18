@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 import { fetchUserBooks, removeBookFromUser, countUserBooks } from '@/api/collections'
 import { useNavigate } from 'react-router-dom'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 
 export default function UserCollection() {
-  const { userId } = useParams<{ userId: string }>()
+  const { userId } = useAuth()
   const navigate = useNavigate()
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [total, setTotal] = useState<number>(0)

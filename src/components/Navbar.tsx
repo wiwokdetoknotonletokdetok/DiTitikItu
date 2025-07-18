@@ -18,7 +18,7 @@ export default function Navbar() {
       {userId ? (
         <>
           <Link to={`/profile/${userId}`} style={{ marginRight: '1rem' }}>Profil</Link>
-          <Link to={`/users/${userId}/books`} style={{ marginRight: '1rem' }}>Koleksi</Link>
+          <Link to={`/users/me/books`} style={{ marginRight: '1rem' }}>Koleksi</Link>
           <span style={{ marginRight: '1rem' }}>Hi, {name}!</span>
           <button onClick={handleLogout}>Logout</button>
         </>

@@ -3,12 +3,14 @@ import { useParams } from 'react-router-dom'
 import { userProfile } from '@/api/userProfile.ts'
 import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import { useNavigate } from 'react-router-dom'
 
 function UserProfile() {
   const { userId } = useParams<{ userId: string }>()
   const [profile, setProfile] = useState<UserProfileResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!userId) return
@@ -49,6 +51,14 @@ function UserProfile() {
       <p><strong>Followers:</strong> {profile.followers}</p>
       <p><strong>Followings:</strong> {profile.followings}</p>
       <p><strong>Points:</strong> {profile.points}</p>
+
+      <button
+        onClick={() => navigate(`/users/${userId}/books`)}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Lihat Koleksi
+      </button>
+
     </div>
   )
 }
