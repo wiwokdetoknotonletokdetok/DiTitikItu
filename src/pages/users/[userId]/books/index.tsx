@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchUserBooks, removeBookFromUser, countUserBooks } from '@/api/collections'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 
 export default function UserCollection() {
-  const { userId } = useParams<{ userId: string }>()
+  const { userId: paramUserId } = useParams<{ userId: string }>()
+  const { userId: authUserId } = useAuth()
+
+  const userId = paramUserId
   const navigate = useNavigate()
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [total, setTotal] = useState<number>(0)
@@ -62,15 +66,17 @@ export default function UserCollection() {
                 />
                 <h3 className="font-semibold">{book.title}</h3>
                 <p className="text-sm text-gray-600">{book.publisherName}</p>
-                <button
-                    onClick={(e) => {
+                {authUserId === paramUserId && (
+                    <button
+                        onClick={(e) => {
                         e.stopPropagation()
                         handleRemove(book.id, book.title)
-                    }}
-                    className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                    Hapus
-                </button>
+                        }}
+                        className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                        Hapus
+                    </button>
+                )}
             </div>
             ))}
         </div>
