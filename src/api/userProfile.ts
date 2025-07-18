@@ -2,7 +2,7 @@ import type {UserProfileResponse} from '@/dto/UserProfileResponse.ts'
 import type {WebResponse} from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 export async function userProfile(userId: string): Promise<WebResponse<UserProfileResponse>> {
   const res = await fetch(`${BASE_URL}/users/${userId}`, {

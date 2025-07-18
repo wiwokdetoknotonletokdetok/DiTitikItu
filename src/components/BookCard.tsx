@@ -1,4 +1,6 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
+import { useAuth } from '@/context/AuthContext'
+import { addBookToCollection } from '@/api/collections'
 
 interface Props {
   book: BookSummaryDTO
@@ -6,7 +8,19 @@ interface Props {
 }
 
 export default function BookCard({ book, onClick }: Props) {
-  console.log('Rendering BookCard for:', book)
+  const { userId } = useAuth()
+  const isLoggedIn = !!userId
+
+  const handleAddToCollection = async () => {
+    try {
+      await addBookToCollection(book.id)
+      alert('Buku berhasil ditambahkan ke koleksi!')
+    } catch (error) {
+      alert('Gagal menambahkan buku ke koleksi.')
+      console.error(error)
+    }
+  }
+
   return (
     <div
       onClick={onClick}
@@ -23,7 +37,21 @@ export default function BookCard({ book, onClick }: Props) {
       <p className="text-xs text-gray-500">ISBN: {book.isbn}</p>
       <p className="text-xs mt-1">Genre: {book.genreNames.join(', ')}</p>
       <p className="text-xs">Author: {book.authorNames.join(', ')}</p>
-      <button type='submit'>Edit</button>
+      <button type="button">Edit</button>
+
+      {isLoggedIn && (
+        <button
+          type="button"
+          title="Tambah buku ini ke koleksi Anda"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleAddToCollection()
+          }}
+          className="mt-2 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          ＋ Tambah ke Koleksi
+        </button>
+      )}
     </div>
   )
 }

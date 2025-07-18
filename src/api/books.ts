@@ -4,7 +4,7 @@ import { ApiError } from '@/exception/ApiError.ts'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'
 
 export async function fetchBooks(params: {
   title?: string

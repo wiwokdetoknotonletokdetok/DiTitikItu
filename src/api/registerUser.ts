@@ -2,7 +2,7 @@ import type { RegisterUserRequest } from '@/dto/RegisterUserRequest.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 export async function registerUser(registerUserRequest: RegisterUserRequest): Promise<WebResponse<string>> {
   const res = await fetch(`${BASE_URL}/auth/register`, {
