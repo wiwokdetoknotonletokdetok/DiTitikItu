@@ -8,7 +8,7 @@ export async function getUserProfile(userId: string): Promise<WebResponse<UserPr
   const res = await fetch(`${BASE_URL}/users/${userId}`, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json'
+      'Accept': 'application/json',
     }
   })
 
