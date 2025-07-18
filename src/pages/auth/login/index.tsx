@@ -4,6 +4,9 @@ import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import { useAuth } from '@/context/AuthContext'
+import { jwtDecode } from 'jwt-decode'
+import { userProfile } from '@/api/userProfile'
 import TextInput from '@/components/TextInput'
 import PasswordInput from '@/components/PasswordInput'
 import SubmitButton from '@/components/SubmitButton'
@@ -14,13 +17,25 @@ function LoginUser() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const { setUserId, setName } = useAuth()
+
 
   const handleSubmit = async (e: React.MouseEvent | React.FormEvent) => {
     e.preventDefault()
 
     try {
       const res: WebResponse<LoginUserResponse> = await loginUser({ email, password })
-      console.log('Login sukses:', res.data.token)
+      const token = res.data.token
+      localStorage.setItem('token', token)
+
+      const decoded = jwtDecode<{ sub: string }>(token)
+      setUserId(decoded.sub)
+
+      const profile = await userProfile(decoded.sub);
+      setName(profile.data.name);
+
+      console.log('Login sukses:', token)
+
       navigate('/books')
     } catch (err) {
       console.error('Login error:', err)

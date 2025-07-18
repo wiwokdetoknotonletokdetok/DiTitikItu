@@ -1,4 +1,6 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
+import { useAuth } from '@/context/AuthContext'
+import { addBookToCollection } from '@/api/collections'
 import type { BookAIResultDTO } from '@/dto/BookAIResultDTO'
 
 interface Props {
@@ -7,9 +9,22 @@ interface Props {
   onUpdate?: () => void
 }
 
-export default function BookCard({ book, onClick, onUpdate}: Props) { 
+export default function BookCard({ book, onClick, onUpdate }: Props) {
+  const { userId } = useAuth()
+  const isLoggedIn = !!userId
+
+  const handleAddToCollection = async () => {
+    try {
+      await addBookToCollection(book.id!)
+      alert('Buku berhasil ditambahkan ke koleksi!')
+    } catch (error) {
+      alert('Gagal menambahkan buku ke koleksi.')
+      console.error(error)
+    }
+  }
+
   return (
-    <div className='border rounded-lg p-4 shadow-sm hover:shadow-md transition'>
+    <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition">
       <div onClick={onClick} className="cursor-pointer py-2">
         <img
           src={book.bookPicture}
@@ -20,26 +35,44 @@ export default function BookCard({ book, onClick, onUpdate}: Props) {
           }}
           className="w-full max-w-sm aspect-[2/3] object-cover rounded shadow"
         />
-        <h3 className="font-semibold text-lg">{book.title}</h3>
-        {book.publisherName && <p className="text-sm">Penerbit: {book.publisherName}</p>}
-        {book.totalRatings !== undefined && <p className="text-sm">Rating: {book.totalRatings}</p>}
-        {book.isbn && <p className="text-xs text-gray-500">ISBN: {book.isbn}</p>}
-        {Array.isArray(book.genreNames) && book.genreNames.length > 0 && (
-          <p className="text-xs mt-1">Genre: {book.genreNames.join(', ')}</p>
-        )}
-        {Array.isArray(book.authorNames) && book.authorNames.length > 0 && (
-          <p className="text-xs">Author: {book.authorNames.join(', ')}</p>
-        )}
       </div>
+
+      <h3 className="font-semibold text-lg mt-2">{book.title}</h3>
+      {book.publisherName && <p className="text-sm">Penerbit: {book.publisherName}</p>}
+      {book.totalRatings !== undefined && <p className="text-sm">Rating: {book.totalRatings}</p>}
+      {book.isbn && <p className="text-xs text-gray-500">ISBN: {book.isbn}</p>}
+      {Array.isArray(book.genreNames) && book.genreNames.length > 0 && (
+        <p className="text-xs mt-1">Genre: {book.genreNames.join(', ')}</p>
+      )}
+      {Array.isArray(book.authorNames) && book.authorNames.length > 0 && (
+        <p className="text-xs">Author: {book.authorNames.join(', ')}</p>
+      )}
+
+      {isLoggedIn && (
+        <button
+          type="button"
+          title="Tambah buku ini ke koleksi Anda"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleAddToCollection()
+          }}
+          className="mt-2 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          ＋ Tambah ke Koleksi
+        </button>
+      )}
+
       {onUpdate && (
         <button
-          onClick={onUpdate}
-          className="text-sm text-white bg-[#1E497C] hover:bg-[#5C8BC1] px-4 py-2 rounded-md shadow-sm transition"
+          onClick={(e) => {
+            e.stopPropagation()
+            onUpdate()
+          }}
+          className="mt-2 text-sm text-white bg-[#1E497C] hover:bg-[#5C8BC1] px-4 py-2 rounded-md shadow-sm transition"
         >
           ✏️ Edit
         </button>
       )}
-
     </div>
   )
 }
