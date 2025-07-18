@@ -41,7 +41,12 @@ export async function removeBookFromUser(bookId: string): Promise<string> {
 }
 
 export async function fetchUserBooks(userId: string): Promise<BookSummaryDTO[]> {
-  const res = await fetch(`${BASE_URL}/users/${userId}/books`)
+  const res = await fetch(`${BASE_URL}/users/${userId}/books`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    }
+  })
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
@@ -53,7 +58,12 @@ export async function fetchUserBooks(userId: string): Promise<BookSummaryDTO[]> 
 }
 
 export async function countUserBooks(userId: string): Promise<number> {
-  const res = await fetch(`${BASE_URL}/users/${userId}/books/count`)
+  const res = await fetch(`${BASE_URL}/users/${userId}/books/count`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    }
+  })
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
