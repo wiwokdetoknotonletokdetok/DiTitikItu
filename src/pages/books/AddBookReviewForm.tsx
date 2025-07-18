@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { postReview } from '@/api/reviews'
 import { ApiError } from '@/exception/ApiError'
+import StarRatingInput from '@/components/StarRatingInput'
 
 interface AddBookReviewFormProps {
   bookId: string
@@ -30,33 +31,28 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
 
   return (
     <div className="mt-6">
-      <h2 className="text-xl font-semibold mb-2">Tulis Review</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-l font-semibold">Tulis Review</h2>
+        <StarRatingInput value={rating} onChange={setRating} />
+      </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         <textarea
-          className="w-full border rounded p-2"
+          className="w-full border rounded p-2 resize-none"
           rows={3}
           placeholder="Apa pendapatmu tentang buku ini?"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
-        /> <br />
-        <input
-          type="number"
-          min={0}
-          max={5}
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          className="w-20 border p-1 rounded"
-          required
-        /> <br /><br />
+        />
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          className="bg-[#1E497C] text-white px-4 py-1 rounded hover:bg-[#5C8BC1]"
         >
           Kirim Review
         </button>
         {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
       </form>
     </div>
+
   )
 }
