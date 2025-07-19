@@ -5,9 +5,12 @@ import { useNavigate } from 'react-router-dom'
 import BookCard from '@/components/BookCard'
 import MapView from '@/components/MapView'
 import BookSearchBar from '@/components/SearchBar'
+import { searchBooks } from '@/api/getBooksSemantic'
 
 export default function BookList() {
-  const [books, setBooks] = useState<BookSummaryDTO[]>([])
+  const [advancedBooks, setAdvancedBooks] = useState<BookSummaryDTO[]>([])
+  const [aiBooks, setAiBooks] = useState<BookSummaryDTO[]>([])
+
   const navigate = useNavigate()
 
   const dummyBooks = [
@@ -22,13 +25,25 @@ export default function BookList() {
     genre?: string
     publisher?: string
   }) => {
-    try {
-      const result = await fetchBooks(params)
-      setBooks(result)
-    } catch (err) {
-      console.error('Gagal fetch buku:', err)
-    }
-  }
+       try {
+          const advancedResults = await fetchBooks(params)
+          setAdvancedBooks(advancedResults)
+
+          if (advancedResults.length === 0 && params.title) {
+            const aiRawResults = await searchBooks(params.title)
+            const aiMapped = aiRawResults.map((book: BookSummaryDTO) => ({
+              id: book.id,
+              title: book.title,
+              bookPicture: book.bookPicture,
+            }))
+            setAiBooks(aiMapped)
+          } else {
+            setAiBooks([]) 
+          }
+        } catch (err) {
+          console.error('Gagal fetch buku:', err)
+        }
+      }
 
   useEffect(() => {
     handleSearch({})
@@ -52,19 +67,37 @@ export default function BookList() {
           <MapView books={dummyBooks} />
         </div>
 
-        {books.length === 0 ? (
+        {advancedBooks.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {advancedBooks.map(book => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  onClick={() => navigate(`/books/${book.id}`)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {aiBooks.length > 0 && (
+          <>
+            <h2 className="text-lg font-bold text-[#1E497C] mt-8 mb-2">Mungkin maksud Anda</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {aiBooks.map(book => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  onClick={() => navigate(`/books/${book.id}`)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {advancedBooks.length === 0 && aiBooks.length === 0 && (
           <p className="text-gray-600 mt-4 text-center">Tidak ada buku yang ditemukan.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {books.map(book => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onClick={() => navigate(`/books/${book.id}`)}
-                onUpdate={() => handleSearch({})}
-              />
-            ))}
-          </div>
         )}
       </div>
     </div>
