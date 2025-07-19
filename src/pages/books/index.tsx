@@ -6,7 +6,6 @@ import BookCard from '@/components/BookCard'
 import MapView from '@/components/MapView'
 import BookSearchBar from '@/components/SearchBar'
 import { searchBooks } from '@/api/getBooksSemantic'
-import type { BookAIResultDTO } from '@/dto/BookAIResultDTO'
 
 export default function BookList() {
   const [advancedBooks, setAdvancedBooks] = useState<BookSummaryDTO[]>([])
@@ -32,7 +31,7 @@ export default function BookList() {
 
           if (advancedResults.length === 0 && params.title) {
             const aiRawResults = await searchBooks(params.title)
-            const aiMapped = aiRawResults.map((book: BookAIResultDTO) => ({
+            const aiMapped = aiRawResults.map((book: BookSummaryDTO) => ({
               id: book.id,
               title: book.title,
               bookPicture: book.bookPicture,
@@ -76,7 +75,6 @@ export default function BookList() {
                   key={book.id}
                   book={book}
                   onClick={() => navigate(`/books/${book.id}`)}
-                  onUpdate={() => handleSearch({})}
                 />
               ))}
             </div>
@@ -91,6 +89,7 @@ export default function BookList() {
                 <BookCard
                   key={book.id}
                   book={book}
+                  onClick={() => navigate(`/books/${book.id}`)}
                 />
               ))}
             </div>
