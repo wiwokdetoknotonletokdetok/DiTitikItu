@@ -13,6 +13,7 @@ import BookReviewList from './BookReviewList'
 import AddBookLocationForm from './AddBookLocationForm'
 import BookLocationList from './BookLocationList'
 import { Plus } from 'lucide-react'
+import { StarRating } from '@/components/StarRating'
 
 export default function BookDetailPage() {
   const { id } = useParams()
@@ -21,6 +22,9 @@ export default function BookDetailPage() {
   const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
   const [locations, setLocations] = useState<BookLocationResponse[]>([])
   const [showAddLocation, setShowAddLocation] = useState(false)
+  
+  const userId = localStorage.getItem("userId")
+  const existingReview = reviews.find((r) => r.userId === userId)
 
   const fetchLocations = async () => {
     const data = await fetchBookLocations(id!)
@@ -32,7 +36,7 @@ export default function BookDetailPage() {
     try {
       const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviewsWithUser(id),
+        fetchReviewsWithUser(id), // ini error
       ])
       setBook(bookData)
       setReviews(reviewDataWithUser)
@@ -129,16 +133,12 @@ export default function BookDetailPage() {
       
       <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2 text-center">Rating Buku</h2>
-        <p className="text-3xl text-yellow-600 mb-4 text-center">
-          {Array.from({ length: 5 }, (_, index) => (
-            <span key={index}>
-              {index < book.totalRatings ? '★' : '☆'}
-            </span>
-          ))}
-        </p>
+        <StarRating rating={book.totalRatings} />
 
         <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2 text-left">Ulasan Pengguna</h2>
-        <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+        {!existingReview && (
+          <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+        )}
         <BookReviewList reviews={reviews} bookId={id!} onUpdate={fetchBookAndReviews} />
       </div>
     </div>

@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { searchBooks } from '@/api/getBooksSemantic'
 
 interface SearchFormInputs {
   title?: string
@@ -50,17 +51,14 @@ export default function BookSearchBar({ onSearch }: BookSearchBarProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 bg-[#FAFAFA] border rounded-md shadow-sm">
       <div className="relative w-full">
-        {/* 🔍 di kiri */}
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1E497C] h-4 w-4" />
 
-        {/* input */}
         <input
           {...register("title")}
           placeholder="Cari judul buku..."
           className="pl-9 pr-28 py-2 border border-[#1E497C] rounded w-full"
         />
 
-        {/* ❌ clear */}
         {titleWatch && (
           <X
             className="absolute right-20 top-1/2 -translate-y-1/2 text-black cursor-pointer h-4 w-4 hover:text-[#E53935]"
@@ -71,7 +69,6 @@ export default function BookSearchBar({ onSearch }: BookSearchBarProps) {
           />
         )}
 
-        {/* 🔍 submit */}
         <button
           type="submit"
           className="absolute right-12 top-1/2 -translate-y-1/2 text-[#1E497C] hover:text-white hover:bg-[#1E497C] p-1 h-9 w-9 flex items-center justify-center transition-colors rounded-full"
@@ -79,7 +76,6 @@ export default function BookSearchBar({ onSearch }: BookSearchBarProps) {
           <Search className="h-4 w-4" />
         </button>
 
-        {/* ⚙️ filter */}
         <button
           type="button"
           onClick={() => setShowAdvanced((prev) => !prev)}
@@ -89,7 +85,6 @@ export default function BookSearchBar({ onSearch }: BookSearchBarProps) {
         </button>
       </div>
 
-      {/* filter lanjutan */}
       {showAdvanced && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <input {...register("isbn")} placeholder="ISBN" className="border border-[#1E497C] p-2 rounded w-full" />
