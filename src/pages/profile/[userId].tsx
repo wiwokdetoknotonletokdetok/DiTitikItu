@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getUserProfile } from '@/api/getUserProfile.ts'
 import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import { useAuth } from '@/context/AuthContext'
+import Modal from '@/components/Modal'
+import LoginPromptContent from '@/components/LoginPromptContent'
+import SimpleUserList from '@/components/SimpleUserList'
+import { getUserFollowers } from '@/api/getUserFollowers'
+import { getUserFollowings } from '@/api/getUserFollowings'
 
 function UserProfilePage() {
+  const navigate = useNavigate()
+  const { token, isLoggedIn } = useAuth()
   const { userId } = useParams<{ userId: string }>()
   const [profile, setProfile] = useState<UserProfileResponse>()
   const [loading, setLoading] = useState(true)
@@ -59,7 +67,7 @@ function UserProfilePage() {
   }
 
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>
-  if (!profile) return <p>User profile tidak ditemukan.</p>
+  if (!profile || !userId) return <p>User profile tidak ditemukan.</p>
 
   return (
     <div className="flex h-screen w-screen p-8 gap-4 bg-gray-50">
@@ -79,20 +87,38 @@ function UserProfilePage() {
         <div className="mt-10 grid grid-cols-3 gap-x-12 gap-y-6 max-w-xl mx-auto text-gray-700 text-center">
           <button
             className="flex flex-col cursor-pointer"
-            onClick={() => alert(`Pengikut: ${profile.followers}`)}
+            onClick={() => navigate('#followers')}
           >
             <span className="text-sm font-semibold uppercase tracking-wide">Pengikut</span>
             <span className="mt-1">{profile.followers}</span>
           </button>
+          <Modal hash="#followers">
+            <h2 className="text-xl font-semibold mb-4">Pengikut</h2>
+            {isLoggedIn() && token !== null ? (
+              <SimpleUserList userId={userId} token={token} api={getUserFollowers}/>
+            ) : (
+              <LoginPromptContent/>
+            )}
+          </Modal>
+
           <button
             className="flex flex-col cursor-pointer"
-            onClick={() => alert(`Mengikuti: ${profile.followings}`)}
+            onClick={() => navigate('#followings')}
           >
             <span className="text-sm font-semibold uppercase tracking-wide">Mengikuti</span>
             <span className="mt-1">{profile.followings}</span>
           </button>
+          <Modal hash="#followings">
+            <h2 className="text-xl font-semibold mb-4">Mengikuti</h2>
+            {isLoggedIn() && token !== null ? (
+              <SimpleUserList userId={userId} token={token} api={getUserFollowings}/>
+            ) : (
+              <LoginPromptContent/>
+            )}
+          </Modal>
+
           <div className="flex flex-col">
-            <span className="text-sm font-semibold uppercase tracking-wide">Poin</span>
+          <span className="text-sm font-semibold uppercase tracking-wide">Poin</span>
             <span className="mt-1">{profile.points}</span>
           </div>
         </div>
