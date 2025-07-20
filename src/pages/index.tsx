@@ -13,6 +13,9 @@ import type { BookResponseDTO } from '@/dto/BookResponseDTO.ts'
 import { getBooksId } from '@/api/getBooksId.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
 import { getBooksIdLocations } from '@/api/getBooksIdLocations.ts'
+import { Tab, TabButton, TabPanel } from '@/components/Tab.tsx'
+import BookReviewForm from '@/pages/books/AddBookReviewForm.tsx'
+import ToContentButton from "@/components/ToContentButton.tsx";
 
 function formatDistance(meters: number): string {
   if (meters < 1000) {
@@ -26,11 +29,34 @@ export default function Home() {
   const [recommendations, setRecommendations] = useState<BookSummaryDTO[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
   const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
   const [selectedBookLocations, setSelectedBookLocations] = useState<BookLocationResponse[]>([])
   const [loadingBook, setLoadingBook] = useState(false)
   const [flyToLocation, setFlyToLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+      },
+      {
+        threshold: 0.1,
+      }
+    )
+
+    const target = contentRef.current
+    if (target) observer.observe(target)
+
+    return () => {
+      if (target) observer.unobserve(target)
+    }
+  }, [])
+
+  const handleScroll = () => {
+    contentRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   useEffect(() => {
     const fallbackToIPLocation = async () => {
@@ -117,6 +143,7 @@ export default function Home() {
 
   return (
     <div className="p-4 sm:p-6 bg-[#FAFAFA] min-h-screen">
+      {!isVisible && <ToContentButton onClick={() => contentRef.current?.scrollIntoView({ behavior: 'smooth' })} />}
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-[#1C2C4C]">📚 Daftar Buku</h1>
@@ -149,8 +176,17 @@ export default function Home() {
           ) : selectedBook && (
             <div
               className="transition-all duration-500 lg:w-[30%] transform translate-x-0 opacity-100 bg-white rounded shadow p-4"
-              style={{ maxHeight: '85vh', overflowY: 'auto' }}
+              style={{maxHeight: '85vh', overflowY: 'auto'}}
             >
+              <button
+                onClick={() => {
+                  setSelectedBook(null)
+                  setSelectedBookLocations([])
+                }}
+                className="mb-4 text-sm text-blue-600 hover:underline"
+              >
+                Tutup
+              </button>
               <img
                 src={selectedBook.bookPicture}
                 alt={selectedBook.title}
@@ -188,40 +224,57 @@ export default function Home() {
                 </div>
               </div>
 
-              {selectedBookLocations.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-700 font-medium mb-2">Lokasi Buku:</p>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {selectedBookLocations.map((location) => (
-                      <li
-                        key={location.id}
-                        className="border border-gray-200 rounded p-2"
-                        onClick={() => setFlyToLocation({
-                          latitude: location.coordinates[0], longitude: location.coordinates[1]
-                        })}
-                      >
-                        <p className="font-semibold text-gray-800">{location.locationName}</p>
-                        <p className="text-gray-800">{formatDistance(location.distanceMeters)}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <Tab defaultTab="locations">
+                <TabButton id="locations">Lokasi</TabButton>
+                <TabButton id="reviews">Ulasan</TabButton>
 
-              <button
-                onClick={() => {
-                  setSelectedBook(null)
-                  setSelectedBookLocations([])
-                }}
-                className="mt-4 text-sm text-blue-600 hover:underline"
-              >
-                Tutup
-              </button>
+                <TabPanel id="locations">
+                  <div>
+                    {selectedBookLocations.length > 0 ? (
+                      <ul className="space-y-2 text-sm text-gray-600">
+                        {selectedBookLocations.map((location) => (
+                          <li
+                            key={location.id}
+                            className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
+                            onClick={() =>
+                              setFlyToLocation({
+                                latitude: location.coordinates[0],
+                                longitude: location.coordinates[1],
+                              })
+                            }
+                          >
+                            <p className="font-semibold text-gray-800">
+                              {location.locationName}
+                            </p>
+                            <p className="text-gray-800">
+                              {formatDistance(location.distanceMeters)}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
+                    )}
+                  </div>
+                </TabPanel>
+                <TabPanel id="reviews">
+                  <div className="mb-3">
+                    <BookReviewForm bookId={selectedBook.id} onSuccess={() => {
+                    }}/>
+                  </div>
+                  <hr className="border-t border-gray-300"/>
+                  <div className="flex flex-col gap-4 py-6">
+                    <p className="text-sm text-center text-gray-500">
+                      Belum ada ulasan tersedia untuk buku ini.
+                    </p>
+                  </div>
+                </TabPanel>
+              </Tab>
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div ref={contentRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {loading ? (
             <p>Loading...</p>
           ) : (
