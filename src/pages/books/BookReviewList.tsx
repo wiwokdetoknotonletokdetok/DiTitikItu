@@ -2,6 +2,8 @@ import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { deleteReview, updateReview } from '@/api/reviews'
 import { useEffect, useState } from 'react'
 import StarRatingInput from '@/components/StarRatingInput'
+import { ApiError } from '@/exception/ApiError'
+import { set } from 'react-hook-form'
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -25,13 +27,18 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
   const [editing, setEditing] = useState(false)
   const [editMessage, setEditMessage] = useState(myReview?.message || '')
   const [editRating, setEditRating] = useState(myReview?.rating || 0)
+  const [error, setError] = useState<string | null>(null)
+  
 
   const handleDelete = async () => {
     try {
       await deleteReview(bookId, myReview!.userId)
       onUpdate()
     } catch (err) {
-      console.error('Gagal menghapus review:', err)
+      if (err instanceof ApiError) {
+        console.error('Gagal menghapus review:', err)
+        setError(err.message || err.errors?.[0] || "Terjadi kesalahan.")
+      }
     }
   }
 
@@ -45,79 +52,95 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
       setEditing(false)
       onUpdate()
     } catch (err) {
-      console.error('Gagal mengedit review:', err)
+      if (err instanceof ApiError) {
+        console.error('Gagal menghapus review:', err)
+        setError(err.message || err.errors?.[0] || "Terjadi kesalahan.")
+      }
     }
   }
 
   return (
-    <div className="mt-6 bg-[#FAFAFA] p-4 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4 text-[#1C2C4C]">Review Pembaca</h2>
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        {reviews.length === 0 && (
+          <p className="text-gray-500 italic">Belum ada review untuk buku ini.</p>
+        )}
+        {myReview && (
+          <div className="border-t pt-3 mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <img
+                src={myReview.profilePicture}
+                alt={myReview.name}
+                className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+              />
+              <span>
+                <p className="text-sm font-semibold text-[#1C2C4C]">{myReview.name}</p>
+                <p className="text-xs text-gray-600">
+                  {getFormattedReviewDate(myReview.createdAt, myReview.updatedAt)}
+                </p>
+              </span>
+            </div>
 
-      {reviews.length === 0 && (
-        <p className="text-gray-500 italic">Belum ada review untuk buku ini.</p>
-      )}
-
-      {myReview && (
-        <div className="border border-[#2E7D32] rounded-lg p-4 mb-6 bg-[#A5D6A7]/20">
-          <div className="flex items-center gap-2 mb-1">
-            <img src={myReview.profilePicture} alt={myReview.name} className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"/>
-            <span>
-              <p className="text-sm font-semibold text-[#1C2C4C]">{myReview.name}</p>
-              <p className="text-xs text-gray-600">
-                {getFormattedReviewDate(myReview.createdAt, myReview.updatedAt)}
-              </p>
-            </span>
+            {editing ? (
+              <form onSubmit={handleUpdate} className="space-y-2 mt-2">
+                <StarRatingInput value={editRating} onChange={setEditRating} />
+                <textarea
+                  className="w-full border border-[#1E497C] rounded-md p-2 text-sm resize-none"
+                  value={editMessage}
+                  onChange={(e) => setEditMessage(e.target.value)}
+                  required
+                />
+                <div className="space-x-2">
+                  <button
+                    type="submit"
+                    className="bg-[#1E497C] hover:bg-[#5C8BC1] text-white px-3 py-1 rounded-md text-sm"
+                  >
+                    Simpan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(false)
+                      setEditMessage(myReview.message)
+                      setEditRating(myReview.rating)
+                      setError(null)
+                    }}
+                    className="text-gray-600 text-sm"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <p className="text-xs text-yellow-600">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <span key={index}>
+                      {index < myReview.rating ? '★' : '☆'}
+                    </span>
+                  ))}
+                </p>
+                <p className="text-sm italic text-[#1C2C4C] mt-1">{myReview.message}</p>
+                <div className="space-x-3 mt-2">
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-sm text-[#1E497C] hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-sm text-[#E53935] hover:underline"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-          {editing ? (
-            <form onSubmit={handleUpdate} className="space-y-2">
-              <StarRatingInput value={editRating} onChange={setEditRating} />
-              <textarea className="w-full border border-[#1E497C] rounded-md p-2 text-sm resize-none" value={editMessage} onChange={(e) => setEditMessage(e.target.value)} required/>
-              <div className="space-x-2">
-                <button type="submit" className="bg-[#1E497C] hover:bg-[#5C8BC1] text-white px-3 py-1 rounded-md text-sm"> Simpan </button>
-                <button type="button" onClick={() => {
-                    setEditing(false)
-                    setEditMessage(myReview.message)
-                    setEditRating(myReview.rating)
-                  }} 
-                  className="text-gray-600 text-sm"> 
-                  Batal
-                </button>
-              </div>
-            </form>
-          ) : (
-            <>
-              <p className="text-xs text-yellow-600">
-                {Array.from({ length: 5 }, (_, index) => (
-                  <span key={index}>
-                    {index < myReview.rating ? '★' : '☆'}
-                  </span>
-                ))}
-              </p>
+        )}
 
-              <p className="text-sm italic text-[#1C2C4C]">{myReview.message}</p>
-
-              <div className="space-x-3 mt-2">
-                <button
-                  onClick={() => setEditing(true)}
-                  className="text-sm text-[#1E497C] hover:underline"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="text-sm text-[#E53935] hover:underline"
-                >
-                  Hapus
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-4">
         {otherReviews.map((r, i) => (
-          <div key={i} className="border-t pt-3 mt-3 border-[#2E7D32]/50">
+          <div key={i} className="border-t pt-3 mt-3 border-gray-300">
             <div className="flex items-center gap-2 mb-1">
               <img
                 src={r.profilePicture}
@@ -125,9 +148,7 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
                 className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
               />
               <span>
-                <p className="text-sm font-semibold text-[#1C2C4C]">
-                  {r.name}
-                </p>
+                <p className="text-sm font-semibold text-[#1C2C4C]">{r.name}</p>
                 <p className="text-xs text-gray-600">
                   {getFormattedReviewDate(r.createdAt, r.updatedAt)}
                 </p>
@@ -140,12 +161,12 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
                 </span>
               ))}
             </p>
-            <p className="text-sm italic text-[#1C2C4C]">{r.message}</p>
+            <p className="text-sm italic text-[#1C2C4C] mt-1">{r.message}</p>
           </div>
         ))}
-      </div>
+        {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
-      )
+  )
 }
 
 function getFormattedReviewDate(createdAt: string, updatedAt?: string) {
