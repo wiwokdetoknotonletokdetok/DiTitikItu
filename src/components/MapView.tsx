@@ -28,7 +28,7 @@ function GoToUserButton({ position }) {
   return (
     <button
       onClick={handleClick}
-      className="absolute bottom-28 right-2.5 z-[1000] p-2 bg-white border border-gray-300 shadow-md rounded cursor-pointer"
+      className="absolute text-gray-500 bottom-28 right-2.5 z-[1000] p-2 bg-white hover:bg-gray-100 border border-gray-200 shadow-md rounded cursor-pointer"
     >
       <Locate size={20} />
     </button>
@@ -39,7 +39,7 @@ function CustomZoomControl() {
   const map = useMap()
 
   return (
-    <div className="absolute bottom-6 right-2.5 flex flex-col z-[1000] border border-gray-300 shadow-md rounded overflow-hidden">
+    <div className="absolute text-gray-500 bottom-6 right-2.5 flex flex-col z-[1000] border border-gray-200 shadow-md rounded overflow-hidden">
       <button
         onClick={() => map.zoomIn()}
         className="p-2 bg-white hover:bg-gray-100"
