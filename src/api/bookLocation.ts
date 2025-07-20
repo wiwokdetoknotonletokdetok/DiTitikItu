@@ -35,7 +35,7 @@ export async function postBookLocation(bookId: string, location: BookLocationReq
 
 export async function updateBookLocation(bookId: string, locationId: string, location: BookLocationRequest): Promise<void> {
   const res = await fetch(`${BASE_URL}/books/${bookId}/locations/${locationId}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`

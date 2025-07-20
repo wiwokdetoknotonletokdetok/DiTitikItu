@@ -3,22 +3,20 @@ import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import { deleteBookLocation, updateBookLocation } from '@/api/bookLocation'
 import { ApiError } from '@/exception/ApiError'
 
-export default function BookLocationList({
-  locations,
-  bookId,
-  onRefresh,
-}: {
-  locations: BookLocationResponse[]
+type BookLocationListProps = {
   bookId: string
-  onRefresh: () => void
-}) {
+  locations: BookLocationResponse[]
+  mode?: 'compact' | 'full'
+  onRefresh?: () => void
+}
+
+export default function BookLocationList({ bookId, mode = 'full', locations, onRefresh }: BookLocationListProps) {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editName, setEditName] = useState('')
   const [editLat, setEditLat] = useState('')
   const [editLng, setEditLng] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
-  const MAX_VISIBLE = 3
+  const [error, setError] = useState<string | null>(null)
 
   const startEdit = (loc: BookLocationResponse) => {
     setEditingId(loc.id)
@@ -36,7 +34,7 @@ export default function BookLocationList({
         longitude: parseFloat(editLng),
       })
       setEditingId(null)
-      onRefresh()
+      onRefresh?.()
     } catch (e) {
         if (e instanceof ApiError) {
           console.error(e.message)
@@ -49,9 +47,8 @@ export default function BookLocationList({
 
   const handleDelete = async (id: number) => {
     try {
-      console.log('Buku id:', bookId, 'Lokasi id:', id)
       await deleteBookLocation(bookId, id.toString())
-      onRefresh()
+      onRefresh?.()
     } catch (e) {
       if (e instanceof ApiError) {
           setError(e.message || 'Gagal mengambil data user')
@@ -61,17 +58,19 @@ export default function BookLocationList({
     }
   }
 
-  return (
-    <div className="mt-6">
-      {locations.length === 0 ? (
-        <p className="text-sm text-gray-500">Belum ada lokasi.</p>
-      ) : (
-        <>
+  const MAX_VISIBLE = 3
+  const isScrollable = locations.length > MAX_VISIBLE
 
-        <ul className="space-y-4">
+return (
+  <div className="mt-6">
+    {locations.length === 0 ? (
+      <p className="text-sm text-gray-500">Belum ada lokasi.</p>
+    ) : (
+      <>
+        <div className={isScrollable ? "max-h-60 overflow-y-auto pr-1 space-y-4" : "space-y-4"}>
           {(showModal ? locations : locations.slice(0, MAX_VISIBLE)).map((loc) => (
-          <li key={loc.id} className="border rounded p-3">
-            {editingId === loc.id ? (
+            <li key={loc.id} className="border rounded p-3 list-none">
+              {editingId === loc.id ? (
                 <div className="space-y-2">
                   <input
                     value={editName}
@@ -95,7 +94,7 @@ export default function BookLocationList({
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={handleUpdate}
-                      className="bg-green-600 text-white px-3 py-1 rounded"
+                      className="bg-[#1E497C] hover:bg-[#5C8BC1] text-white px-3 py-1 rounded"
                     >
                       Simpan
                     </button>
@@ -108,47 +107,48 @@ export default function BookLocationList({
                   </div>
                 </div>
               ) : (
-              <>
-                <div>
-                  <strong>{loc.locationName}</strong> – ({loc.coordinates.join(', ')}){' '}
-                  <span className="text-gray-500">({loc.distanceMeters.toFixed(1)} m)</span>
-                </div>
-                <div className="mt-2 space-x-3">
-                  <button onClick={() => startEdit(loc)} className="text-blue-600 hover:underline">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(loc.id)} className="text-red-600 hover:underline">
-                    Hapus
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                <>
+                  <div>
+                    <strong>{loc.locationName}</strong> – ({loc.coordinates.join(', ')}){' '}
+                    <span className="text-gray-500">({loc.distanceMeters.toFixed(1)} m)</span>
+                  </div>
+                  <div className="mt-2 space-x-3">
+                    <button onClick={() => startEdit(loc)} className="text-blue-600 hover:underline">
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(loc.id)} className="text-red-600 hover:underline">
+                      Hapus
+                    </button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
+        </div>
 
-      {!showModal && locations.length > MAX_VISIBLE && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setShowModal(true)}
-            className="text-blue-600 hover:underline text-sm"
-          >
-            Lihat Semua Lokasi ({locations.length})
-          </button>
-        </div>
-      )}
-      {showModal && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setShowModal(false)}
-            className="text-gray-500 hover:underline text-sm"
-          >
-            Tampilkan Lebih Sedikit
-          </button>
-        </div>
-      )}
+        {!showModal && locations.length > MAX_VISIBLE && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setShowModal(true)}
+              className="text-blue-600 hover:underline text-sm"
+            >
+              Lihat Semua Lokasi ({locations.length})
+            </button>
+          </div>
+        )}
+
+        {showModal && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-gray-500 hover:underline text-sm"
+            >
+              Tampilkan Lebih Sedikit
+            </button>
+          </div>
+        )}
       </>
-      )}
-    </div>
+    )}
+  </div>
   )
 }

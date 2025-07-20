@@ -2,9 +2,11 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import type {UserPosition} from '@/dto/UserPosition.ts'
+import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 
 interface MapViewProps {
   userPosition: UserPosition
+  bookLocations: BookLocationResponse[]
 }
 
 function SetViewTo({ position }) {
@@ -46,7 +48,7 @@ function GoToUserButton({ position }) {
   )
 }
 
-export default function MapView({ books, userPosition } : MapViewProps) {
+export default function MapView({ userPosition, bookLocations } : MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
 
   return (
@@ -66,11 +68,11 @@ export default function MapView({ books, userPosition } : MapViewProps) {
           </>
         )}
 
-        {books.map(book => (
-          <Marker key={book.id} position={[book.lat, book.lng]}>
-            <Popup>{book.title}</Popup>
-          </Marker>
-        ))}
+        {bookLocations.length > 0 && bookLocations.map((loc, idx) => (
+            <Marker key={idx} position={loc.coordinates}>
+              <Popup>{loc.locationName}</Popup>
+            </Marker>
+          ))}
 
         {userPosition && <GoToUserButton position={userPosition}/>}
       </MapContainer>

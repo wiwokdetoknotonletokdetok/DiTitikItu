@@ -14,6 +14,7 @@ import AddBookLocationForm from './AddBookLocationForm'
 import BookLocationList from './BookLocationList'
 import { Plus } from 'lucide-react'
 import { StarRating } from '@/components/StarRating'
+import { useUserLocation } from '@/context/LocationContext'
 
 export default function BookDetailPage() {
   const { id } = useParams()
@@ -25,10 +26,19 @@ export default function BookDetailPage() {
   
   const userId = localStorage.getItem("userId")
   const existingReview = reviews.find((r) => r.userId === userId)
+  const userLocation = useUserLocation()
 
   const fetchLocations = async () => {
-    const data = await fetchBookLocations(id!)
-    setLocations(data)
+    if (!userLocation || !id) {
+      console.warn("Gagal fetch lokasi: userLocation atau id belum siap")
+      return
+    }
+    try {
+      const data = await fetchBookLocations(id, userLocation.latitude, userLocation.longitude)
+      setLocations(data)
+    } catch (err) {
+      console.error('Gagal fetch lokasi buku:', err)
+    }
   }
 
   const fetchData = async () => {
@@ -36,7 +46,7 @@ export default function BookDetailPage() {
     try {
       const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviewsWithUser(id), // ini error
+        fetchReviewsWithUser(id), 
       ])
       setBook(bookData)
       setReviews(reviewDataWithUser)
@@ -63,10 +73,13 @@ export default function BookDetailPage() {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [id])
+    if (id && userLocation) {
+      fetchData()
+    }
+  }, [id, userLocation])
 
-  if (loading) return <p className="p-6 text-gray-500">Loading detail buku...</p>
+
+  if (loading) return <p className="p-6 text-gray-500">{ localStorage.getItem("userLocation") } Loading detail buku...</p>
   if (!book) return <p className="p-6 text-red-500">Buku tidak ditemukan</p>
 
   return (
@@ -103,7 +116,7 @@ export default function BookDetailPage() {
 
       <div>
         <p className='text-xl font-semibold text-[#1C2C4C] mb-2'>📍 Lokasi:</p>
-        <BookLocationList bookId={id!} onRefresh={fetchLocations} locations={locations} />
+        <BookLocationList bookId={id!} onRefresh={fetchLocations} locations={locations} mode='full'/>
         {showAddLocation && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-md w-full max-w-md relative">
