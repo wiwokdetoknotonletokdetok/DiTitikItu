@@ -46,7 +46,7 @@ export default function LoginUser() {
     try {
       const response: WebResponse<LoginUserResponse> = await loginUser(form)
       login(response.data.token)
-      navigate('/books')
+      navigate('/')
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 401) {
         setApiError(err.message)
