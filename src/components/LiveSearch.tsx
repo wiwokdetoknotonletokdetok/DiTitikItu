@@ -16,13 +16,18 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isTyping, setIsTyping] = useState(false)
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      const fetchData = async () => {
-        if (query.length > 2) {
+    let typingTimeout: NodeJS.Timeout
+
+    if (query.length > 2) {
+      setLoading(true)
+      setIsTyping(true)
+
+      typingTimeout = setTimeout(() => {
+        const fetchData = async () => {
           try {
-            setLoading(true)
             const response: WebResponse<BookSummaryDTO[]> = await getBooksSemantic(query)
             setResults(response.data)
             setIsOpen(true)
@@ -32,17 +37,20 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
             setIsOpen(false)
           } finally {
             setLoading(false)
+            setIsTyping(false)
           }
-        } else {
-          setResults([])
-          setIsOpen(false)
         }
-      }
 
-      fetchData()
-    }, 300)
+        fetchData()
+      }, 300)
+    } else {
+      setResults([])
+      setIsOpen(false)
+      setLoading(false)
+      setIsTyping(false)
+    }
 
-    return () => clearTimeout(delayDebounce)
+    return () => clearTimeout(typingTimeout)
   }, [query])
 
   useEffect(() => {
@@ -95,17 +103,13 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
         )}
       </div>
 
-      {isOpen && (loading || results.length > 0 || (query.length > 2 && !loading)) && (
+      {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 max-h-96 overflow-auto border border-gray-200 bg-white rounded-3xl shadow-lg z-[1000]">
-          {loading && (
-            <>
-              <SkeletonItem />
-              <SkeletonItem />
-              <SkeletonItem />
-            </>
+          {(loading || isTyping) && (
+            <SkeletonItem />
           )}
 
-          {!loading && query.length > 2 && results.length === 0 && (
+          {!loading && !isTyping && query.length > 2 && results.length === 0 && (
             <Link to="/books/new">
               <p className="py-4 px-8 text-center text-sm text-gray-500 hover:bg-gray-50">
                 Judul belum tersedia. Mau tambahkan?
@@ -113,7 +117,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
             </Link>
           )}
 
-          {!loading && results.length > 0 && (
+          {!loading && !isTyping && results.length > 0 && (
             <ul className="divide-y divide-gray-200">
               {results.map((book, i) => (
                 <li
