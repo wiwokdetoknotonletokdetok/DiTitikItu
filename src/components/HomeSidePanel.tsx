@@ -16,9 +16,13 @@ type Props = {
   onClose: () => void
   onFlyTo: (lat: number, lng: number) => void
   onUpdate: () => void
+  onAddLocationClick: () => void
+  newMarkerPosition?: { lat: number; lng: number }
+  onCancelAddLocation?: () => void
+  onSaveAddLocation?: () => void
 }
 
-export default function HomeSidePanel({ book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
+export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
   return (
     <div
       className="transition-all duration-500 lg:w-[30%] transform translate-x-0 opacity-100 bg-white rounded shadow p-4"
@@ -61,6 +65,35 @@ export default function HomeSidePanel({ book, locations, reviews, onClose, onFly
         <TabButton id="reviews">Ulasan</TabButton>
 
         <TabPanel id="locations">
+          {!newMarkerPosition ? (
+            <div className="mb-3">
+              <button
+                onClick={onAddLocationClick}
+                className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                + Tambah Lokasi
+              </button>
+            </div>
+          ) : (
+            <div className="mb-3 space-y-2">
+              <button
+                onClick={() => {
+                  onSaveAddLocation?.()
+                }}
+                className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition w-full"
+              >
+                Simpan Lokasi
+              </button>
+              <button
+                onClick={() => {
+                  onCancelAddLocation?.()
+                }}
+                className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-300 transition w-full"
+              >
+                Batal
+              </button>
+            </div>
+          )}
           {locations.length > 0 ? (
             <ul className="space-y-2 text-sm text-gray-600">
               {locations.map((loc) => (
@@ -81,9 +114,9 @@ export default function HomeSidePanel({ book, locations, reviews, onClose, onFly
 
         <TabPanel id="reviews">
           <div className="mb-4">
-            <BookReviewForm bookId={book.id} onUpdate={onUpdate} />
+            <BookReviewForm bookId={book.id} onUpdate={onUpdate}/>
           </div>
-          <hr className="border-t border-gray-300" />
+          <hr className="border-t border-gray-300"/>
           <div className="flex flex-col">
             {reviews.length > 0 ? (
               <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate} />

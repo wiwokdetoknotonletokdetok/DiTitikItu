@@ -5,6 +5,9 @@ import type { UserPosition } from '@/dto/UserPosition.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
 import FlyToLocation from '@/components/FlyToLocation.tsx'
 import { Locate, Plus, Minus } from 'lucide-react'
+import {ApiError} from "@/exception/ApiError.ts";
+import {deleteBookLocation} from "@/api/bookLocation.ts";
+import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
 
 function SetViewTo({ position }) {
   const map = useMap()
@@ -58,14 +61,29 @@ function CustomZoomControl() {
 
 
 interface MapViewProps {
+  selectedBook: BookResponseDTO | null
   bookLocations: BookLocationResponse[]
   userPosition?: UserPosition
   flyToLocation?: { latitude: number, longitude: number } | null
   children?: React.ReactNode
+  newMarkerPosition?: { lat: number; lng: number } | null
+  onUpdateNewMarkerPosition?: (pos: { lat: number; lng: number }) => void
 }
 
-export default function MapView({ children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
+export default function MapView({ selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
+
+  async function handleDeleteLocation(bookId: number, locationId: number) {
+    try {
+      await deleteBookLocation(bookId, locationId)
+    } catch (err) {
+      if (err instanceof ApiError && err.statusCode === 401) {
+        console.log(err.message)
+      } else {
+        console.log('Terjadi kesalahan. Silakan coba lagi.')
+      }
+    }
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -79,6 +97,22 @@ export default function MapView({ children, bookLocations, userPosition, flyToLo
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+
+        {newMarkerPosition && (
+          <Marker
+            position={[newMarkerPosition.lat, newMarkerPosition.lng]}
+            draggable={true}
+            eventHandlers={{
+              dragend: (e) => {
+                const marker = e.target
+                const position = marker.getLatLng()
+                onUpdateNewMarkerPosition?.({ lat: position.lat, lng: position.lng })
+              }
+            }}
+          >
+            <Popup>Lokasi baru (geser pin ini)</Popup>
+          </Marker>
+        )}
 
         {userPosition && (
           <>
@@ -96,7 +130,17 @@ export default function MapView({ children, bookLocations, userPosition, flyToLo
             key={location.id}
             position={[location.coordinates[0], location.coordinates[1]]}
           >
-            <Popup>{location.locationName}</Popup>
+            <Popup>
+              <div>
+                <p className="font-semibold">{location.locationName}</p>
+                <button
+                  className="mt-2 text-red-600 text-sm hover:underline"
+                  onClick={() => {handleDeleteLocation(selectedBook?.id, location.id)}}
+                >
+                  Hapus Lokasi
+                </button>
+              </div>
+            </Popup>
           </Marker>
         ))}
 
