@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react'
-import type {MouseEventHandler} from 'react'
-import Tooltip from "@/components/ToolTip.tsx";
+import type { MouseEventHandler } from 'react'
+import Tooltip from '@/components/Tooltip.tsx'
 
 interface ToContentButtonProps {
   onClick?: MouseEventHandler<HTMLButtonElement>

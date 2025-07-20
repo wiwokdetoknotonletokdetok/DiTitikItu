@@ -9,7 +9,7 @@ import SubmitButton from '@/components/SubmitButton'
 import FormRedirectLink from '@/components/FormRedirectLink'
 import TextInputError from '@/components/TextInputError'
 import { Info, X } from 'lucide-react'
-import ToolTip from '@/components/ToolTip'
+import ToolTip from '@/components/Tooltip.tsx'
 
 export default function RegisterUser() {
   const navigate = useNavigate()

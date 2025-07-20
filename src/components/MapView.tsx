@@ -1,9 +1,10 @@
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import {MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl} from 'react-leaflet'
 import { useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import type { UserPosition } from '@/dto/UserPosition.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
-import FlyToLocation from "@/components/FlyToLocation.tsx";
+import FlyToLocation from '@/components/FlyToLocation.tsx'
+import { Locate, Plus, Minus } from 'lucide-react'
 
 function SetViewTo({ position }) {
   const map = useMap()
@@ -27,35 +28,53 @@ function GoToUserButton({ position }) {
   return (
     <button
       onClick={handleClick}
-      style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        zIndex: 1000,
-        padding: '8px 12px',
-        backgroundColor: '#fff',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}
+      className="absolute bottom-28 right-2.5 z-[1000] p-2 bg-white border border-gray-300 shadow-md rounded cursor-pointer"
     >
-      Ke Lokasi Saya
+      <Locate size={20} />
     </button>
   )
 }
+
+function CustomZoomControl() {
+  const map = useMap()
+
+  return (
+    <div className="absolute bottom-6 right-2.5 flex flex-col z-[1000] border border-gray-300 shadow-md rounded overflow-hidden">
+      <button
+        onClick={() => map.zoomIn()}
+        className="p-2 bg-white hover:bg-gray-100"
+      >
+        <Plus size={20} />
+      </button>
+      <button
+        onClick={() => map.zoomOut()}
+        className="p-2 bg-white hover:bg-gray-100"
+      >
+        <Minus size={20} />
+      </button>
+    </div>
+  )
+}
+
 
 interface MapViewProps {
   bookLocations: BookLocationResponse[]
   userPosition?: UserPosition
   flyToLocation?: { latitude: number, longitude: number } | null
+  children?: React.ReactNode
 }
 
-export default function MapView({ bookLocations, userPosition, flyToLocation }: MapViewProps) {
+export default function MapView({ children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
 
   return (
     <div style={{ position: 'relative' }}>
-      <MapContainer center={center} zoom={userPosition ? 13 : 2} style={{ height: '85vh', width: '100%' }}>
+      <MapContainer
+        center={center}
+        zoom={userPosition ? 13 : 2}
+        style={{ height: '85vh', width: '100%' }}
+        zoomControl={false}
+      >
         <TileLayer
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -87,9 +106,10 @@ export default function MapView({ bookLocations, userPosition, flyToLocation }: 
             longitude={flyToLocation.longitude}
           />
         )}
-
+        <CustomZoomControl />
         {userPosition && <GoToUserButton position={userPosition} />}
       </MapContainer>
+      {children}
     </div>
   )
 }

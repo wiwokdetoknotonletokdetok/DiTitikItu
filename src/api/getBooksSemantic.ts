@@ -1,23 +1,31 @@
-import axios from "axios";
-import { ApiError } from "@/exception/ApiError.ts";
+import axios from 'axios'
+import { ApiError } from '@/exception/ApiError.ts'
+import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
+import type {WebResponse} from '@/dto/WebResponse.ts'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function searchBooks(query: string, max = 4, threshold = 0.4) {
+export async function getBooksSemantic(query: string, max = 4, threshold = 0.4): Promise<WebResponse<BookSummaryDTO[]>> {
   try {
-    const response = await axios.get(`${BASE_URL}/books`, {
-      params: { q: query, max, threshold },
-      headers: { Accept: "application/json" },
-    });
+    const response = await axios.get<WebResponse<BookSummaryDTO[]>>(
+      `${BASE_URL}/books`, {
+      params: {
+        q: query,
+        max,
+        threshold
+      },
+      headers: {
+        Accept: "application/json"
+      },
+    })
 
-    return response.data.data;
-  } catch (error: any) {
-    console.error("Gagal fetch buku:", error);
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const data = error.response.data as WebResponse<string>
+      throw new ApiError(data.errors, error.response.status, data.errors)
+    }
 
-    const message = error.response?.data?.message || "Gagal mengambil data buku";
-    const statusCode = error.response?.status || 500;
-    const errors = error.response?.data?.errors || "Terjadi kesalahan jaringan atau server";
-
-    throw new ApiError(message, statusCode, errors);
+    throw new ApiError('Unknown error occurred', 500, 'Unknown error')
   }
 }

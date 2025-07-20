@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import BookSearchBar from '@/components/SearchBar'
 import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getRecommendationsBooks } from '@/api/getRecommendationsBooks'
 import { getBooksId } from '@/api/getBooksId'
@@ -11,9 +10,10 @@ import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import { ApiError } from '@/exception/ApiError'
 import ToContentButton from '@/components/ToContentButton'
 
-import HomeMaps from '@/components/HomeMaps'
+import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
+import LiveSearch from "@/components/LiveSearch.tsx";
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -104,17 +104,17 @@ export default function Home() {
           </a>
         </div>
 
-        <div className="mb-6" ref={mapContainerRef}>
-          <BookSearchBar onSearch={() => {}} />
-        </div>
-
-        <div className="mb-6 flex flex-col lg:flex-row gap-4">
+        <div ref={mapContainerRef} className="mb-6 flex flex-col lg:flex-row gap-4">
           <div className={`transition-all duration-500 ${selectedBook ? 'lg:w-[70%]' : 'lg:w-full'}`}>
-            <HomeMaps
+            <MapsView
               userPosition={userPosition}
               bookLocations={selectedBookLocations}
               flyToLocation={flyToLocation}
-            />
+            >
+              <div className="absolute z-[1000] top-2.5 left-2.5 max-w-md w-full">
+                <LiveSearch onSelectBook={handleSelectBook} />
+              </div>
+            </MapsView>
           </div>
 
           {loadingBook ? (
