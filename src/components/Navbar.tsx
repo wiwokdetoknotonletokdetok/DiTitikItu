@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { logoutUser } from '@/api/logoutUser.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
-import type { WebResponse } from '@/dto/WebResponse.ts'
-import {ApiError} from "@/exception/ApiError.ts";
+import { ApiError } from '@/exception/ApiError.ts'
 
 export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
