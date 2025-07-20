@@ -3,6 +3,8 @@ import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getRecommendationsBooks } from '@/api/getRecommendationsBooks'
 import { getBooksId } from '@/api/getBooksId'
 import { getBooksIdLocations } from '@/api/getBooksIdLocations'
+import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
+
 import type { UserPosition } from '@/dto/UserPosition'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
@@ -18,6 +20,7 @@ import Tooltip from '@/components/Tooltip.tsx'
 import { BookPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Navbar from '@/components/Navbar.tsx'
+import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -28,6 +31,7 @@ export default function Home() {
   const [loadingBook, setLoadingBook] = useState(false)
   const [flyToLocation, setFlyToLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -88,11 +92,25 @@ export default function Home() {
         setSelectedBookLocations(locationRes.data)
       }
 
+      await refreshBookAndReviews(bookId)
       mapContainerRef.current?.scrollIntoView({ behavior: 'smooth' })
     } catch (err) {
       console.error('Gagal mengambil detail/lokasi buku:', err)
     } finally {
       setLoadingBook(false)
+    }
+  }
+
+  const refreshBookAndReviews = async (bookId: string) => {
+    try {
+      const [bookDetail, reviewDataWithUser] = await Promise.all([
+        getBooksId(bookId),
+        fetchReviewsWithUser(bookId),
+      ])
+      setSelectedBook(bookDetail.data)
+      setReviews(reviewDataWithUser)
+    } catch (err) {
+      console.error('Gagal fetch data:', err)
     }
   }
 
@@ -135,11 +153,13 @@ export default function Home() {
             <HomeSidePanel
               book={selectedBook}
               locations={selectedBookLocations}
+              reviews={reviews}
               onClose={() => {
                 setSelectedBook(null)
                 setSelectedBookLocations([])
               }}
-              onFlyTo={(lat, lng) => setFlyToLocation({latitude: lat, longitude: lng})}
+              onFlyTo={(lat, lng) => setFlyToLocation({ latitude: lat, longitude: lng })}
+              onUpdate={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
             />
           )}
         </div>

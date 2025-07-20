@@ -5,10 +5,10 @@ import StarRatingInput from '@/components/StarRatingInput'
 
 interface AddBookReviewFormProps {
   bookId: string
-  onSuccess: () => void
+  onUpdate: () => void
 }
 
-export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormProps) {
+export default function BookReviewForm({ bookId, onUpdate }: AddBookReviewFormProps) {
   const [message, setMessage] = useState('')
   const [rating, setRating] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +21,7 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
       await postReview(bookId, { message, rating })
       setMessage('')
       setRating(0)
-      onSuccess()
+      onUpdate()
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || err.errors?.[0] || "Terjadi kesalahan.")

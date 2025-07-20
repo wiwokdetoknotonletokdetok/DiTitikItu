@@ -2,6 +2,8 @@ import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import BookReviewForm from '@/pages/books/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
+import BookReviewList from '@/pages/books/BookReviewList'
+import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -10,11 +12,13 @@ function formatDistance(meters: number): string {
 type Props = {
   book: BookResponseDTO
   locations: BookLocationResponse[]
+  reviews: ReviewWithUserDTO[]
   onClose: () => void
   onFlyTo: (lat: number, lng: number) => void
+  onUpdate: () => void
 }
 
-export default function HomeSidePanel({ book, locations, onClose, onFlyTo }: Props) {
+export default function HomeSidePanel({ book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
   return (
     <div
       className="transition-all duration-500 lg:w-[30%] transform translate-x-0 opacity-100 bg-white rounded shadow p-4"
@@ -76,14 +80,18 @@ export default function HomeSidePanel({ book, locations, onClose, onFlyTo }: Pro
         </TabPanel>
 
         <TabPanel id="reviews">
-          <div className="mb-3">
-            <BookReviewForm bookId={book.id} onSuccess={() => {}} />
+          <div className="mb-4">
+            <BookReviewForm bookId={book.id} onUpdate={onUpdate} />
           </div>
           <hr className="border-t border-gray-300" />
-          <div className="flex flex-col gap-4 py-6">
-            <p className="text-sm text-center text-gray-500">
-              Belum ada ulasan tersedia untuk buku ini.
-            </p>
+          <div className="flex flex-col">
+            {reviews.length > 0 ? (
+              <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate} />
+            ) : (
+              <p className="text-sm text-center text-gray-500">
+                Belum ada ulasan tersedia untuk buku ini.
+              </p>
+            )}
           </div>
         </TabPanel>
       </Tab>
