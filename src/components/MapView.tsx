@@ -1,11 +1,9 @@
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
-import type {UserPosition} from '@/dto/UserPosition.ts'
-
-interface MapViewProps {
-  userPosition: UserPosition
-}
+import type { UserPosition } from '@/dto/UserPosition.ts'
+import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
+import FlyToLocation from "@/components/FlyToLocation.tsx";
 
 function SetViewTo({ position }) {
   const map = useMap()
@@ -13,7 +11,7 @@ function SetViewTo({ position }) {
     if (position) {
       map.setView(position, 13)
     }
-  }, [position])
+  }, [])
   return null
 }
 
@@ -46,12 +44,18 @@ function GoToUserButton({ position }) {
   )
 }
 
-export default function MapView({ books, userPosition } : MapViewProps) {
+interface MapViewProps {
+  bookLocations: BookLocationResponse[]
+  userPosition?: UserPosition
+  flyToLocation?: { latitude: number, longitude: number } | null
+}
+
+export default function MapView({ bookLocations, userPosition, flyToLocation }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
 
   return (
-    <div style={{position: 'relative'}}>
-      <MapContainer center={center} zoom={userPosition ? 13 : 2} style={{height: '450px', width: '100%'}}>
+    <div style={{ position: 'relative' }}>
+      <MapContainer center={center} zoom={userPosition ? 13 : 2} style={{ height: '85vh', width: '100%' }}>
         <TileLayer
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -66,13 +70,25 @@ export default function MapView({ books, userPosition } : MapViewProps) {
           </>
         )}
 
-        {books.map(book => (
-          <Marker key={book.id} position={[book.lat, book.lng]}>
-            <Popup>{book.title}</Popup>
+        {bookLocations
+        .filter(location => location.coordinates[0] !== undefined && location.coordinates[1] !== undefined)
+        .map(location => (
+          <Marker
+            key={location.id}
+            position={[location.coordinates[0], location.coordinates[1]]}
+          >
+            <Popup>{location.locationName}</Popup>
           </Marker>
         ))}
 
-        {userPosition && <GoToUserButton position={userPosition}/>}
+        {flyToLocation && (
+          <FlyToLocation
+            latitude={flyToLocation.latitude}
+            longitude={flyToLocation.longitude}
+          />
+        )}
+
+        {userPosition && <GoToUserButton position={userPosition} />}
       </MapContainer>
     </div>
   )
