@@ -1,5 +1,4 @@
 export interface UserProfileResponse {
-  email: string
   name: string
   bio: string
   profilePicture: string

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
@@ -15,6 +15,8 @@ import TextInputError from '@/components/TextInputError'
 export default function LoginUser() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname || '/'
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [touched, setTouched] = useState({ email: false, password: false })
@@ -45,13 +47,12 @@ export default function LoginUser() {
 
     try {
       const response: WebResponse<LoginUserResponse> = await loginUser(form)
-      login(response.data.token)
-      navigate('/')
+      await login(response.data.token)
+      navigate(from, { replace: true })
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 401) {
         setApiError(err.message)
       } else {
-        console.error(err)
         setApiError('Terjadi kesalahan. Silakan coba lagi.')
       }
     }
