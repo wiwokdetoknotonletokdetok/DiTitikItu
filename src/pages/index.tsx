@@ -17,6 +17,7 @@ import LiveSearch from '@/components/LiveSearch.tsx'
 import Tooltip from '@/components/Tooltip.tsx'
 import { BookPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import Navbar from '@/components/Navbar.tsx'
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -27,7 +28,6 @@ export default function Home() {
   const [loadingBook, setLoadingBook] = useState(false)
   const [flyToLocation, setFlyToLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [isVisible, setIsVisible] = useState(false)
-
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -97,15 +97,10 @@ export default function Home() {
   }
 
   return (
-    <div className="p-4 sm:p-6 bg-[#FAFAFA] min-h-screen">
+    <div className="px-4 bg-[#FAFAFA] min-h-screen">
       {!isVisible && <ToContentButton onClick={() => contentRef.current?.scrollIntoView({ behavior: 'smooth' })} />}
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-[#1C2C4C]">📚 Daftar Buku</h1>
-          <a href="/books/new" className="text-sm text-white bg-[#1E497C] hover:bg-[#5C8BC1] px-4 py-2 rounded-md shadow-sm">
-            + Tambah Buku Baru
-          </a>
-        </div>
+        <Navbar />
 
         <div ref={mapContainerRef} className="mb-6 flex flex-col lg:flex-row gap-4">
           <div className={`transition-all duration-500 ${selectedBook ? 'lg:w-[70%]' : 'lg:w-full'}`}>

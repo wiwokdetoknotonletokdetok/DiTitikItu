@@ -1,11 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import type { UserPrincipal } from '@/dto/UserPrincipal'
+import type { UserProfileResponse } from '@/dto/UserProfileResponse'
+import type { WebResponse } from '@/dto/WebResponse'
+import { getUserProfile } from '@/api/getUserProfile'
+import { ApiError } from '@/exception/ApiError'
 
 type AuthContextType = {
   user: UserPrincipal | null
   token: string | null
-  login: (token: string) => void
+  login: (token: string) => Promise<void>
   logout: () => void
   isLoggedIn: () => boolean
 }
@@ -22,25 +26,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      const payload = jwtDecode<JwtPayload>(token)
-      const currentTime = Math.floor(Date.now() / 1000)
+    const init = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
 
-      if (payload.exp && payload.exp < currentTime) {
+      try {
+        const payload = jwtDecode<JwtPayload>(token)
+        const currentTime = Math.floor(Date.now() / 1000)
+
+        if (payload.exp && payload.exp < currentTime) {
+          logout()
+        } else {
+          const profile: WebResponse<UserProfileResponse> = await getUserProfile(payload.sub)
+          setUser({
+            id: payload.sub,
+            name: profile.data.name ,
+            profilePicture: profile.data.profilePicture
+          })
+          setToken(token)
+        }
+      } catch (e) {
         logout()
-      } else {
-        setUser({ id: payload.sub })
-        setToken(token)
       }
     }
+
+    init()
   }, [])
 
-  const login = (token: string) => {
-    const payload = jwtDecode<JwtPayload>(token)
-    localStorage.setItem('token', token)
-    setUser({ id: payload.sub })
-    setToken(token)
+  const login = async (token: string) => {
+    try {
+      const payload = jwtDecode<JwtPayload>(token)
+      const profile: WebResponse<UserProfileResponse> = await getUserProfile(payload.sub)
+      localStorage.setItem('token', token)
+      setUser({
+        id: payload.sub,
+        name: profile.data.name ,
+        profilePicture: profile.data.profilePicture
+      })
+      setToken(token)
+    } catch (e) {
+      console.error('Login gagal:', e)
+      throw e
+    }
   }
 
   const logout = () => {

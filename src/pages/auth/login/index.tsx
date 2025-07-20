@@ -45,13 +45,12 @@ export default function LoginUser() {
 
     try {
       const response: WebResponse<LoginUserResponse> = await loginUser(form)
-      login(response.data.token)
-      navigate('/books')
+      await login(response.data.token)
+      navigate('/')
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 401) {
         setApiError(err.message)
       } else {
-        console.error(err)
         setApiError('Terjadi kesalahan. Silakan coba lagi.')
       }
     }
