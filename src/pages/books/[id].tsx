@@ -36,7 +36,7 @@ export default function BookDetailPage() {
     try {
       const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviewsWithUser(id), // ini error
+        fetchReviewsWithUser(id), 
       ])
       setBook(bookData)
       setReviews(reviewDataWithUser)

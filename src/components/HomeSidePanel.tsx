@@ -15,10 +15,10 @@ type Props = {
   reviews: ReviewWithUserDTO[]
   onClose: () => void
   onFlyTo: (lat: number, lng: number) => void
-  onUpdate: () => void
+  onUpdateReviews: () => void
 }
 
-export default function HomeSidePanel({ book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
+export default function HomeSidePanel({ book, locations, reviews, onClose, onFlyTo, onUpdateReviews}: Props) {
   return (
     <div
       className="transition-all duration-500 lg:w-[30%] transform translate-x-0 opacity-100 bg-white rounded shadow p-4"
@@ -81,12 +81,12 @@ export default function HomeSidePanel({ book, locations, reviews, onClose, onFly
 
         <TabPanel id="reviews">
           <div className="mb-4">
-            <BookReviewForm bookId={book.id} onUpdate={onUpdate} />
+            <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
           </div>
           <hr className="border-t border-gray-300" />
           <div className="flex flex-col">
             {reviews.length > 0 ? (
-              <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate} />
+              <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />
             ) : (
               <p className="text-sm text-center text-gray-500">
                 Belum ada ulasan tersedia untuk buku ini.

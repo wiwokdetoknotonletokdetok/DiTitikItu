@@ -7,10 +7,10 @@ import { ApiError } from '@/exception/ApiError'
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
   bookId: string
-  onUpdate: () => void
+  onUpdateReviews: () => void
 }
 
-export default function BookReviewList({ reviews, bookId, onUpdate }: BookReviewListProps) {
+export default function BookReviewList({ reviews, bookId, onUpdateReviews }: BookReviewListProps) {
   const userId = localStorage.getItem("userId")
 
   const myReview = reviews.find((r) => r.userId === userId)
@@ -32,7 +32,7 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
   const handleDelete = async () => {
     try {
       await deleteReview(bookId, myReview!.userId)
-      onUpdate()
+      onUpdateReviews()
     } catch (err) {
       if (err instanceof ApiError) {
         console.error('Gagal menghapus review:', err)
@@ -49,7 +49,7 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         rating: editRating
       })
       setEditing(false)
-      onUpdate()
+      onUpdateReviews()
     } catch (err) {
       if (err instanceof ApiError) {
         console.error('Gagal menghapus review:', err)

@@ -164,7 +164,7 @@ export default function Home() {
                 setSelectedBookLocations([])
               }}
               onFlyTo={(lat, lng) => setFlyToLocation({ latitude: lat, longitude: lng })}
-              onUpdate={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
+              onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
             />
           )}
         </div>
