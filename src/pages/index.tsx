@@ -13,7 +13,10 @@ import ToContentButton from '@/components/ToContentButton'
 import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
-import LiveSearch from "@/components/LiveSearch.tsx";
+import LiveSearch from '@/components/LiveSearch.tsx'
+import Tooltip from '@/components/Tooltip.tsx'
+import { BookPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -112,7 +115,21 @@ export default function Home() {
               flyToLocation={flyToLocation}
             >
               <div className="absolute z-[1000] top-2.5 left-2.5 max-w-md w-full">
-                <LiveSearch onSelectBook={handleSelectBook} />
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1">
+                    <LiveSearch onSelectBook={handleSelectBook}/>
+                  </div>
+                  <Link to="/books/new">
+                    <button
+                      className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center"
+                      aria-label="Tambah buku"
+                    >
+                      <Tooltip message="Tambah buku baru">
+                        <BookPlus size={20}/>
+                      </Tooltip>
+                    </button>
+                  </Link>
+                </div>
               </div>
             </MapsView>
           </div>
@@ -127,7 +144,7 @@ export default function Home() {
                 setSelectedBook(null)
                 setSelectedBookLocations([])
               }}
-              onFlyTo={(lat, lng) => setFlyToLocation({ latitude: lat, longitude: lng })}
+              onFlyTo={(lat, lng) => setFlyToLocation({latitude: lat, longitude: lng})}
             />
           )}
         </div>

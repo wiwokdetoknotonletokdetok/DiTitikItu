@@ -3,7 +3,7 @@ import { getBooksSemantic } from '@/api/getBooksSemantic.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 import Tooltip from '@/components/Tooltip.tsx'
-import { X } from 'lucide-react'
+import { X, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface LiveSearchProps {
@@ -16,6 +16,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [isTyping, setIsTyping] = useState(false)
 
   useEffect(() => {
@@ -76,12 +77,23 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
   return (
     <div className="relative" ref={containerRef}>
       <div className="relative">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.focus()}
+          className="absolute left-4 translate-y-1/2 text-gray-500 focus:outline-none"
+          aria-label="Fokus ke input pencarian"
+        >
+          <Tooltip message="Cari buku">
+            <Search size={20}/>
+          </Tooltip>
+        </button>
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Apa yang ingin kamu baca hari ini?"
-          className="py-3 px-6 w-full text-sm border border-gray-300 shadow-md rounded-full focus:outline-none pr-10"
+          className="py-3 px-11 w-full text-sm border border-gray-300 shadow-md rounded-full focus:outline-none pr-10"
           onFocus={() => {
             if (results.length > 0) setIsOpen(true)
           }}
@@ -93,7 +105,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
               setResults([])
               setIsOpen(false)
             }}
-            className="absolute right-4 translate-y-1/2 transform text-gray-500 hover:text-gray-600 focus:outline-none"
+            className="absolute right-4 translate-y-1/2 transform text-gray-600 focus:outline-none"
             aria-label="Hapus pencarian"
           >
             <Tooltip message="Hapus pencarian">
@@ -104,14 +116,15 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 max-h-96 overflow-auto border border-gray-200 bg-white rounded-3xl shadow-lg z-[1000]">
+        <div
+          className="absolute top-full left-0 right-0 mt-1 max-h-96 overflow-auto border border-gray-200 bg-white rounded-3xl shadow-lg z-[1000]">
           {(loading || isTyping) && (
-            <SkeletonItem />
+            <SkeletonItem/>
           )}
 
           {!loading && !isTyping && query.length > 2 && results.length === 0 && (
             <Link to="/books/new">
-              <p className="py-4 px-8 text-center text-sm text-gray-500 hover:bg-gray-50">
+              <p className="py-4 px-8 text-center text-sm text-gray-500 hover:bg-gray-100">
                 Judul belum tersedia. Mau tambahkan?
               </p>
             </Link>
@@ -122,7 +135,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
               {results.map((book, i) => (
                 <li
                   key={i}
-                  className="flex items-center space-x-4 p-3 hover:bg-gray-50 cursor-pointer transition"
+                  className="flex items-center space-x-4 p-3 hover:bg-gray-100 cursor-pointer transition"
                   onClick={() => onSelectBook(book.id)}
                 >
                   <img
