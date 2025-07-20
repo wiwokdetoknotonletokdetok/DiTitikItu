@@ -3,7 +3,6 @@ import { deleteReview, updateReview } from '@/api/reviews'
 import { useEffect, useState } from 'react'
 import StarRatingInput from '@/components/StarRatingInput'
 import { ApiError } from '@/exception/ApiError'
-import { set } from 'react-hook-form'
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
