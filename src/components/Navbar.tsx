@@ -37,7 +37,7 @@ export default function Navbar() {
     try {
       await logoutUser(token)
       logout()
-      navigate('/auth/login')
+      navigate('/')
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 401) {
         console.log(err.message)

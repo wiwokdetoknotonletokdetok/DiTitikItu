@@ -4,6 +4,7 @@ import BookReviewForm from '@/pages/books/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/pages/books/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
+import { useAuth } from '@/context/AuthContext'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -19,6 +20,9 @@ type Props = {
 }
 
 export default function HomeSidePanel({ book, locations, reviews, onClose, onFlyTo, onUpdateReviews}: Props) {
+  const { isLoggedIn, user } = useAuth()
+  const existingReview = reviews.find((r) => r.userId === user?.id)
+
   return (
     <div
       className="transition-all duration-500 lg:w-[30%] transform translate-x-0 opacity-100 bg-white rounded shadow p-4"
@@ -81,7 +85,9 @@ export default function HomeSidePanel({ book, locations, reviews, onClose, onFly
 
         <TabPanel id="reviews">
           <div className="mb-4">
-            <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
+            {isLoggedIn() && !existingReview && (
+              <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
+            )}
           </div>
           <hr className="border-t border-gray-300" />
           <div className="flex flex-col">

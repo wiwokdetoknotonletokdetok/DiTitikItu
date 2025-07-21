@@ -3,6 +3,7 @@ import { deleteReview, updateReview } from '@/api/reviews'
 import { useEffect, useState } from 'react'
 import StarRatingInput from '@/components/StarRatingInput'
 import { ApiError } from '@/exception/ApiError'
+import { useAuth } from '@/context/AuthContext'
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -11,10 +12,9 @@ interface BookReviewListProps {
 }
 
 export default function BookReviewList({ reviews, bookId, onUpdateReviews }: BookReviewListProps) {
-  const userId = localStorage.getItem("userId")
-
-  const myReview = reviews.find((r) => r.userId === userId)
-  const otherReviews = reviews.filter((r) => r.userId !== userId)
+  const { token, isLoggedIn, user, logout } = useAuth()
+  const myReview = reviews.find((r) => r.userId === user?.id)
+  const otherReviews = reviews.filter((r) => r.userId !== user?.id)
 
   useEffect(() => {
     if (myReview) {
