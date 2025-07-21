@@ -32,7 +32,7 @@ export default function BookReviewForm({ bookId, onUpdate }: AddBookReviewFormPr
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-l font-semibold">Tulis Review</h2>
+        <h2 className="text-l font-semibold">Tulis ulasan</h2>
         <StarRatingInput value={rating} onChange={setRating} />
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -48,7 +48,7 @@ export default function BookReviewForm({ bookId, onUpdate }: AddBookReviewFormPr
           type="submit"
           className="bg-[#1E497C] text-white px-4 py-1 rounded hover:bg-[#5C8BC1]"
         >
-          Kirim Review
+          Kirim ulasan
         </button>
         {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
       </form>

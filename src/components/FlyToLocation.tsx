@@ -4,16 +4,17 @@ import { useMap } from 'react-leaflet'
 interface FlyToLocationProps {
   latitude: number
   longitude: number
+  trigger: number
 }
 
-export default function FlyToLocation({ latitude, longitude }: FlyToLocationProps) {
+export default function FlyToLocation({ latitude, longitude, trigger }: FlyToLocationProps) {
   const map = useMap()
 
   useEffect(() => {
     map.flyTo([latitude, longitude], 16, {
       duration: 1.5
     })
-  }, [latitude, longitude, map])
+  }, [trigger, map])
 
   return null
 }

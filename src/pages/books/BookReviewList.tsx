@@ -3,6 +3,8 @@ import { deleteReview, updateReview } from '@/api/reviews'
 import { useEffect, useState } from 'react'
 import StarRatingInput from '@/components/StarRatingInput'
 import { ApiError } from '@/exception/ApiError'
+import { useAuth } from '@/context/AuthContext.tsx'
+import { Link } from 'react-router-dom'
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -11,7 +13,8 @@ interface BookReviewListProps {
 }
 
 export default function BookReviewList({ reviews, bookId, onUpdate }: BookReviewListProps) {
-  const userId = localStorage.getItem("userId")
+  const { user } = useAuth()
+  const userId = user?.id
 
   const myReview = reviews.find((r) => r.userId === userId)
   const otherReviews = reviews.filter((r) => r.userId !== userId)
@@ -59,20 +62,29 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
   }
 
   return (
-      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div>
         {reviews.length === 0 && (
-          <p className="text-gray-500 italic">Belum ada review untuk buku ini.</p>
+          <p className="text-sm text-center text-gray-500 pt-2">
+            Belum ada ulasan tersedia untuk buku ini.
+          </p>
         )}
         {myReview && (
-          <div className="border-t pt-3 mb-3">
+          <div className="pt-3 mb-3">
             <div className="flex items-center gap-2 mb-1">
-              <img
-                src={myReview.profilePicture}
-                alt={myReview.name}
-                className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
-              />
+            <Link to={`/profile/${myReview.userId}`}>
+                <img
+                  src={myReview.profilePicture}
+                  alt={myReview.name}
+                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                />
+              </Link>
               <span>
-                <p className="text-sm font-semibold text-[#1C2C4C]">{myReview.name}</p>
+                <Link
+                  to={`/profile/${myReview.userId}`}
+                  className="text-sm font-semibold text-[#1C2C4C]"
+                >
+                  {myReview.name}
+                </Link>
                 <p className="text-xs text-gray-600">
                   {getFormattedReviewDate(myReview.createdAt, myReview.updatedAt)}
                 </p>
@@ -118,7 +130,7 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
                     </span>
                   ))}
                 </p>
-                <p className="text-sm italic text-[#1C2C4C] mt-1">{myReview.message}</p>
+                <p className="text-sm text-[#1C2C4C] mt-1">{myReview.message}</p>
                 <div className="space-x-3 mt-2">
                   <button
                     onClick={() => setEditing(true)}
@@ -139,15 +151,22 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
         )}
 
         {otherReviews.map((r, i) => (
-          <div key={i} className="border-t pt-3 mt-3 border-gray-300">
+          <div key={i} className="pt-3 mt-3 border-gray-300">
             <div className="flex items-center gap-2 mb-1">
-              <img
-                src={r.profilePicture}
-                alt={r.name}
-                className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
-              />
+              <Link to={`/profile/${r.userId}`}>
+                <img
+                  src={r.profilePicture}
+                  alt={r.name}
+                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                />
+              </Link>
               <span>
-                <p className="text-sm font-semibold text-[#1C2C4C]">{r.name}</p>
+                <Link
+                  to={`/profile/${r.userId}`}
+                  className="text-sm font-semibold text-[#1C2C4C]"
+                >
+                  {r.name}
+                </Link>
                 <p className="text-xs text-gray-600">
                   {getFormattedReviewDate(r.createdAt, r.updatedAt)}
                 </p>
@@ -160,7 +179,7 @@ export default function BookReviewList({ reviews, bookId, onUpdate }: BookReview
                 </span>
               ))}
             </p>
-            <p className="text-sm italic text-[#1C2C4C] mt-1">{r.message}</p>
+            <p className="text-sm text-[#1C2C4C] mt-1">{r.message}</p>
           </div>
         ))}
         {error && <p className="text-red-500 mt-2">{error}</p>}

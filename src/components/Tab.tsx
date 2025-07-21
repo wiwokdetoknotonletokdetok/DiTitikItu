@@ -49,7 +49,7 @@ export function TabButton({id, children, active, onClick}: TabButtonProps & { ac
     <button
       onClick={onClick}
       className={`pb-2 text-sm font-medium ${
-        active ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+        active ? 'text-[#1E497C] border-b-2 border-[#1E497C]' : 'text-gray-500'
       }`}
     >
       {children}

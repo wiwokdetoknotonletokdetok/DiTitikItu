@@ -1,10 +1,10 @@
-import {MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl} from 'react-leaflet'
-import { useEffect } from 'react'
+import {MapContainer, Marker, Popup, TileLayer, useMap} from 'react-leaflet'
+import {useEffect, useState} from 'react'
 import 'leaflet/dist/leaflet.css'
 import type { UserPosition } from '@/dto/UserPosition.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
 import FlyToLocation from '@/components/FlyToLocation.tsx'
-import { Locate, Plus, Minus } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 import {ApiError} from "@/exception/ApiError.ts";
 import {deleteBookLocation} from "@/api/bookLocation.ts";
 import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
@@ -13,29 +13,10 @@ function SetViewTo({ position }) {
   const map = useMap()
   useEffect(() => {
     if (position) {
-      map.setView(position, 13)
+      map.setView(position, 16)
     }
   }, [])
   return null
-}
-
-function GoToUserButton({ position }) {
-  const map = useMap()
-
-  const handleClick = () => {
-    if (position) {
-      map.flyTo([position.latitude, position.longitude], 13)
-    }
-  }
-
-  return (
-    <button
-      onClick={handleClick}
-      className="absolute text-gray-500 bottom-28 right-2.5 z-[1000] p-2 bg-white hover:bg-gray-100 border border-gray-200 shadow-md rounded cursor-pointer"
-    >
-      <Locate size={20} />
-    </button>
-  )
 }
 
 function CustomZoomControl() {
@@ -63,14 +44,15 @@ function CustomZoomControl() {
 interface MapViewProps {
   selectedBook: BookResponseDTO | null
   bookLocations: BookLocationResponse[]
-  userPosition?: UserPosition
+  userPosition: UserPosition
   flyToLocation?: { latitude: number, longitude: number } | null
+  flyToTrigger: number
   children?: React.ReactNode
   newMarkerPosition?: { lat: number; lng: number } | null
   onUpdateNewMarkerPosition?: (pos: { lat: number; lng: number }) => void
 }
 
-export default function MapView({ selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
+export default function MapView({ flyToTrigger,selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
 
   async function handleDeleteLocation(bookId: number, locationId: number) {
@@ -89,7 +71,7 @@ export default function MapView({ selectedBook, newMarkerPosition, onUpdateNewMa
     <div style={{ position: 'relative' }}>
       <MapContainer
         center={center}
-        zoom={userPosition ? 13 : 2}
+        zoom={userPosition ? 16 : 2}
         style={{ height: '85vh', width: '100%' }}
         zoomControl={false}
       >
@@ -119,7 +101,7 @@ export default function MapView({ selectedBook, newMarkerPosition, onUpdateNewMa
             <Marker position={[userPosition.latitude, userPosition.longitude]}>
               <Popup>Lokasi Anda</Popup>
             </Marker>
-            <SetViewTo position={[userPosition.latitude, userPosition.longitude]} />
+            <SetViewTo position={[userPosition.latitude, userPosition.longitude]}/>
           </>
         )}
 
@@ -148,10 +130,10 @@ export default function MapView({ selectedBook, newMarkerPosition, onUpdateNewMa
           <FlyToLocation
             latitude={flyToLocation.latitude}
             longitude={flyToLocation.longitude}
+            trigger={flyToTrigger}
           />
         )}
         <CustomZoomControl />
-        {userPosition && <GoToUserButton position={userPosition} />}
       </MapContainer>
       {children}
     </div>

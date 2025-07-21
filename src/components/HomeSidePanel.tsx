@@ -4,8 +4,9 @@ import BookReviewForm from '@/pages/books/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/pages/books/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
-import {ChevronRight} from "lucide-react";
-import Tooltip from "@/components/Tooltip.tsx";
+import { ChevronRight } from 'lucide-react'
+import Tooltip from '@/components/Tooltip.tsx'
+import { useState } from 'react'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -25,12 +26,17 @@ type Props = {
 }
 
 export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   return (
     <div className="relative lg:w-[30%]">
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
         <Tooltip message="Tutup panel samping">
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose()
+              setIsExpanded(false)
+            }}
             className="bg-white text-gray-500 py-4 shadow rounded-l-lg"
           >
             <ChevronRight size={20} />
@@ -42,7 +48,28 @@ export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, 
         className="transition-all duration-500 transform translate-x-0 opacity-100 bg-white rounded p-4 shadow"
         style={{maxHeight: '85vh', overflowY: 'auto'}}
       >
-        <img src={book.bookPicture} alt={book.title} className="w-full h-60 object-cover rounded mb-4"/>
+
+        <div className="relative group w-full mb-4 rounded overflow-hidden">
+          <img
+            src={book.bookPicture}
+            alt={book.title}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`
+              w-full object-cover cursor-pointer
+              transition-all duration-500 ease-in-out
+              ${isExpanded ? 'max-h-[1000px]' : 'max-h-[240px]'}
+            `}
+          />
+
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition duration-300 pointer-events-none"/>
+
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
+            <span className="text-white text-sm font-medium">
+              {isExpanded ? 'Klik untuk perkecil' : 'Klik untuk perbesar'}
+            </span>
+          </div>
+        </div>
+
 
         <h2 className="text-xl font-bold text-[#1C2C4C] mb-2">{book.title}</h2>
 
@@ -128,13 +155,7 @@ export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, 
             </div>
             <hr className="border-t border-gray-300"/>
             <div className="flex flex-col">
-              {reviews.length > 0 ? (
-                <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate}/>
-              ) : (
-                <p className="text-sm text-center text-gray-500">
-                  Belum ada ulasan tersedia untuk buku ini.
-                </p>
-              )}
+              <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate}/>
             </div>
           </TabPanel>
         </Tab>

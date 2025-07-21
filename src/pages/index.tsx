@@ -3,25 +3,22 @@ import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getBooksId } from '@/api/getBooksId'
 import {booksIdLocations, postBooksIdLocations} from '@/api/booksIdLocations.ts'
 import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
-
 import type { UserPosition } from '@/dto/UserPosition'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import { ApiError } from '@/exception/ApiError'
 import ToContentButton from '@/components/ToContentButton'
-
 import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
-import LiveSearch from '@/components/LiveSearch.tsx'
-import Tooltip from '@/components/Tooltip.tsx'
-import { BookPlus } from 'lucide-react'
-import {Link, useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '@/components/Navbar.tsx'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
-import Modal from "@/components/Modal.tsx";
-import TextInput from "@/components/TextInput.tsx";
-import SubmitButton from "@/components/SubmitButton.tsx";
+import Modal from '@/components/Modal.tsx'
+import TextInput from '@/components/TextInput.tsx'
+import SubmitButton from '@/components/SubmitButton.tsx'
+import BookToolbar from '@/components/BookToolbar.tsx'
+import LocateMeButton from '@/components/LocateMebutton.tsx'
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -36,6 +33,11 @@ export default function Home() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [newMarkerPosition, setNewMarkerPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
+  const [flyTrigger, setFlyTrigger] = useState(0)
+
+  function handleFlyTo() {
+    setFlyTrigger(prev => prev + 1)
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -137,26 +139,21 @@ export default function Home() {
               userPosition={userPosition}
               bookLocations={selectedBookLocations}
               flyToLocation={flyToLocation}
+              flyToTrigger={flyTrigger}
               newMarkerPosition={newMarkerPosition}
               onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
             >
-              <div className="absolute z-[1000] top-2.5 left-2.5 max-w-md w-full">
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1">
-                    <LiveSearch onSelectBook={handleSelectBook}/>
-                  </div>
-                  <Link to="/books/new">
-                    <button
-                      className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center"
-                      aria-label="Tambah buku"
-                    >
-                      <Tooltip message="Tambah buku baru">
-                        <BookPlus size={20}/>
-                      </Tooltip>
-                    </button>
-                  </Link>
-                </div>
-              </div>
+              <>
+                <BookToolbar onSelectBook={handleSelectBook}/>
+                <LocateMeButton
+                  onClick={() => {
+                    if (userPosition) {
+                      setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
+                      handleFlyTo()
+                    }
+                  }}
+                />
+              </>
             </MapsView>
           </div>
 
@@ -175,6 +172,7 @@ export default function Home() {
                 if (userPosition) {
                   setNewMarkerPosition({ lat: userPosition.latitude, lng: userPosition.longitude })
                   setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
+                  handleFlyTo()
                 }
               }}
               newMarkerPosition={newMarkerPosition}
@@ -183,16 +181,21 @@ export default function Home() {
                 setLocationName('')
               }}
               onSaveAddLocation={() => navigate('#locations')}
-              onFlyTo={(lat, lng) => setFlyToLocation({ latitude: lat, longitude: lng })}
+              onFlyTo={(lat, lng) => {
+                setFlyToLocation({ latitude: lat, longitude: lng })
+                handleFlyTo()
+              }}
               onUpdate={() => refreshBookAndReviews(selectedBook.id)}
             />
           )}
         </div>
 
-        <HomeContent
-          onSelectBook={handleSelectBook}
-          contentRef={contentRef}
-        />
+        <div className="mb-6">
+          <HomeContent
+            onSelectBook={handleSelectBook}
+            contentRef={contentRef}
+          />
+        </div>
         <Modal hash="#locations">
           <form onSubmit={handleNewLocation}>
             <TextInput
