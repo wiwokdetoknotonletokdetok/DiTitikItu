@@ -4,7 +4,6 @@ import type { UserPrincipal } from '@/dto/UserPrincipal'
 import type { UserProfileResponse } from '@/dto/UserProfileResponse'
 import type { WebResponse } from '@/dto/WebResponse'
 import { getUserProfile } from '@/api/getUserProfile'
-import { ApiError } from '@/exception/ApiError'
 
 type AuthContextType = {
   user: UserPrincipal | null

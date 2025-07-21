@@ -85,7 +85,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
           <p><span className="font-medium">Tahun Terbit:</span> {book.publishedYear}</p>
           <p><span className="font-medium">Bahasa:</span> {book.language}</p>
           <p><span className="font-medium">Halaman:</span> {book.totalPages}</p>
-          <p><span className="font-medium">Rating:</span> {book.totalRatings} ⭐</p>
+          <p><span className="font-medium">Rating:</span> {book.totalRatings.toFixed(1)} ⭐</p>
         </div>
 
         <div className="mb-4 text-sm text-gray-600 whitespace-pre-wrap">
@@ -156,7 +156,12 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
             )}
           </TabPanel>
           <TabPanel id="reviews">
-            <StarRating rating={book.totalRatings} size={8} />
+            <div className="flex flex-col items-center">
+              <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
+              <StarRating rating={book.totalRatings} size={5} />
+              <p className="text-sm text-gray-500 mt-1">{book.totalRatings} ulasan</p>
+            </div>
+
             <div className="mb-4">
               {isLoggedIn() && !existingReview && (
                 <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
