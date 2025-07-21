@@ -94,9 +94,9 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
         <div className="mb-4">
           <p className="text-sm text-gray-700"><span className="font-medium">Genre:</span></p>
           <div className="flex flex-wrap mt-1 gap-1">
-            {book.genreNames.map((genre) => (
-              <span key={genre} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-              {genre}
+            {book.genres.map((genre) => (
+              <span key={genre.id} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+              {genre.genreName}
             </span>
             ))}
           </div>
