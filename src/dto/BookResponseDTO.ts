@@ -1,3 +1,5 @@
+import type { GenreResponse } from '@/dto/GenreResponse.ts'
+
 export interface BookResponseDTO {
   id: string
   isbn: string
@@ -10,5 +12,5 @@ export interface BookResponseDTO {
   bookPicture: string
   publisherName: string
   authorNames: string[]
-  genreNames: string[]
+  genres: GenreResponse[]
 }

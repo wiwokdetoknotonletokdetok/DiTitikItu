@@ -2,7 +2,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 
 interface PasswordInputProps {
-  label: string
+  label: React.ReactNode
   name: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
