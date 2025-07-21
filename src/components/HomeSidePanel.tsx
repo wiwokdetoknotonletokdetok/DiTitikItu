@@ -123,7 +123,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
                     onSaveAddLocation?.()
                     onUpdateLocations?.()
                   }}
-                  className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition w-full"
+                  className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition w-full"
                 >
                   Simpan Lokasi
                 </button>

@@ -108,15 +108,15 @@ export default function Home() {
     e.preventDefault()
 
     try {
-      await postBooksIdLocations(selectedBook?.id, {
+      await postBooksIdLocations(selectedBook!.id, {
         locationName: locationName,
-        latitude: newMarkerPosition?.lat,
-        longitude: newMarkerPosition?.lng
+        latitude: newMarkerPosition!.lat,
+        longitude: newMarkerPosition!.lng
       })
       navigate(-1)
       setLocationName('')
       setNewMarkerPosition(null)
-      refreshLocations(selectedBook?.id)
+      refreshLocations(selectedBook!.id)
     } catch (err) {
       setLocationName('')
       setNewMarkerPosition(null)
@@ -130,10 +130,7 @@ export default function Home() {
 
   const refreshLocations = async (bookId: string) => {
     if (!userPosition) return
-    console.log("Lokasi User: ", userPosition)
-    console.log("ID Buku: ", bookId)
     const data = await fetchBookLocations(bookId, userPosition.latitude, userPosition.longitude)
-    console.log("Lokasi Buku: ", data)
     setSelectedBookLocations(data)
   }
 

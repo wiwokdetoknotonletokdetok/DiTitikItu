@@ -6,7 +6,7 @@ import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
 import FlyToLocation from '@/components/FlyToLocation.tsx'
 import { Plus, Minus } from 'lucide-react'
 import {ApiError} from "@/exception/ApiError.ts";
-import {deleteBookLocation} from "@/api/bookLocation.ts";
+import {deleteBookLocation, updateBookLocation} from "@/api/bookLocation.ts";
 import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
 import { useAuth } from '@/context/AuthContext'
 
@@ -57,6 +57,35 @@ interface MapViewProps {
 export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation, onRefreshLocations }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
   const { token } = useAuth()
+  const [editingLocationId, setEditingLocationId] = useState<number | null>(null)
+  const [editedPosition, setEditedPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const [editedLocationName, setEditedLocationName] = useState("")
+  const [localLocations, setLocalLocations] = useState<BookLocationResponse[]>(bookLocations)
+
+  async function handleSaveEditedLocation(bookId: string, locationId: number) {
+    if (!editedPosition || !editedLocationName.trim()) return
+
+    try {
+      await updateBookLocation(bookId, String(locationId), {
+        latitude: editedPosition.lat,
+        longitude: editedPosition.lng,
+        locationName: editedLocationName.trim()
+      })
+
+      setEditingLocationId(null)
+      setEditedPosition(null)
+      setEditedLocationName("")
+      setLocalLocations(prev => prev.map(loc =>
+        loc.id === locationId
+          ? { ...loc, coordinates: [editedPosition.lat, editedPosition.lng], locationName: editedLocationName.trim() }
+          : loc
+      ))
+      onRefreshLocations()
+    } catch (error) {
+      console.error("Gagal update lokasi:", error)
+    }
+  }
+
 
   async function handleDeleteLocation(bookId: string, locationId: number) {
     try {
@@ -70,6 +99,10 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
     }
   }
   }
+
+  useEffect(() => {
+    setLocalLocations(bookLocations)
+  }, [bookLocations])
 
   return (
     <div style={{ position: 'relative' }}>
@@ -109,29 +142,74 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
           </>
         )}
 
-        {bookLocations
-        .filter(location => location.coordinates[0] !== undefined && location.coordinates[1] !== undefined)
-        .map(location => (
-          <Marker
-            key={location.id}
-            position={[location.coordinates[0], location.coordinates[1]]}
-          >
-            <Popup>
-              <div>
-                <p className="font-semibold">{location.locationName}</p>
-                {token && (
-                  <button
-                    className="mt-2 text-red-600 text-sm hover:underline"
-                    onClick={() => {
-                      handleDeleteLocation(selectedBook!.id, location.id);
-                    }}
-                  >
-                    Hapus Lokasi
-                  </button>
-                )}
-              </div>
-            </Popup>
-          </Marker>
+        {localLocations
+          .filter(location => location.coordinates[0] !== undefined && location.coordinates[1] !== undefined)
+          .map(location => (
+            <Marker
+              key={location.id}
+              position={
+                editingLocationId === location.id && editedPosition
+                ? [editedPosition.lat, editedPosition.lng]
+                : [location.coordinates[0], location.coordinates[1]]
+              }
+              draggable={token && location.id === editingLocationId} // hanya bisa drag saat edit
+              eventHandlers={
+                token && location.id === editingLocationId
+                  ? {
+                      dragend: (e) => {
+                        const marker = e.target
+                        const pos = marker.getLatLng()
+                        setEditedPosition({ lat: pos.lat, lng: pos.lng })
+                      }
+                    }
+                  : {}
+              }
+            >
+              <Popup>
+                <div>
+                  <p className="font-semibold">Lokasi: {location.locationName}</p>
+
+                  {token && (
+                    <>
+                      {editingLocationId === location.id ? (
+                          <>
+                            <input
+                              className="border p-1 text-sm w-full mt-1"
+                              value={editedLocationName}
+                              onChange={(e) => setEditedLocationName(e.target.value)}
+                            />
+
+                            <button
+                              className="mt-2 mr-2 text-blue-600 text-sm hover:underline"
+                              onClick={() => handleSaveEditedLocation(selectedBook!.id, location.id)}
+                            >
+                              Simpan Lokasi
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className="mt-2 mr-2 text-blue-600 text-sm hover:underline"
+                            onClick={() => {
+                              setEditingLocationId(location.id)
+                              setEditedPosition({ lat: location.coordinates[0], lng: location.coordinates[1] })
+                              setEditedLocationName(location.locationName)
+                            }}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      <button
+                        className="mt-2 text-red-600 text-sm hover:underline"
+                        onClick={() => handleDeleteLocation(selectedBook!.id, location.id)}
+                      >
+                        Hapus
+                      </button>
+                    </>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+
         ))}
 
         {flyToLocation && (
