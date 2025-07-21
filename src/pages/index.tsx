@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getBooksId } from '@/api/getBooksId'
-import {booksIdLocations, postBooksIdLocations} from '@/api/booksIdLocations.ts'
+import { booksIdLocations, postBooksIdLocations } from '@/api/booksIdLocations.ts'
 import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
 import type { UserPosition } from '@/dto/UserPosition'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
@@ -186,6 +186,7 @@ export default function Home() {
                 handleFlyTo()
               }}
               onUpdate={() => refreshBookAndReviews(selectedBook.id)}
+              onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
             />
           )}
         </div>

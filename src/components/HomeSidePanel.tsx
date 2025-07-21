@@ -7,6 +7,7 @@ import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { ChevronRight } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
 import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -23,10 +24,13 @@ type Props = {
   newMarkerPosition?: { lat: number; lng: number }
   onCancelAddLocation?: () => void
   onSaveAddLocation?: () => void
+  onUpdateReviews: () => void
 }
 
-export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo, onUpdate}: Props) {
+export default function HomeSidePanel({ onUpdateReviews, onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo }: Props) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { isLoggedIn, user } = useAuth()
+  const existingReview = reviews.find((r) => r.userId === user?.id)
 
   return (
     <div className="relative lg:w-[30%]">
@@ -148,14 +152,21 @@ export default function HomeSidePanel({ onSaveAddLocation, onCancelAddLocation, 
               <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
             )}
           </TabPanel>
-
           <TabPanel id="reviews">
             <div className="mb-4">
-              <BookReviewForm bookId={book.id} onUpdate={onUpdate}/>
+              {isLoggedIn() && !existingReview && (
+                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
+              )}
             </div>
-            <hr className="border-t border-gray-300"/>
+            <hr className="border-t border-gray-300" />
             <div className="flex flex-col">
-              <BookReviewList reviews={reviews} bookId={book.id} onUpdate={onUpdate}/>
+              {reviews.length > 0 ? (
+                <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />
+              ) : (
+                <p className="text-sm text-center text-gray-500">
+                  Belum ada ulasan tersedia untuk buku ini.
+                </p>
+              )}
             </div>
           </TabPanel>
         </Tab>
