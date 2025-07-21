@@ -5,11 +5,12 @@ import { ApiError } from '@/exception/ApiError.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function fetchBookLocations(bookId: string): Promise<BookLocationResponse[]> {
-  const res = await fetch(`${BASE_URL}/books/${bookId}/locations`)
+export async function fetchBookLocations(bookId: string, lat: number, lng: number): Promise<BookLocationResponse[]> {
+  const res = await fetch(`${BASE_URL}/books/${bookId}/locations?latitude=${lat}&longitude=${lng}`)
 
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
+    console.error('Error fetching book locations:', data.errors)
     throw new ApiError(data.errors, res.status, data.errors)
   }
   
@@ -35,7 +36,7 @@ export async function postBookLocation(bookId: string, location: BookLocationReq
 
 export async function updateBookLocation(bookId: string, locationId: string, location: BookLocationRequest): Promise<void> {
   const res = await fetch(`${BASE_URL}/books/${bookId}/locations/${locationId}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -49,7 +50,7 @@ export async function updateBookLocation(bookId: string, locationId: string, loc
   }
 }
 
-export async function deleteBookLocation(bookId: string, locationId: string): Promise<void> {
+export async function deleteBookLocation(bookId: string, locationId: number): Promise<void> {
   const res = await fetch(`${BASE_URL}/books/${bookId}/locations/${locationId}`, {
     method: 'DELETE',
     headers: {
