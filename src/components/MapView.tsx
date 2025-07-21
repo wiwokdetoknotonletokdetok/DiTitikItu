@@ -8,6 +8,7 @@ import { Plus, Minus } from 'lucide-react'
 import {ApiError} from "@/exception/ApiError.ts";
 import {deleteBookLocation} from "@/api/bookLocation.ts";
 import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
+import { useAuth } from '@/context/AuthContext'
 
 function SetViewTo({ position }) {
   const map = useMap()
@@ -50,21 +51,24 @@ interface MapViewProps {
   children?: React.ReactNode
   newMarkerPosition?: { lat: number; lng: number } | null
   onUpdateNewMarkerPosition?: (pos: { lat: number; lng: number }) => void
+  onRefreshLocations: () => void
 }
 
-export default function MapView({ flyToTrigger,selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation }: MapViewProps) {
+export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation, onRefreshLocations }: MapViewProps) {
   const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
+  const { token } = useAuth()
 
-  async function handleDeleteLocation(bookId: number, locationId: number) {
+  async function handleDeleteLocation(bookId: string, locationId: number) {
     try {
       await deleteBookLocation(bookId, locationId)
-    } catch (err) {
-      if (err instanceof ApiError && err.statusCode === 401) {
-        console.log(err.message)
-      } else {
-        console.log('Terjadi kesalahan. Silakan coba lagi.')
-      }
+      onRefreshLocations()
+      } catch (err) {
+    if (err instanceof ApiError) {
+      console.error("API error:", err.message)
+    } else {
+      console.error("Error tak dikenal:", err)
     }
+  }
   }
 
   return (
@@ -115,12 +119,16 @@ export default function MapView({ flyToTrigger,selectedBook, newMarkerPosition, 
             <Popup>
               <div>
                 <p className="font-semibold">{location.locationName}</p>
-                <button
-                  className="mt-2 text-red-600 text-sm hover:underline"
-                  onClick={() => {handleDeleteLocation(selectedBook?.id, location.id)}}
-                >
-                  Hapus Lokasi
-                </button>
+                {token && (
+                  <button
+                    className="mt-2 text-red-600 text-sm hover:underline"
+                    onClick={() => {
+                      handleDeleteLocation(selectedBook!.id, location.id);
+                    }}
+                  >
+                    Hapus Lokasi
+                  </button>
+                )}
               </div>
             </Popup>
           </Marker>

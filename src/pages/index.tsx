@@ -19,6 +19,7 @@ import TextInput from '@/components/TextInput.tsx'
 import SubmitButton from '@/components/SubmitButton.tsx'
 import BookToolbar from '@/components/BookToolbar.tsx'
 import LocateMeButton from '@/components/LocateMebutton.tsx'
+import {fetchBookLocations} from "@/api/bookLocation.ts";
 
 export default function Home() {
   const [userPosition, setUserPosition] = useState<UserPosition>()
@@ -103,7 +104,7 @@ export default function Home() {
     }
   }
 
-  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>) {
+  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>, bookId: string) {
     e.preventDefault()
 
     try {
@@ -115,6 +116,7 @@ export default function Home() {
       navigate(-1)
       setLocationName('')
       setNewMarkerPosition(null)
+      refreshLocations(selectedBook?.id)
     } catch (err) {
       setLocationName('')
       setNewMarkerPosition(null)
@@ -125,6 +127,21 @@ export default function Home() {
       }
     }
   }
+
+  const refreshLocations = async (bookId: string) => {
+    if (!userPosition) return
+    console.log("Lokasi User: ", userPosition)
+    console.log("ID Buku: ", bookId)
+    const data = await fetchBookLocations(bookId, userPosition.latitude, userPosition.longitude)
+    console.log("Lokasi Buku: ", data)
+    setSelectedBookLocations(data)
+  }
+
+  useEffect(() => {
+    if (selectedBook?.id) {
+      refreshLocations(selectedBook.id)
+    }
+  }, [selectedBook?.id])
 
   return (
     <div ref={topRef} className="px-4 bg-[#FAFAFA] min-h-screen">
@@ -142,6 +159,11 @@ export default function Home() {
               flyToTrigger={flyTrigger}
               newMarkerPosition={newMarkerPosition}
               onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
+              onRefreshLocations={() => {
+                if (selectedBook?.id) {
+                  refreshLocations(selectedBook.id)
+                }
+              }}
             >
               <>
                 <BookToolbar onSelectBook={handleSelectBook}/>
@@ -187,6 +209,7 @@ export default function Home() {
               }}
               onUpdate={() => refreshBookAndReviews(selectedBook.id)}
               onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
+              onUpdateLocations={() => refreshLocations(selectedBook?.id)}
             />
           )}
         </div>

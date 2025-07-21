@@ -25,9 +25,10 @@ type Props = {
   onCancelAddLocation?: () => void
   onSaveAddLocation?: () => void
   onUpdateReviews: () => void
+  onUpdateLocations: () => void
 }
 
-export default function HomeSidePanel({ onUpdateReviews, onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo }: Props) {
+export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSaveAddLocation, onCancelAddLocation, newMarkerPosition, onAddLocationClick, book, locations, reviews, onClose, onFlyTo }: Props) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { isLoggedIn, user } = useAuth()
   const existingReview = reviews.find((r) => r.userId === user?.id)
@@ -120,6 +121,7 @@ export default function HomeSidePanel({ onUpdateReviews, onSaveAddLocation, onCa
                 <button
                   onClick={() => {
                     onSaveAddLocation?.()
+                    onUpdateLocations?.()
                   }}
                   className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition w-full"
                 >
