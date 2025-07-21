@@ -10,7 +10,7 @@ interface ToContentButtonProps {
 
 export default function ToContentButton({onClick, className, ariaLabel = 'Scroll ke konten'}: ToContentButtonProps) {
   return (
-    <div className="z-[10000] fixed bottom-2 left-1/2 -translate-x-1/2 transform">
+    <div className="z-[2000] fixed bottom-2 left-1/2 -translate-x-1/2 transform">
       <Tooltip message="Rekomendasi buku">
         <button
           onClick={onClick}
