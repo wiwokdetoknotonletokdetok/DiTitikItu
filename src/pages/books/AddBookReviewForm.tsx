@@ -5,10 +5,10 @@ import StarRatingInput from '@/components/StarRatingInput'
 
 interface AddBookReviewFormProps {
   bookId: string
-  onSuccess: () => void
+  onUpdateReviews: () => void
 }
 
-export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormProps) {
+export default function BookReviewForm({ bookId, onUpdateReviews }: AddBookReviewFormProps) {
   const [message, setMessage] = useState('')
   const [rating, setRating] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +21,7 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
       await postReview(bookId, { message, rating })
       setMessage('')
       setRating(0)
-      onSuccess()
+      onUpdateReviews()
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || err.errors?.[0] || "Terjadi kesalahan.")
@@ -32,7 +32,7 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-l font-semibold">Tulis Review</h2>
+        <h2 className="text-l font-semibold">Tulis ulasan</h2>
         <StarRatingInput value={rating} onChange={setRating} />
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -48,7 +48,7 @@ export default function BookReviewForm({ bookId, onSuccess }: AddBookReviewFormP
           type="submit"
           className="bg-[#1E497C] text-white px-4 py-1 rounded hover:bg-[#5C8BC1]"
         >
-          Kirim Review
+          Kirim ulasan
         </button>
         {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
       </form>

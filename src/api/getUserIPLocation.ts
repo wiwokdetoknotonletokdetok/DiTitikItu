@@ -1,14 +1,14 @@
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import type { LocationData } from '@/dto/LocationData.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function logoutUser(token: string): Promise<WebResponse<string>> {
-  const res = await fetch(`${BASE_URL}/auth/logout`, {
-    method: 'POST',
+export async function getUserIPLocation(): Promise<WebResponse<LocationData>> {
+  const res = await fetch(`${BASE_URL}/locations/me`, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      'Accept': 'application/json'
     }
   })
 

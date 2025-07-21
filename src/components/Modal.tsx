@@ -22,15 +22,20 @@ const Modal: React.FC<ModalProps> = ({ hash, children }) => {
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
     }
-    return () => document.removeEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
   }, [isOpen, navigate])
 
   if (!isOpen) return null
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-50"
       onClick={() => navigate(-1)}
     >
       <div

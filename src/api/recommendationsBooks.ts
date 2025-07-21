@@ -1,14 +1,14 @@
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function logoutUser(token: string): Promise<WebResponse<string>> {
-  const res = await fetch(`${BASE_URL}/auth/logout`, {
-    method: 'POST',
+export async function recommendationsBooks(limit: number = 8): Promise<WebResponse<BookSummaryDTO[]>> {
+  const res = await fetch(`${BASE_URL}/recommendations/books?limit=${limit}`, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      'Accept': 'application/json'
     }
   })
 

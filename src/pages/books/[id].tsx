@@ -36,7 +36,7 @@ export default function BookDetailPage() {
     try {
       const [bookData, reviewDataWithUser] = await Promise.all([
         fetchBookById(id),
-        fetchReviewsWithUser(id), // ini error
+        fetchReviewsWithUser(id), 
       ])
       setBook(bookData)
       setReviews(reviewDataWithUser)
@@ -137,9 +137,9 @@ export default function BookDetailPage() {
 
         <h2 className="text-xl font-semibold text-[#1C2C4C] mb-2 text-left">Ulasan Pengguna</h2>
         {!existingReview && (
-          <BookReviewForm bookId={id!} onSuccess={fetchBookAndReviews} />
+          <BookReviewForm bookId={id!} onUpdateReviews={fetchBookAndReviews} />
         )}
-        <BookReviewList reviews={reviews} bookId={id!} onUpdate={fetchBookAndReviews} />
+        <BookReviewList reviews={reviews} bookId={id!} onUpdateReviews={fetchBookAndReviews} />
       </div>
     </div>
   )

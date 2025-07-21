@@ -2,7 +2,6 @@ import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X, SlidersHorizontal } from 'lucide-react'
-import { searchBooks } from '@/api/getBooksSemantic'
 
 interface SearchFormInputs {
   title?: string
