@@ -8,6 +8,7 @@ import { ChevronRight } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { StarRating } from '@/components/StarRating'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -155,6 +156,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
             )}
           </TabPanel>
           <TabPanel id="reviews">
+            <StarRating rating={book.totalRatings} size={8} />
             <div className="mb-4">
               {isLoggedIn() && !existingReview && (
                 <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
