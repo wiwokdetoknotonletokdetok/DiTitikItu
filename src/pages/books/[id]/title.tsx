@@ -7,20 +7,21 @@ import { useEffect, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdateTitlePage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value || ''
-  const [title, setTitle] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [title, setTitle] = useState(book?.title || '')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!location.state?.value) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const validateTitle = (title: string) => {
     if (title.trim().length === 0) {
@@ -38,6 +39,11 @@ export default function BookUpdateTitlePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!id || !book) {
+      setError("Data buku tidak tersedia.")
+      return
+    }
+
     const validationError = validateTitle(title)
     if (validationError) {
       setError(validationError)
@@ -47,8 +53,9 @@ export default function BookUpdateTitlePage() {
     setError(null)
 
     try {
-      await updateBook(id, { title: title })
+      await updateBook(id, { ...book, title: title })
       console.log('Judul buku berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         console.error(err.message)

@@ -1,12 +1,12 @@
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-interface BookItemProps {
+interface BookItemProps<T = any> {
   label: string
   value: string
   to?: string
   onClick?: () => void
-  state: { value: string }
+  state: { value: T }
 }
 
 function FieldItemSkeleton({ label }: { label: string }) {
@@ -26,6 +26,8 @@ function FieldItemSkeleton({ label }: { label: string }) {
 }
 
 export default function FieldItem({state, label, value, to, onClick}: BookItemProps) {
+  console.log('FieldItem props:', { label, value, to, state, onClick })
+
   const content = (
     <div className="flex items-center justify-between p-4 bg-white shadow transition hover:bg-gray-100">
       <div className="flex items-center space-x-4">
@@ -58,6 +60,7 @@ export default function FieldItem({state, label, value, to, onClick}: BookItemPr
 }
 
 export function FieldItemWithLoading({ isLoading, ...props }: { isLoading: boolean } & BookItemProps) {
+  console.log('FieldItemWithLoading props:', { ...props, isLoading })
   if (isLoading) {
     return <FieldItemSkeleton label={props.label} />
   }

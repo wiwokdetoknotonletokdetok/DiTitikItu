@@ -29,6 +29,19 @@ export default function BookUpdatePage() {
   const [isUploading, setIsUploading] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  const bookRequest = {
+    isbn,
+    title: form.title,
+    synopsis: form.synopsis,
+    bookPicture: form.bookPicture,
+    totalPages: form.totalPages,
+    publishedYear: form.publishedYear,
+    language,
+    publisherName,
+    authorNames: authorNames.split(',').map((name) => name.trim()),
+    genreIds: genre ? [genre.id] : [],
+  }
+
   useEffect(() => {
     if (!id) return
     const fetchData  = async () => {
@@ -100,56 +113,56 @@ export default function BookUpdatePage() {
               label="Judul buku"
               value={form.title}
               to={`/books/${id}/title`}
-              state={{ value: form.title }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="ISBN"
               value={isbn}
               to={`/books/${id}/isbn`}
-              state={{ value: isbn }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Sinopsis"
               value={form.synopsis}
               to={`/books/${id}/synopsis`}
-              state={{ value: form.synopsis }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Jumlah halaman"
               value={form.totalPages.toString()}
               to={`/books/${id}/total-pages`}
-              state={{ value: form.totalPages.toString() }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Tahun terbit"
               value={form.publishedYear.toString()}
               to={`/books/${id}/published-year`}
-              state={{ value: form.publishedYear.toString() }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Bahasa"
               value={language}
               to={`/books/${id}/language`}
-              state={{ value: language }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Penerbit"
               value={publisherName}
               to={`/books/${id}/publisher`}
-              state={{ value: publisherName }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
             <FieldItemWithLoading
               label="Penulis"
               value={authorNames}
               to={`/books/${id}/authors`}
-              state={{ value: authorNames }}
+              state={{ value: bookRequest }}
               isLoading={loading}
 
             />
@@ -157,7 +170,7 @@ export default function BookUpdatePage() {
               label="Genre"
               value={genre?.genreName || ''}
               to={`/books/${id}/genres`}
-              state={{ value: genre }}
+              state={{ value: bookRequest }}
               isLoading={loading}
             />
           </div>

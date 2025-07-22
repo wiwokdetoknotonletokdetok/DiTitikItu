@@ -1,24 +1,21 @@
 import { Star, StarHalf, StarOff } from 'lucide-react'
 
-export function StarRating({ rating }: { rating: number }) {
+export function StarRating({ rating, size = 5 }: { rating: number; size?: number }) {
+  const sizeClass = `w-${size} h-${size}`
   const stars = []
 
   for (let i = 1; i <= 5; i++) {
     if (rating >= i) {
-      stars.push(
-        <Star key={i} className="text-yellow-400 w-5 h-5" fill="currentColor" stroke="#000000" strokeWidth={1} />
-      )
+      stars.push(<Star key={i} className={`text-yellow-400 ${sizeClass}`} fill="currentColor" stroke="#000000" />)
     } else if (rating >= i - 0.5) {
       stars.push(
-        <div key={i} className="relative w-5 h-5">
-          <Star className="absolute text-gray-300 w-5 h-5" fill="none" stroke="#000000" strokeWidth={1}/>
-          <StarHalf className="absolute text-yellow-400 w-5 h-5" fill="currentColor" stroke="none"/>
+        <div key={i} className={`relative ${sizeClass}`}>
+          <Star className={`absolute text-gray-300 ${sizeClass}`} fill="none" stroke="#000000" />
+          <StarHalf className={`absolute text-yellow-400 ${sizeClass}`} fill="currentColor" stroke="none" />
         </div>
       )
     } else {
-      stars.push(
-        <StarOff key={i} className="text-gray-300 w-5 h-5" fill="currentColor" stroke="#AAAAAA" strokeWidth={1}/>
-      )
+      stars.push(<StarOff key={i} className={`text-gray-300 ${sizeClass}`} fill="currentColor" stroke="#AAAAAA" />)
     }
   }
 

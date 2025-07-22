@@ -9,6 +9,7 @@ export interface BookResponseDTO {
   publishedYear: number
   language: string
   totalRatings: number
+  totalReviews: number
   bookPicture: string
   publisherName: string
   authorNames: string[]

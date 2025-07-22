@@ -9,6 +9,7 @@ import {ApiError} from "@/exception/ApiError.ts";
 import {deleteBookLocation, updateBookLocation} from "@/api/bookLocation.ts";
 import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
 import { useAuth } from '@/context/AuthContext'
+import L from 'leaflet'
 
 function SetViewTo({ position }) {
   const map = useMap()
@@ -19,6 +20,15 @@ function SetViewTo({ position }) {
   }, [])
   return null
 }
+
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
+  shadowSize: [41, 41]
+})
 
 function CustomZoomControl() {
   const map = useMap()
@@ -135,10 +145,13 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
 
         {userPosition && (
           <>
-            <Marker position={[userPosition.latitude, userPosition.longitude]}>
+            <Marker
+              position={[userPosition.latitude, userPosition.longitude]}
+              icon={redIcon}
+            >
               <Popup>Lokasi Anda</Popup>
             </Marker>
-            <SetViewTo position={[userPosition.latitude, userPosition.longitude]}/>
+            <SetViewTo position={[userPosition.latitude, userPosition.longitude]} />
           </>
         )}
 
