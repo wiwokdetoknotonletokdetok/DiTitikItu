@@ -1,16 +1,30 @@
 import Navbar from '@/components/Navbar.tsx'
 import { useState } from 'react'
 import PrivateRoute from '@/PrivateRoute.tsx'
+import { deleteRecommendationsBooks } from '@/api/recommendationsBooks.ts'
+import { useAuth } from '@/context/AuthContext.tsx'
+import { ApiError } from '@/exception/ApiError.ts'
+import TextInputError from '@/components/TextInputError.tsx'
 
 function SettingsPreferencesRecommendationsPage() {
+  const { token } = useAuth()
   const [isReset, setIsReset] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
 
   const handleReset = async () => {
     setLoading(true)
+    setApiMessage('')
+
+    if (!token) return
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200))
+      await deleteRecommendationsBooks(token)
       setIsReset(true)
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setApiMessage(err.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -39,12 +53,12 @@ function SettingsPreferencesRecommendationsPage() {
               loading || isReset ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
             }`}
           >
-            {loading ? 'Mereset...' : isReset ? 'Rekomendasi berhasil direset' : 'Reset Rekomendasi'}
+            {loading ? 'Memproses...' : isReset ? 'Rekomendasi berhasil direset' : 'Reset Rekomendasi'}
           </button>
-
           <p className="mt-3 text-gray-500 italic text-xs">
             Reset rekomendasi tidak akan menghapus koleksi buku Anda.
           </p>
+          <TextInputError message={apiMessage} />
         </div>
       </div>
     </PrivateRoute>

@@ -1,7 +1,7 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import BookCard from '@/components/BookCard'
 import { useEffect, useState } from 'react'
-import { recommendationsBooks } from '@/api/recommendationsBooks.ts'
+import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
 
 type Props = {
   onSelectBook: (id: string) => void
@@ -16,7 +16,7 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
     const fetchBooks = async () => {
       setLoading(true)
       try {
-        const res = await recommendationsBooks()
+        const res = await getRecommendationsBooks()
         setRecommendations(res.data)
       } catch (err) {
         console.error('Gagal mengambil data buku:', err)
