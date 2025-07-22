@@ -5,9 +5,6 @@ import type { UserProfileResponse } from '@/dto/UserProfileResponse'
 import type { WebResponse } from '@/dto/WebResponse'
 import { getUserProfile } from '@/api/getUserProfile'
 
-const encodeKey = (key: string) => btoa(key)
-const decodeKey = (key: string) => atob(key)
-
 type AuthContextType = {
   user: UserPrincipal | null
   token: string | null
@@ -31,23 +28,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const init = async () => {
-      const encodedToken = localStorage.getItem(encodeKey('token'))
-      const encodedId = localStorage.getItem(encodeKey('id'))
-      const encodedName = localStorage.getItem(encodeKey('name'))
-      const encodedProfilePicture = localStorage.getItem(encodeKey('profilePicture'))
+      const token = localStorage.getItem('token')
+      const id = localStorage.getItem('id')
+      const name = localStorage.getItem('name')
+      const profilePicture = localStorage.getItem('profilePicture')
 
-      if (!encodedToken || !encodedId || !encodedName || !encodedProfilePicture) {
+      if (!token || !id || !name || !profilePicture) {
         setIsLoading(false)
         logout()
         return
       }
 
       try {
-        const token = decodeKey(encodedToken)
-        const id = decodeKey(encodedId)
-        const name = decodeKey(encodedName)
-        const profilePicture = decodeKey(encodedProfilePicture)
-
         const payload = jwtDecode<JwtPayload>(token)
         const currentTime = Math.floor(Date.now() / 1000)
         if (payload.exp && payload.exp < currentTime) {
@@ -69,10 +61,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const payload = jwtDecode<JwtPayload>(token)
       const profile: WebResponse<UserProfileResponse> = await getUserProfile(payload.sub)
 
-      localStorage.setItem(encodeKey('token'), encodeKey(token))
-      localStorage.setItem(encodeKey('id'), encodeKey(payload.sub))
-      localStorage.setItem(encodeKey('name'), encodeKey(profile.data.name))
-      localStorage.setItem(encodeKey('profilePicture'), encodeKey(profile.data.profilePicture))
+      localStorage.setItem('token', token)
+      localStorage.setItem('id', payload.sub)
+      localStorage.setItem('name', profile.data.name)
+      localStorage.setItem('profilePicture', profile.data.profilePicture)
 
       setUser({
         id: payload.sub,
@@ -87,10 +79,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const logout = () => {
-    localStorage.removeItem(encodeKey('token'))
-    localStorage.removeItem(encodeKey('id'))
-    localStorage.removeItem(encodeKey('name'))
-    localStorage.removeItem(encodeKey('profilePicture'))
+    localStorage.removeItem('token')
+    localStorage.removeItem('id')
+    localStorage.removeItem('name')
+    localStorage.removeItem('profilePicture')
     setUser(null)
     setToken(null)
   }
