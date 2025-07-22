@@ -1,159 +1,253 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { createBook } from '@/api/books'
 import { ApiError } from '@/exception/ApiError'
-import { useNavigate } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import TextInput from '@/components/TextInput.tsx'
-import Navbar from '@/components/Navbar.tsx'
 import TextArea from '@/components/TextArea.tsx'
-import SubmitButton from '@/components/SubmitButton.tsx'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
+import SelectGenre from '@/components/SelectGenre.tsx'
+import SubmitButton from '@/components/SubmitButton.tsx'
+import Alert from '@/components/Alert.tsx'
+import Tooltip from '@/components/Tooltip.tsx'
+import { Info } from 'lucide-react'
 import { getAuthors } from '@/api/authors.ts'
 import { getLanguages } from '@/api/languages.ts'
 import { getPublishers } from '@/api/publishers.ts'
-import Tooltip from '@/components/Tooltip.tsx'
-import { Info } from 'lucide-react'
-import SelectGenre from '@/components/SelectGenre.tsx'
 import { getGenres } from '@/api/genres.ts'
+import Navbar from '@/components/Navbar.tsx'
+import TextInputError from '@/components/TextInputError.tsx'
+
+type FormState = {
+  title: string
+  isbn: string
+  synopsis: string
+  totalPages: string
+  publishedYear: string
+  language: string
+  publisherName: string
+  authorNames: string
+  genreId: string
+}
+
+type TouchedState = Record<keyof FormState, boolean>
 
 export default function NewBookPage() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({
-    title: '',
-    synopsis: '',
-    bookPicture: 'https://placehold.co/300x450?text=Book',
-    totalPages: '',
-    publishedYear: '',
+  const [form, setForm] = useState<FormState>({
+    title: '', isbn: '', synopsis: '', totalPages: '', publishedYear: '',
+    language: '', publisherName: '', authorNames: '', genreId: ''
   })
+  const [touched, setTouched] = useState<TouchedState>({
+    title: false, isbn: false, synopsis: false, totalPages: false, publishedYear: false,
+    language: false, publisherName: false, authorNames: false, genreId: false
+  })
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [apiMessage, setApiMessage] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [isbn, setIsbn] = useState('')
-  const [language, setLanguage] = useState('')
-  const [publisherName, setPublisherName] = useState('')
-  const [authorNames, setAuthorNames] = useState('')
-  const [genreId, setGenreId] = useState('')
-
-  const [message, setMessage] = useState('')
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!form.title.trim()) return setMessage('Judul buku tidak boleh kosong')
-    if (form.title.length > 255) return setMessage('Judul buku tidak boleh lebih dari 255 karakter')
-    if (!isbn.trim()) return setMessage('ISBN tidak boleh kosong')
-    if (isbn.length > 17) return setMessage('ISBN tidak boleh lebih dari 17 karakter')
-    if (!form.synopsis.trim()) return setMessage('Sinopsis tidak boleh kosong')
-    if (!form.totalPages.trim()) return setMessage('Jumlah halaman tidak boleh kosong')
-    const totalPages = parseInt(form.totalPages)
-    if (isNaN(totalPages) || parseInt(form.totalPages) < 1) return setMessage('Jumlah halaman harus lebih dari 0')
-
-    if (!form.publishedYear.trim()) return setMessage('Tahun terbit tidak boleh kosong')
-    const publishedYear = parseInt(form.publishedYear)
-    if (isNaN(publishedYear) || publishedYear < 0) return setMessage('Tahun terbit tidak valid')
-
-    if (!language.trim()) return setMessage('Bahasa tidak boleh kosong')
-
-    if (!publisherName.trim()) return setMessage('Nama penerbit tidak boleh kosong')
-    if (publisherName.length > 50) return setMessage('Nama penerbit tidak boleh lebih dari 50 karakter')
-
-    if (!authorNames.trim()) return setMessage('Nama penulis tidak boleh kosong')
-    const authorArray = authorNames.split(',').map(a => a.trim())
-    if (authorArray.some(name => name === '')) return setMessage('Setiap nama penulis harus diisi')
-
-    if (!genreId.trim()) return setMessage('Genre tidak boleh kosong')
-      
-    try {
-      console.log('sending:', form)
-      await createBook({
-        ...form,
-        isbn: isbn,
-        language: language,
-        publisherName: publisherName,
-        authorNames: authorNames.split(',').map(name => name.trim()),
-        genreIds: [parseInt(genreId)],
-        totalPages: parseInt(form.totalPages),
-        publishedYear: parseInt(form.publishedYear),
-      })
-      console.log('book created')
-      navigate('/')
-    } catch (err) {
-      console.error(err)
-      if (err instanceof ApiError) {
-        setMessage(err.message)
-      }
-    }
-  }
+  const MAX_ISBN_LENGTH = 17
+  const MAX_TITLE_LENGTH = 50
+  const MAX_PUBLISHER_NAME = 50
+  const MAX_AUTHOR_NAME = 50
+  const MAX_LANGUAGE_LENGTH = 50
+  const SYNOPSIS_MAX_LENGTH = 400
 
   function formatISBN(value: string) {
     const cleaned = value.replace(/[^0-9Xx]/g, '')
-
     if (cleaned.length <= 3) return cleaned
     if (cleaned.length <= 4) return `${cleaned.slice(0,3)}-${cleaned.slice(3)}`
     if (cleaned.length <= 6) return `${cleaned.slice(0,3)}-${cleaned.slice(3,4)}-${cleaned.slice(4)}`
     if (cleaned.length <= 12) return `${cleaned.slice(0,3)}-${cleaned.slice(3,4)}-${cleaned.slice(4,6)}-${cleaned.slice(6)}`
     if (cleaned.length <= 13) return `${cleaned.slice(0,3)}-${cleaned.slice(3,4)}-${cleaned.slice(4,6)}-${cleaned.slice(6,12)}-${cleaned.slice(12)}`
-
     return cleaned
   }
 
-  const MAX_ISBN_LENGTH = 17
-
-  const handleIsbnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIsbnChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value
+    if (val.length > MAX_ISBN_LENGTH) val = val.slice(0, MAX_ISBN_LENGTH)
+    setForm(prev => ({ ...prev, isbn: formatISBN(val) }))
+    setTouched(prev => ({ ...prev, isbn: true }))
+    setApiMessage('')
+  }, [])
 
-    if (val.length > MAX_ISBN_LENGTH) {
-      val = val.slice(0, MAX_ISBN_LENGTH)
+  function isValidISBN10(isbn: string): boolean {
+    if (isbn.length !== 10) return false
+    let sum = 0
+    for (let i = 0; i < 9; i++) {
+      const digit = parseInt(isbn[i], 10)
+      if (isNaN(digit)) return false
+      sum += digit * (10 - i)
+    }
+    const lastChar = isbn[9].toUpperCase()
+    if (lastChar !== 'X' && isNaN(Number(lastChar))) return false
+    sum += lastChar === 'X' ? 10 : Number(lastChar)
+    return sum % 11 === 0
+  }
+
+  function isValidISBN13(isbn: string): boolean {
+    if (isbn.length !== 13) return false
+    let sum = 0
+    for (let i = 0; i < 13; i++) {
+      const digit = parseInt(isbn[i], 10)
+      if (isNaN(digit)) return false
+      sum += i % 2 === 0 ? digit : digit * 3
+    }
+    return sum % 10 === 0
+  }
+
+  const isValidISBN = useCallback((value: string) => {
+    const cleaned = value.replace(/[^0-9Xx]/g, '')
+    return cleaned.length === 10
+      ? isValidISBN10(cleaned)
+      : cleaned.length === 13
+        ? isValidISBN13(cleaned)
+        : false
+  }, [])
+
+  const isNotEmpty = useCallback((value: string) => value.trim() !== '', [])
+  const maxLength = useCallback((value: string, len: number) => value.length <= len, [])
+  const isPositiveInt = useCallback((value: string) => {
+    const n = parseInt(value)
+    return !isNaN(n) && n > 0
+  }, [])
+  const isValidYear = useCallback((value: string) => {
+    const n = parseInt(value)
+    return !isNaN(n) && n >= 0
+  }, [])
+  const validateAuthors = useCallback((value: string) => {
+    const arr = value.split(',').map(v => v.trim())
+    return (
+      arr.length > 0 &&
+      arr.every(v => v !== '' && v.length <= MAX_AUTHOR_NAME)
+    )
+  }, [])
+
+  const errors = useMemo(() => {
+    const errs: Partial<Record<keyof FormState, string>> = {}
+
+    if ((touched.title || submitAttempted) && !isNotEmpty(form.title)) errs.title = 'Judul buku tidak boleh kosong'
+    else if (form.title.length > MAX_TITLE_LENGTH) errs.title = `Judul buku tidak boleh lebih dari ${MAX_TITLE_LENGTH} karakter`
+
+    if ((touched.isbn || submitAttempted)) {
+      if (!isNotEmpty(form.isbn)) errs.isbn = 'ISBN tidak boleh kosong'
+      else if (!isValidISBN(form.isbn)) errs.isbn = 'ISBN tidak valid'
     }
 
-    const formatted = formatISBN(val)
-    setIsbn(formatted)
-  }
+    if ((touched.synopsis || submitAttempted)) {
+      if (!isNotEmpty(form.synopsis)) errs.synopsis = 'Sinopsis tidak boleh kosong'
+      else if(!maxLength(form.synopsis, SYNOPSIS_MAX_LENGTH)) errs.synopsis = `Sinopsis tidak boleh lebih dari ${SYNOPSIS_MAX_LENGTH} karakter`
+    }
+
+    if ((touched.totalPages || submitAttempted)) {
+      if (!isNotEmpty(form.totalPages)) errs.totalPages = 'Jumlah halaman tidak boleh kosong'
+      else if (!isPositiveInt(form.totalPages)) errs.totalPages = 'Jumlah halaman harus lebih dari 0'
+    }
+
+    if ((touched.publishedYear || submitAttempted)) {
+      if (!isNotEmpty(form.publishedYear)) errs.publishedYear = 'Tahun terbit tidak boleh kosong'
+      else if (!isValidYear(form.publishedYear)) errs.publishedYear = 'Tahun terbit tidak valid'
+    }
+
+    if ((touched.language || submitAttempted)) {
+      if (!isNotEmpty(form.language)) errs.language = 'Bahasa tidak boleh kosong'
+      else if (!maxLength(form.language, MAX_LANGUAGE_LENGTH)) errs.language = `Bahasa tidak boleh lebih dari ${MAX_LANGUAGE_LENGTH} karakter`
+    }
+
+    if ((touched.publisherName || submitAttempted)) {
+      if (!isNotEmpty(form.publisherName)) errs.publisherName = 'Nama penerbit tidak boleh kosong'
+      else if (!maxLength(form.publisherName, MAX_PUBLISHER_NAME)) errs.publisherName = `Nama penerbit tidak boleh lebih dari ${MAX_PUBLISHER_NAME} karakter`
+    }
+
+    if ((touched.authorNames || submitAttempted)) {
+      if (!isNotEmpty(form.authorNames)) errs.authorNames = 'Nama penulis tidak boleh kosong'
+      else if (!validateAuthors(form.authorNames)) errs.authorNames = `Setiap nama penulis harus terisi dan tidak lebih dari ${MAX_AUTHOR_NAME} karakter`
+    }
+
+    if ((touched.genreId || submitAttempted) && !isNotEmpty(form.genreId)) errs.genreId = 'Genre tidak boleh kosong'
+
+    return errs
+  }, [form, touched, submitAttempted, isNotEmpty, maxLength, isPositiveInt, isValidYear, validateAuthors, isValidISBN])
+
+  const isFormValid = useMemo(() => Object.keys(errors).length === 0, [errors])
+
+  const handleChange = useCallback(
+    (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      setForm(prev => ({ ...prev, [key]: e.target.value }))
+      setTouched(prev => ({ ...prev, [key]: true }))
+      setApiMessage('')
+    }, []
+  )
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      setSubmitAttempted(true)
+      setTouched(Object.keys(touched).reduce((acc, k) => ({ ...acc, [k]: true }), {} as TouchedState))
+      if (!isFormValid) return
+
+      setIsLoading(true)
+      try {
+        await createBook({
+          title: form.title,
+          isbn: form.isbn.replace(/-/g, ''),
+          synopsis: form.synopsis,
+          totalPages: parseInt(form.totalPages),
+          publishedYear: parseInt(form.publishedYear),
+          language: form.language,
+          publisherName: form.publisherName,
+          authorNames: form.authorNames.split(',').map(a => a.trim()),
+          genreIds: [parseInt(form.genreId)],
+          bookPicture: 'https://placehold.co/300x450?text=Book'
+        })
+        navigate('/')
+      } catch (err) {
+        if (err instanceof ApiError) setApiMessage(err.message)
+        else setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
+      } finally {
+        setIsLoading(false)
+      }
+    }, [form, isFormValid, navigate]
+  )
+
 
   return (
     <PrivateRoute>
       <>
-        <Navbar/>
+        <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Tambah Buku Baru</h1>
 
+          {apiMessage && <Alert message={apiMessage} onClose={() => setApiMessage('')} />}
           <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
             <TextInput
               label="Judul"
               name="title"
               value={form.title}
-              onChange={handleChange}
+              onChange={handleChange('title')}
               placeholder="Masukkan judul buku"
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.title}
+              validation={errors.title && <TextInputError message={errors.title} />}
             />
 
             <TextInput
               label="ISBN"
               name="isbn"
-              value={isbn}
+              value={form.isbn}
               onChange={handleIsbnChange}
               placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-0)"
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.isbn}
+              validation={errors.isbn && <TextInputError message={errors.isbn} />}
             />
 
             <TextArea
               label="Sinopsis"
               name="synopsis"
               value={form.synopsis}
-              onChange={handleChange}
+              onChange={handleChange('synopsis')}
               placeholder="Ringkas sinopsis buku"
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.synopsis}
+              validation={errors.synopsis && <TextInputError message={errors.synopsis} />}
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -161,87 +255,68 @@ export default function NewBookPage() {
                 label="Jumlah halaman"
                 name="totalPages"
                 value={form.totalPages}
-                onChange={handleChange}
+                onChange={handleChange('totalPages')}
                 placeholder="(misal: 100)"
-                hasError={!!message}
-                validation={message && (
-                  <p className="text-red-500 text-xs mt-1">{message}</p>
-                )}
+                hasError={!!errors.totalPages}
+                validation={errors.totalPages && <TextInputError message={errors.totalPages} />}
               />
               <TextInput
                 label="Tahun terbit"
                 name="publishedYear"
                 value={form.publishedYear}
-                onChange={handleChange}
+                onChange={handleChange('publishedYear')}
                 placeholder="(misal: 2025)"
-                hasError={!!message}
-                validation={message && (
-                  <p className="text-red-500 text-xs mt-1">{message}</p>
-                )}
+                hasError={!!errors.publishedYear}
+                validation={errors.publishedYear && <TextInputError message={errors.publishedYear} />}
               />
             </div>
 
             <AutocompleteInput
               label="Bahasa"
               name="language"
-              value={language}
-              onChange={setLanguage}
+              value={form.language}
+              onChange={value => handleChange('language')({ target: { name: 'language', value } } as React.ChangeEvent<HTMLInputElement>)}
               fetchSuggestions={getLanguages}
               placeholder="Masukkan bahasa buku (misal: Indonesia)"
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.language}
+              validation={errors.language && <TextInputError message={errors.language} />}
             />
 
             <AutocompleteInput
               label="Penerbit"
               name="publisherName"
-              value={publisherName}
-              onChange={setPublisherName}
+              value={form.publisherName}
+              onChange={value => handleChange('publisherName')({ target: { name: 'publisherName', value } } as React.ChangeEvent<HTMLInputElement>)}
               fetchSuggestions={getPublishers}
               placeholder="Masukkan nama penerbit"
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.publisherName}
+              validation={errors.publisherName && <TextInputError message={errors.publisherName} />}
             />
 
             <AutocompleteInput
-              label={
-                <div className="flex items-center">
-                  <span>Penulis</span>
-                  <Tooltip message="Jika lebih dari satu, pisahkan dengan koma">
-                    <Info size={12} className="ml-1 text-gray-500"/>
-                  </Tooltip>
-                </div>
-              }
+              label={<div className="flex items-center"><span>Penulis</span><Tooltip message="Jika lebih dari satu, pisahkan dengan koma"><Info size={12} className="ml-1 text-gray-500"/></Tooltip></div>}
               name="authorNames"
-              value={authorNames}
-              onChange={setAuthorNames}
+              multi
+              value={form.authorNames}
+              onChange={value => handleChange('authorNames')({ target: { name: 'authorNames', value } } as React.ChangeEvent<HTMLInputElement>)}
               fetchSuggestions={getAuthors}
               placeholder="Masukkan nama penulis, pisahkan dengan koma"
-              multi
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.authorNames}
+              validation={errors.authorNames && <TextInputError message={errors.authorNames} />}
             />
 
             <SelectGenre
               label="Genre"
-              name="genre"
-              value={genreId}
-              onChange={e => setGenreId(e.target.value)}
+              name="genreId"
+              value={form.genreId}
+              onChange={handleChange('genreId')}
               placeholder="Pilih genre"
               fetchOptions={getGenres}
-              hasError={!!message}
-              validation={message && (
-                <p className="text-red-500 text-xs mt-1">{message}</p>
-              )}
+              hasError={!!errors.genreId}
+              validation={errors.genreId && <TextInputError message={errors.genreId} />}
             />
 
-            <SubmitButton type="submit">
+            <SubmitButton type="submit" isLoading={isLoading} disabled={!isFormValid || isLoading}>
               Simpan buku
             </SubmitButton>
           </form>
