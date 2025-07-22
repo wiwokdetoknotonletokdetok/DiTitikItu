@@ -25,7 +25,7 @@ function FieldItemSkeleton({ label }: { label: string }) {
   )
 }
 
-export default function FieldItem({state, label, value, to, onClick}: BookItemProps) {
+export default function FieldItem<T>({state, label, value, to, onClick}: BookItemProps<T>) {
   const content = (
     <div className="flex items-center justify-between p-4 bg-white shadow transition hover:bg-gray-100">
       <div className="flex items-center space-x-4">
@@ -57,7 +57,7 @@ export default function FieldItem({state, label, value, to, onClick}: BookItemPr
   )
 }
 
-export function FieldItemWithLoading({ isLoading, ...props }: { isLoading: boolean } & BookItemProps) {
+export function FieldItemWithLoading<T>({ isLoading, ...props }: { isLoading: boolean } & BookItemProps<T>) {
   if (isLoading) {
     return <FieldItemSkeleton label={props.label} />
   }
