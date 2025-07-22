@@ -52,7 +52,6 @@ export async function createBook(data: BookRequestDTO): Promise<void> {
     body: JSON.stringify(data)
   })
 
-  console.log('createBook response:', res)
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
@@ -60,7 +59,6 @@ export async function createBook(data: BookRequestDTO): Promise<void> {
 }
 
 export async function updateBook(id: string, data: BookRequestDTO): Promise<void> {
-  console.log('updateBook payload:', data)
   const res = await fetch(`${BASE_URL}/books/${id}`, {
     method: 'PATCH',
     headers: {
@@ -70,7 +68,6 @@ export async function updateBook(id: string, data: BookRequestDTO): Promise<void
     body: JSON.stringify(data)
   })
 
-  console.log('updateBook response:', res)
   if (!res.ok) {
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)

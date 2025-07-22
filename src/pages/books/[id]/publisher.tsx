@@ -1,12 +1,12 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
-import {getPublishers} from '@/api/publishers.ts'
+import { getPublishers } from '@/api/publishers.ts'
 
 export default function BookUpdatePublisherPage() {
   const { id } = useParams()
@@ -46,7 +46,7 @@ export default function BookUpdatePublisherPage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Penerbit">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Penerbit">
           <AutocompleteInput
             label="Penerbit"
             name="publisher"
@@ -55,7 +55,7 @@ export default function BookUpdatePublisherPage() {
             fetchSuggestions={getPublishers}
             placeholder="Masukkan nama penerbit"
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

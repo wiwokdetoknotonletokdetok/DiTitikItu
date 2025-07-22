@@ -1,14 +1,14 @@
-import {useParams, useLocation, useNavigate} from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
 import Tooltip from '@/components/Tooltip.tsx'
-import {Info} from 'lucide-react'
-import {getAuthors} from '@/api/authors.ts'
+import { Info } from 'lucide-react'
+import { getAuthors } from '@/api/authors.ts'
 
 export default function BookUpdateAuthorsPage() {
   const { id } = useParams()
@@ -48,7 +48,7 @@ export default function BookUpdateAuthorsPage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Penulis">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Penulis">
           <AutocompleteInput
             label={
               <div className="flex items-center">
@@ -65,7 +65,7 @@ export default function BookUpdateAuthorsPage() {
             placeholder="Masukkan nama penulis, pisahkan dengan koma"
             multi
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

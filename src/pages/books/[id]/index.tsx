@@ -6,13 +6,12 @@ import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import BookImageUploader from '@/components/BookImageUploader'
 import Navbar from '@/components/Navbar.tsx'
 import PrivateRoute from '@/PrivateRoute.tsx'
-import BookItem from '@/components/BookItem.tsx'
+import { FieldItemWithLoading } from '@/components/FieldItem.tsx'
 import type { GenreResponse } from '@/dto/GenreResponse.ts'
-import {uploadBookPicture} from '@/api/uploadBookPicture.ts'
+import { uploadBookPicture } from '@/api/uploadBookPicture.ts'
 
 export default function BookUpdatePage() {
   const { id: id } = useParams()
-  const [book, setBook] = useState<BookResponseDTO | null>(null)
   const [form, setForm] = useState({
     title: '',
     synopsis: '',
@@ -28,13 +27,13 @@ export default function BookUpdatePage() {
   const [genre, setGenre] = useState<GenreResponse>()
   const [newImage, setNewImage] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!id) return
     const fetchData  = async () => {
       try {
         const data: BookResponseDTO = await fetchBookById(id)
-        setBook(data)
         setForm({
           title: data.title,
           synopsis: data.synopsis,
@@ -47,6 +46,7 @@ export default function BookUpdatePage() {
         setPublisherName(data.publisherName)
         setLanguage(data.language)
         setGenre(data.genres[0])
+        setLoading(false)
       } catch (err) {
         console.error(err)
         if (err instanceof ApiError) {
@@ -82,8 +82,6 @@ export default function BookUpdatePage() {
     uploadImage()
   }, [newImage, id])
 
-  if (!book) return <p className="p-6 text-[#1C2C4C]">Memuat data buku...</p>
-
   return (
     <PrivateRoute>
       <>
@@ -96,59 +94,69 @@ export default function BookUpdatePage() {
             isUploading={isUploading}
           />
           <div className="rounded-lg overflow-hidden shadow mt-4">
-            <BookItem
+            <FieldItemWithLoading
               label="Judul buku"
               value={form.title}
               to={`/books/${id}/title`}
               state={{ value: form.title }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="ISBN"
               value={isbn}
               to={`/books/${id}/isbn`}
               state={{ value: isbn }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Sinopsis"
               value={form.synopsis}
               to={`/books/${id}/synopsis`}
               state={{ value: form.synopsis }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Jumlah halaman"
               value={form.totalPages.toString()}
               to={`/books/${id}/total-pages`}
               state={{ value: form.totalPages.toString() }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Tahun terbit"
               value={form.publishedYear.toString()}
               to={`/books/${id}/published-year`}
               state={{ value: form.publishedYear.toString() }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Bahasa"
               value={language}
               to={`/books/${id}/language`}
               state={{ value: language }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Penerbit"
               value={publisherName}
               to={`/books/${id}/publisher`}
               state={{ value: publisherName }}
+              isLoading={loading}
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Penulis"
               value={authorNames}
               to={`/books/${id}/authors`}
               state={{ value: authorNames }}
+              isLoading={loading}
+
             />
-            <BookItem
+            <FieldItemWithLoading
               label="Genre"
-              value={genre.genreName}
+              value={genre?.genreName || ''}
               to={`/books/${id}/genres`}
               state={{ value: genre }}
+              isLoading={loading}
             />
           </div>
         </div>
