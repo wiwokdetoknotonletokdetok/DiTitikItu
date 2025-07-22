@@ -6,23 +6,29 @@ import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdatePublishedYearPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value
-  const [publishedYear, setPublishedYear] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [publishedYear, setPublishedYear] = useState(book?.publishedYear.toString() || '')
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!id || !book) {
+      setMessage("Data buku tidak tersedia.")
+      return
+    }
 
     if (!publishedYear.trim()) {
       setMessage('Tahun terbit buku tidak boleh kosong!')
@@ -30,8 +36,9 @@ export default function BookUpdatePublishedYearPage() {
     }
 
     try {
-      await updateBook(id, { publishedYear: parseInt(publishedYear) })
+      await updateBook(id, { ...book, publishedYear: parseInt(publishedYear) })
       setMessage('Tahun terbit buku berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)

@@ -7,23 +7,29 @@ import { useEffect, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
 import { getPublishers } from '@/api/publishers.ts'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdatePublisherPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value || ''
-  const [publisher, setPublisher] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [publisher, setPublisher] = useState(book?.publisherName || '')
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!id || !book) {
+      setMessage("Data buku tidak tersedia.")
+      return
+    }
 
     if (!publisher.trim()) {
       setMessage('Penerbit tidak boleh kosong!')
@@ -31,8 +37,12 @@ export default function BookUpdatePublisherPage() {
     }
 
     try {
-      await updateBook(id, { publisherName: publisher })
+      await updateBook(id, {
+        ...book,
+        publisherName: publisher,
+      })
       setMessage('Publisher berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)

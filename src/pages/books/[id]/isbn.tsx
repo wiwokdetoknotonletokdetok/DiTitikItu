@@ -7,23 +7,29 @@ import { useEffect, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdateIsbnPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value
-  const [isbn, setIsbn] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [isbn, setIsbn] = useState(book?.isbn || '')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!id || !book) {
+      setError("Data buku tidak tersedia.")
+      return
+    }
 
     if (!isValidISBN(isbn)) {
       setError('ISBN yang dimasukkan tidak valid!')
@@ -33,8 +39,9 @@ export default function BookUpdateIsbnPage() {
     setError(null)
 
     try {
-      await updateBook(id, { isbn: isbn })
+      await updateBook(id, { ...book, isbn: isbn })
       console.log('ISBN buku berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         console.error(err.message)

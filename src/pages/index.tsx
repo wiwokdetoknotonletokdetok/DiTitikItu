@@ -179,35 +179,37 @@ export default function Home() {
           {loadingBook ? (
             <p className="text-sm text-gray-500">Memuat detail buku...</p>
           ) : selectedBook && (
-            <HomeSidePanel
-              book={selectedBook}
-              locations={selectedBookLocations}
-              reviews={reviews}
-              onClose={() => {
-                setSelectedBook(null)
-                setSelectedBookLocations([])
-              }}
-              onAddLocationClick={() => {
-                if (userPosition) {
-                  setNewMarkerPosition({ lat: userPosition.latitude, lng: userPosition.longitude })
-                  setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
+            <div>
+              <HomeSidePanel
+                book={selectedBook}
+                locations={selectedBookLocations}
+                reviews={reviews}
+                onClose={() => {
+                  setSelectedBook(null)
+                  setSelectedBookLocations([])
+                }}
+                onAddLocationClick={() => {
+                  if (userPosition) {
+                    setNewMarkerPosition({ lat: userPosition.latitude, lng: userPosition.longitude })
+                    setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
+                    handleFlyTo()
+                  }
+                }}
+                newMarkerPosition={newMarkerPosition}
+                onCancelAddLocation={() => {
+                  setNewMarkerPosition(null)
+                  setLocationName('')
+                }}
+                onSaveAddLocation={() => navigate('#locations')}
+                onFlyTo={(lat, lng) => {
+                  setFlyToLocation({ latitude: lat, longitude: lng })
                   handleFlyTo()
-                }
-              }}
-              newMarkerPosition={newMarkerPosition}
-              onCancelAddLocation={() => {
-                setNewMarkerPosition(null)
-                setLocationName('')
-              }}
-              onSaveAddLocation={() => navigate('#locations')}
-              onFlyTo={(lat, lng) => {
-                setFlyToLocation({ latitude: lat, longitude: lng })
-                handleFlyTo()
-              }}
-              onUpdate={() => refreshBookAndReviews(selectedBook.id)}
-              onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
-              onUpdateLocations={() => refreshLocations(selectedBook?.id)}
-            />
+                }}
+                onUpdate={() => refreshBookAndReviews(selectedBook.id)}
+                onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
+                onUpdateLocations={() => refreshLocations(selectedBook?.id)}
+              />
+            </div>
           )}
         </div>
 

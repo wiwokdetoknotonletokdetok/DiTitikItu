@@ -66,6 +66,7 @@ export default function NewBookPage() {
     if (!genreId.trim()) return setMessage('Genre tidak boleh kosong')
       
     try {
+      console.log('sending:', form)
       await createBook({
         ...form,
         isbn: isbn,
@@ -76,6 +77,7 @@ export default function NewBookPage() {
         totalPages: parseInt(form.totalPages),
         publishedYear: parseInt(form.publishedYear),
       })
+      console.log('book created')
       navigate('/')
     } catch (err) {
       console.error(err)

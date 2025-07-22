@@ -9,23 +9,29 @@ import AutocompleteInput from '@/components/AutocompleteInput.tsx'
 import Tooltip from '@/components/Tooltip.tsx'
 import { Info } from 'lucide-react'
 import { getAuthors } from '@/api/authors.ts'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdateAuthorsPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value || ''
-  const [authorNames, setAuthorNames] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [authorNames, setAuthorNames] = useState(book?.authorNames.join(', ') || '')
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!id || !book) {
+      setMessage("Data buku tidak tersedia.")
+      return
+    }
 
     if (!authorNames.trim()) {
       setMessage('Penulis tidak boleh kosong!')
@@ -33,8 +39,9 @@ export default function BookUpdateAuthorsPage() {
     }
 
     try {
-      await updateBook(id, { authorNames: authorNames.split(',').map(name => name.trim()) })
+      await updateBook(id, { ...book, authorNames: authorNames.split(',').map(name => name.trim()) })
       setMessage('Penulis berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)

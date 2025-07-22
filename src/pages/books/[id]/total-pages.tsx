@@ -6,23 +6,29 @@ import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
+import type { BookRequestDTO } from '@/dto/BookRequestDTO'
 
 export default function BookUpdateTotalPagesPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const value = location.state?.value
-  const [totalPages, setTotalPages] = useState(value)
+  const book = (location.state?.value || null) as BookRequestDTO | null
+  const [totalPages, setTotalPages] = useState(book?.totalPages.toString() || '')
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
-  }, [location.state?.value, id, navigate])
+  }, [book, id, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!id || !book) {
+      setMessage("Data buku tidak tersedia.")
+      return
+    }
 
     if (!totalPages.trim()) {
       setMessage('Jumlah halaman buku tidak boleh kosong!')
@@ -30,8 +36,9 @@ export default function BookUpdateTotalPagesPage() {
     }
 
     try {
-      await updateBook(id, { totalPages: parseInt(totalPages) })
+      await updateBook(id, {...book, totalPages: parseInt(totalPages) })
       setMessage('Jumlah halaman buku berhasil diperbarui!')
+      navigate(`/books/${id}`)
     } catch (err) {
       if (err instanceof ApiError) {
         setMessage(err.message)
