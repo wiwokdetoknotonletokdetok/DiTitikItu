@@ -75,6 +75,7 @@ export default function SettingsProfileNamePage() {
           buttonText="Simpan"
           title="Edit Nama"
           isLoading={isLoading}
+          isValid={isValid}
           info={
             <p className="text-xs text-gray-500 mt-1">
               Nama Anda akan terlihat oleh pengguna lain, pastikan sesuai dengan yang diinginkan.

@@ -3,19 +3,27 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
-import { getLanguages } from '@/api/languages.ts'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
-import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import TextInputError from '@/components/TextInputError.tsx'
+import Alert from '@/components/Alert.tsx'
+import { getLanguages } from '@/api/languages.ts'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+
+const MAX_LANGUAGE_LENGTH = 50
 
 export default function BookUpdateLanguagePage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const book = (location.state?.value || null) as BookRequestDTO | null
+  const book = (location.state?.value) as UpdateBookRequest
   const [language, setLanguage] = useState(book?.language || '')
-  const [message, setMessage] = useState<string | null>(null)
+  const [touched, setTouched] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     if (!book) {
@@ -23,50 +31,80 @@ export default function BookUpdateLanguagePage() {
     }
   }, [book, id, navigate])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateLanguage = useCallback(() => {
+    if (!language.trim()) return 'Bahasa tidak boleh kosong'
+    else if (language.length > MAX_LANGUAGE_LENGTH) return `Bahasa tidak boleh lebih dari ${MAX_LANGUAGE_LENGTH} karakter`
+    return ''
+  }, [language])
+
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    return validateLanguage()
+  }, [language, touched, submitAttempted])
+
+  const isValid = useMemo(() => errorMessage === '', [errorMessage])
+
+  const handleLanguageChange = useCallback((value: string) => {
+    setLanguage(value)
+    setTouched(true)
+    setApiMessage('')
+    setIsSuccess(false)
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!id || !book) {
-      setMessage("Data buku tidak tersedia.")
+    setSubmitAttempted(true)
+
+    if (!id) {
+      setApiMessage('Data buku tidak tersedia.')
       return
     }
 
-    if (!language.trim()) {
-      setMessage('Bahasa buku tidak boleh kosong!')
-      return
-    }
+    if (!isValid) return
 
+    setIsLoading(true)
     try {
-
-      await updateBook(id, {
-        ...book,
-        language: language.trim(),
-      })
-
-      setMessage('Bahasa buku berhasil diperbarui!')
-      navigate(`/books/${id}`)
+      await updateBook(id, { language })
+      setIsSuccess(true)
     } catch (err) {
-      console.log(err)
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        setApiMessage(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [language, isValid, id, navigate, book])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Bahasa">
+        <UpdateFieldForm
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Bahasa"
+          isLoading={isLoading}
+          isValid={isValid}
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
+            />
+          )}
           <AutocompleteInput
             label="Bahasa"
             name="language"
             value={language}
-            onChange={setLanguage}
+            onChange={handleLanguageChange}
             fetchSuggestions={getLanguages}
             placeholder="Masukkan bahasa buku (misal: Indonesia)"
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
       </>

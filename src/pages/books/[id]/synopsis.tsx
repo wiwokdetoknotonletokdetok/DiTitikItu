@@ -3,18 +3,24 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextArea from '@/components/TextArea.tsx'
-import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import TextInputError from '@/components/TextInputError.tsx'
+import Alert from '@/components/Alert.tsx'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
 
 export default function BookUpdateSynopsisPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const book = (location.state?.value || null) as BookRequestDTO | null
+  const book = (location.state?.value) as UpdateBookRequest
   const [synopsis, setSynopsis] = useState(book?.synopsis || '')
-  const [message, setMessage] = useState<string | null>(null)
+  const [touched, setTouched] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     if (!book) {
@@ -22,48 +28,81 @@ export default function BookUpdateSynopsisPage() {
     }
   }, [book, id, navigate])
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const validateSynopsis = useCallback(() => {
+    if (!synopsis.trim()) return 'Sinopsis buku tidak boleh kosong!'
+    else if (synopsis.length > 400) return 'Sinopsis buku tidak boleh lebih dari 400 karakter!'
+    return ''
+  }, [synopsis])
+
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    return validateSynopsis()
+  }, [synopsis, touched, submitAttempted, validateSynopsis])
+
+  const isValid = useMemo(() => errorMessage === '', [errorMessage])
+
+  const handleSynopsisChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setSynopsis(e.target.value)
+    setTouched(true)
+    setApiMessage('')
+    setIsSuccess(false)
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitAttempted(true)
 
-    if (!id || !book) {
-      setMessage("Data buku tidak tersedia.")
+    if (!id) {
+      setApiMessage('Data buku tidak tersedia.')
       return
     }
 
-    if (!synopsis.trim()) {
-      setMessage('Sinopsis buku tidak boleh kosong!')
-      return
-    }
+    if (!isValid) return
 
+    setIsLoading(true)
     try {
-      await updateBook(id, {
-        ...book,
-        synopsis: synopsis.trim(),
-      })
-      setMessage('Sinopsis buku berhasil diperbarui!')
-      navigate(`/books/${id}`)
+      await updateBook(id, { synopsis: synopsis.trim() })
+      setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        setApiMessage(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        setApiMessage('Terjadi kesalahan, coba lagi nanti.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [synopsis, isValid, id, navigate])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Sinopsis">
-        <TextArea
-          name="synopsis"
-          label="Sinopsis"
-          placeholder="Ringkas sinopsis buku"
-          value={synopsis}
-          onChange={(e) => setSynopsis(e.target.value)}
-        />
-      </UpdateFieldForm>
+        <UpdateFieldForm
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Sinopsis"
+          isLoading={isLoading}
+          isValid={isValid}
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
+            />
+          )}
+          <TextArea
+            name="synopsis"
+            label="Sinopsis"
+            placeholder="Ringkas sinopsis buku"
+            value={synopsis}
+            onChange={handleSynopsisChange}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
+          />
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

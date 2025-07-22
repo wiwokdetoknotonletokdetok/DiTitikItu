@@ -73,6 +73,7 @@ export default function SettingsProfileNamePage() {
           onSubmit={handleSubmit}
           buttonText="Simpan"
           isLoading={isLoading}
+          isValid={isValid}
           title="Edit Bio"
           info={
             <p className="text-xs text-gray-500 mt-1">
