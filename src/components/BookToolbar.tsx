@@ -16,9 +16,9 @@ export default function BookToolbar({ onSelectBook }: BookToolbarProps) {
 
   function handleAddBookClick() {
     if (isLoggedIn()) {
-      navigate("/books/new")
+      navigate('/books')
     } else {
-      navigate("#login-required")
+      navigate('#login-required')
     }
   }
 

@@ -15,7 +15,7 @@ export default function SettingsItem({ title, description, icon, to, onClick, da
   const content = (
     <div
       className={`flex items-center justify-between p-4 bg-white rounded-lg shadow transition ${
-        danger ? 'hover:bg-red-50' : 'hover:bg-gray-50'
+        danger ? 'hover:bg-red-50' : 'hover:bg-gray-100'
       }`}
     >
       <div className="flex items-center space-x-4">
