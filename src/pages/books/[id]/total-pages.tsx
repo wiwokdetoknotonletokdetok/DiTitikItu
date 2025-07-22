@@ -1,10 +1,10 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
 
 export default function BookUpdateTotalPagesPage() {
@@ -45,7 +45,7 @@ export default function BookUpdateTotalPagesPage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Jumlah Halaman">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Jumlah Halaman">
           <TextInput
             name="totalPages"
             label="Jumlah halaman"
@@ -53,7 +53,7 @@ export default function BookUpdateTotalPagesPage() {
             value={totalPages}
             onChange={(e) => setTotalPages(e.target.value)}
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

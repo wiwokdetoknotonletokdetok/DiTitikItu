@@ -1,11 +1,12 @@
-import {useParams, useLocation, useNavigate} from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
+import TextInputError from '@/components/TextInputError.tsx'
 
 export default function BookUpdateTitlePage() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ export default function BookUpdateTitlePage() {
   const navigate = useNavigate()
   const value = location.state?.value || ''
   const [title, setTitle] = useState(value)
-  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!location.state?.value) {
@@ -21,39 +22,65 @@ export default function BookUpdateTitlePage() {
     }
   }, [location.state?.value, id, navigate])
 
+  const validateTitle = (title: string) => {
+    if (title.trim().length === 0) {
+      return 'Judul buku tidak boleh kosong'
+    }
+    if (title.length < 3) {
+      return 'Judul buku harus memiliki setidaknya 3 karakter'
+    }
+    if (title.length > 100) {
+      return 'Judul buku tidak boleh lebih dari 100 karakter'
+    }
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!title.trim()) {
-      setMessage('Judul buku tidak boleh kosong!')
+    const validationError = validateTitle(title)
+    if (validationError) {
+      setError(validationError)
       return
     }
 
+    setError(null)
+
     try {
       await updateBook(id, { title: title })
-      setMessage('Judul buku berhasil diperbarui!')
+      console.log('Judul buku berhasil diperbarui!')
     } catch (err) {
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        console.error(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        console.error('Terjadi kesalahan, coba lagi nanti.')
       }
     }
+  }
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setTitle(value)
+
+    const validationError = validateTitle(value)
+    setError(validationError)
   }
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Judul Buku">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Judul Buku">
           <TextInput
             name="title"
             label="Judul buku"
             placeholder="Masukkan judul buku"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={handleTitleChange}
+            hasError={error !== null}
+            validation={error ? <TextInputError message={error} /> : null}
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

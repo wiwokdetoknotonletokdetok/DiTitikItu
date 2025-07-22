@@ -1,11 +1,12 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import {useEffect, useState} from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import { useEffect, useState } from 'react'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
+import TextInputError from '@/components/TextInputError.tsx'
 
 export default function BookUpdateIsbnPage() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ export default function BookUpdateIsbnPage() {
   const navigate = useNavigate()
   const value = location.state?.value
   const [isbn, setIsbn] = useState(value)
-  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!location.state?.value) {
@@ -24,19 +25,21 @@ export default function BookUpdateIsbnPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!isbn.trim()) {
-      setMessage('ISBN buku tidak boleh kosong!')
+    if (!isValidISBN(isbn)) {
+      setError('ISBN yang dimasukkan tidak valid!')
       return
     }
 
+    setError(null)
+
     try {
       await updateBook(id, { isbn: isbn })
-      setMessage('ISBN buku berhasil diperbarui!')
+      console.log('ISBN buku berhasil diperbarui!')
     } catch (err) {
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        console.error(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        console.error('Terjadi kesalahan, coba lagi nanti.')
       }
     }
   }
@@ -66,19 +69,67 @@ export default function BookUpdateIsbnPage() {
     setIsbn(formatted)
   }
 
+  function isValidISBN(isbn: string): boolean {
+    const cleaned = isbn.replace(/[^0-9Xx]/g, '')
+
+    if (cleaned.length === 13) {
+      return isValidISBN13(cleaned)
+    }
+
+    if (cleaned.length === 10) {
+      return isValidISBN10(cleaned)
+    }
+
+    return false
+  }
+
+  function isValidISBN10(isbn: string): boolean {
+    if (isbn.length !== 10) return false
+
+    let sum = 0
+    for (let i = 0; i < 9; i++) {
+      const digit = parseInt(isbn[i], 10)
+      if (isNaN(digit)) return false
+      sum += (digit * (10 - i))
+    }
+
+    const lastChar = isbn[9].toUpperCase()
+    if (lastChar !== 'X' && isNaN(parseInt(lastChar, 10))) return false
+
+    sum += (lastChar === 'X' ? 10 : parseInt(lastChar, 10))
+
+    return sum % 11 === 0
+  }
+
+  function isValidISBN13(isbn: string): boolean {
+    if (isbn.length !== 13) return false
+
+    let sum = 0
+    for (let i = 0; i < 13; i++) {
+      const digit = parseInt(isbn[i], 10)
+      if (isNaN(digit)) return false
+
+      sum += (i % 2 === 0) ? digit : (digit * 3)
+    }
+
+    return sum % 10 === 0
+  }
+
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="ISBN">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit ISBN">
           <TextInput
             name="isbn"
             label="ISBN"
             placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-0)"
             value={isbn}
             onChange={(e) => handleIsbnChange(e)}
+            hasError={error !== null}
+            validation={error ? <TextInputError message={error} /> : null}
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

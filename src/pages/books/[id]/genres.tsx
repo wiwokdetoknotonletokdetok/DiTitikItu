@@ -1,13 +1,13 @@
-import {useParams, useLocation, useNavigate} from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
-import {getGenres} from '@/api/genres.ts'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
+import { getGenres } from '@/api/genres.ts'
 import SelectGenre from '@/components/SelectGenre.tsx'
-import type {GenreResponse} from '@/dto/GenreResponse.ts'
+import type { GenreResponse } from '@/dto/GenreResponse.ts'
 
 export default function BookUpdateGenresPage() {
   const { id } = useParams()
@@ -42,7 +42,7 @@ export default function BookUpdateGenresPage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Genre">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Genre">
           <SelectGenre
             label="Genre"
             name="genre"
@@ -51,7 +51,7 @@ export default function BookUpdateGenresPage() {
             placeholder="Pilih genre"
             fetchOptions={getGenres}
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )

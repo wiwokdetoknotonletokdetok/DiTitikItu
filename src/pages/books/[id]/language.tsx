@@ -1,10 +1,10 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useEffect, useState } from 'react'
-import UpdateBookFieldForm from '@/components/UpdateBookFieldForm.tsx'
+import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import { getLanguages } from '@/api/languages.ts'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
 
@@ -46,7 +46,7 @@ export default function BookUpdateLanguagePage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateBookFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Bahasa">
+        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Bahasa">
           <AutocompleteInput
             label="Bahasa"
             name="language"
@@ -55,7 +55,7 @@ export default function BookUpdateLanguagePage() {
             fetchSuggestions={getLanguages}
             placeholder="Masukkan bahasa buku (misal: Indonesia)"
           />
-        </UpdateBookFieldForm>
+        </UpdateFieldForm>
       </>
     </PrivateRoute>
   )
