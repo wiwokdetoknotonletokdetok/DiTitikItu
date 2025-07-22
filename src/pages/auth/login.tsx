@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useCallback, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
@@ -9,8 +9,8 @@ import PasswordInput from '@/components/PasswordInput.tsx'
 import SubmitButton from '@/components/SubmitButton.tsx'
 import FormRedirectLink from '@/components/FormRedirectLink.tsx'
 import { useAuth } from '@/context/AuthContext.tsx'
-import { X } from 'lucide-react'
 import TextInputError from '@/components/TextInputError.tsx'
+import Alert from '@/components/Alert.tsx'
 
 export default function LoginUser() {
   const { login } = useAuth()
@@ -76,17 +76,10 @@ export default function LoginUser() {
         </h1>
 
         {apiError && (
-          <div className="mb-4 relative bg-red-100 text-red-700 pl-3 pr-8 py-[11px] rounded text-sm">
-            <span>{apiError}</span>
-            <button
-              type="button"
-              onClick={() => setApiError('')}
-              className="absolute right-3 inset-y-0 text-lg leading-none hover:text-red-900"
-              aria-label="Tutup pesan kesalahan"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          <Alert
+            message={apiError}
+            onClose={() => setApiError('')}
+          />
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">

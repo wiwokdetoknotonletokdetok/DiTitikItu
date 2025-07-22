@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { registerUser } from '@/api/registerUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
@@ -8,8 +8,9 @@ import PasswordInput from '@/components/PasswordInput.tsx'
 import SubmitButton from '@/components/SubmitButton.tsx'
 import FormRedirectLink from '@/components/FormRedirectLink.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
-import { Info, X } from 'lucide-react'
+import { Info } from 'lucide-react'
 import ToolTip from '@/components/Tooltip.tsx'
+import Alert from '@/components/Alert.tsx'
 
 export default function RegisterUser() {
   const navigate = useNavigate()
@@ -122,17 +123,10 @@ export default function RegisterUser() {
         />
 
         {apiMessage && (
-          <div className="mb-4 relative bg-red-100 text-red-700 pl-3 pr-8 py-[11px] rounded text-sm">
-            <span>{apiMessage}</span>
-            <button
-              type="button"
-              onClick={() => setApiMessage('')}
-              className="absolute right-3 inset-y-0 hover:text-red-900"
-              aria-label="Tutup pesan"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          <Alert
+            message={apiMessage}
+            onClose={() => setApiMessage('')}
+          />
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -170,14 +164,14 @@ export default function RegisterUser() {
                   <span className={`${form.password ? 'text-green-600' : 'text-red-500'}`}>Kata sandi tidak boleh kosong</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${length ? 'bg-green-600' : 'bg-gray-500'}`}></span>
-                  <span className={`${length ? 'text-green-600' : 'text-gray-500'}`}>8-72 karakter</span>
+                  <span className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${length ? 'bg-green-600' : 'bg-red-500'}`}></span>
+                  <span className={`${length ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus 8-72 karakter</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${pattern ? 'bg-green-600' : 'bg-gray-500'}`}></span>
+                  <span className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${pattern ? 'bg-green-600' : 'bg-red-500'}`}></span>
                   <div className="flex items-center">
-                    <span className={`${pattern ? 'text-green-600' : 'text-gray-500'}`}>Huruf & angka</span>
-                    <ToolTip message="Dapat menggunakan simbol @#$%^&+=!_-"><Info size={12} className="ml-1 text-gray-500"/></ToolTip>
+                    <span className={`${pattern ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus mengandung huruf dan angka</span>
+                    <ToolTip message="Dapat menggunakan simbol @#$%^&+=!_-"><Info size={12} className={`ml-1 ${pattern ? 'text-green-600' : 'text-red-500'}`}/></ToolTip>
                   </div>
                 </li>
               </ul>
