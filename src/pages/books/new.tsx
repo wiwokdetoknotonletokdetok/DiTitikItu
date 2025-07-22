@@ -46,7 +46,7 @@ export default function NewBookPage() {
         totalPages: Number(form.totalPages),
         publishedYear: Number(form.publishedYear),
       })
-      navigate('/books')
+      navigate('/')
     } catch (err) {
       console.error(err)
       if (err instanceof ApiError) {

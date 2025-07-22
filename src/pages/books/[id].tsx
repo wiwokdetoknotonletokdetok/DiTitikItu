@@ -94,7 +94,7 @@ export default function BookDetailPage() {
               <p><strong>🏢 Penerbit:</strong> {book.publisherName}</p>
               <p><strong>⭐ Rating:</strong> {book.totalRatings.toFixed(1)} / 5.0</p>
               <p><strong>✍️ Penulis:</strong> {book.authorNames.join(', ')}</p>
-              <p><strong>🏷️ Genre:</strong> {book.genreNames.join(', ')}</p>
+              <p><strong>🏷️ Genre:</strong> {book.genres.join(', ')}</p>
               <p><strong>📚 Halaman:</strong> {book.totalPages}</p>
               <p><strong>📅 Terbit:</strong> {book.publishedYear}</p>
           </div>
