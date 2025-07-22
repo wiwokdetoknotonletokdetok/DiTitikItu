@@ -1,9 +1,11 @@
 import { X } from 'lucide-react'
+import { useEffect } from 'react'
 
 type AlertMessageProps = {
   message: string
   onClose: () => void
   type?: 'error' | 'success'
+  duration?: number
 }
 
 const typeStyles = {
@@ -15,10 +17,20 @@ const typeStyles = {
   },
 }
 
-export default function AlertMessage({ message, onClose, type = 'error' }: AlertMessageProps) {
-  if (!message) return null
-
+export default function AlertMessage({ duration = 3000, message, onClose, type = 'error' }: AlertMessageProps) {
   const styles = typeStyles[type]
+
+  useEffect(() => {
+    if (!message) return
+
+    const timeout = setTimeout(() => {
+      onClose()
+    }, duration)
+
+    return () => clearTimeout(timeout)
+  }, [message, onClose, duration])
+
+  if (!message) return null
 
   return (
     <div className={`mb-4 relative ${styles.container} pl-3 pr-8 py-[11px] rounded text-sm`}>

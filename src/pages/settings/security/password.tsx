@@ -84,7 +84,7 @@ function SettingsSecurityPasswordPage() {
 
       try {
         await authPassword(form, token)
-        setApiMessage({message: 'Kata sandi berhasil diubah', type: 'success'})
+        setApiMessage({message: 'Kata sandi berhasil diubah.', type: 'success'})
         setSubmitAttempted(false)
         setTouched({
           currentPassword: false,

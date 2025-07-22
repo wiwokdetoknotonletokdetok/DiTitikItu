@@ -3,22 +3,81 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import { useAuth } from '@/context/AuthContext.tsx'
 import TextInput from '@/components/TextInput.tsx'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
-import { useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import TextInputError from '@/components/TextInputError.tsx'
+import { ApiError } from '@/exception/ApiError.ts'
+import { patchUsersMe } from '@/api/usersMe.ts'
+import Alert from '@/components/Alert.tsx'
 
 export default function SettingsProfileEmailPage() {
   const { token } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const value = location.state?.value
-  const [email, setEmail] = useState(value)
+  const [email, setEmail] = useState(value ?? '')
+  const [touched, setTouched] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [apiMessage, setApiMessage] = useState<{message: string, type: 'error' | 'success'}>({message: '', type: 'error'})
+
+  useEffect(() => {
+    if (!location.state?.value) {
+      navigate(`/settings/profile`)
+    }
+  }, [location.state?.value, navigate])
+
+  const isValidEmail = useCallback((email: string) => {
+    const pattern = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/
+    return pattern.test(email)
+  }, [])
+
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    if (!email) return 'Anda belum mengisi alamat email'
+    if (!isValidEmail(email)) return 'Alamat email yang Anda masukkan tidak valid'
+    return ''
+  }, [email, touched, submitAttempted, isValidEmail])
+
+  const isFormValid = useMemo(() => {
+    return errorMessage === '' && isValidEmail(email)
+  }, [email, isValidEmail])
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    setTouched(true)
+    setApiMessage({message: '', type: 'error'})
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitAttempted(true)
+
+    if (!isFormValid) return
+
+    setIsLoading(true)
+    try {
+      await patchUsersMe({ email }, token)
+      setApiMessage({message: 'Email berhasil diubah.', type: 'success'})
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setApiMessage({message: err.message, type: 'error'})
+      } else {
+        setApiMessage({message: 'Terjadi kesalahan. Silakan coba lagi.', type: 'error'})
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [email, isFormValid])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
         <UpdateFieldForm
-          onSubmit={() => {}}
+          onSubmit={handleSubmit}
           buttonText="Simpan"
+          isLoading={isLoading}
           title="Edit Email"
           info={
             <div className="text-xs text-gray-500 mt-1">
@@ -32,12 +91,21 @@ export default function SettingsProfileEmailPage() {
             </div>
           }
         >
+          {apiMessage && (
+            <Alert
+              type={apiMessage.type}
+              message={apiMessage.message}
+              onClose={() => setApiMessage({message: '', type: 'error'})}
+            />
+          )}
           <TextInput
+            label="Alamat email"
             name="email"
-            label="Email"
-            placeholder=""
+            placeholder="contoh: email@domain.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleChange}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
       </>
