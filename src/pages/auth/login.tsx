@@ -16,7 +16,7 @@ export default function LoginUser() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = location.state?.from?.pathname || '/'
+  const [isLoading, setIsLoading] = useState(false)
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [touched, setTouched] = useState({ email: false, password: false })
@@ -45,9 +45,12 @@ export default function LoginUser() {
 
     if (!isValid) return
 
+    setIsLoading(true)
+
     try {
       const response: WebResponse<LoginUserResponse> = await loginUser(form)
       await login(response.data.token)
+      const from = location.state?.from?.pathname || '/'
       navigate(from, { replace: true })
     } catch (err) {
       if (err instanceof ApiError && err.statusCode === 401) {
@@ -55,6 +58,8 @@ export default function LoginUser() {
       } else {
         setApiError('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
+      setIsLoading(false)
     }
   }, [form, isValid, login, navigate])
 
@@ -105,7 +110,7 @@ export default function LoginUser() {
             validation={errors.password ? <TextInputError message={errors.password} /> : null}
           />
 
-          <SubmitButton type="submit">
+          <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
             Masuk
           </SubmitButton>
         </form>

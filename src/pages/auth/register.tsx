@@ -13,6 +13,7 @@ import ToolTip from '@/components/Tooltip.tsx'
 
 export default function RegisterUser() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -87,6 +88,9 @@ export default function RegisterUser() {
       setSubmitAttempted(true)
       setTouched({ name: true, email: true, password: true, confirmPassword: true })
       if (!isFormValid) return
+
+      setIsLoading(true)
+
       try {
         const res: WebResponse<string> = await registerUser(form)
         setApiMessage(`Register berhasil: ${res.data}`)
@@ -97,6 +101,9 @@ export default function RegisterUser() {
           console.error(err)
           setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
         }
+      } finally {
+        setIsLoading(false)
+
       }
     }, [form, isFormValid, navigate]
   )
@@ -187,7 +194,9 @@ export default function RegisterUser() {
             validation={errors.confirmPassword && <TextInputError message={errors.confirmPassword} />}
           />
 
-          <SubmitButton type="submit">Daftar</SubmitButton>
+          <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
+            Daftar
+          </SubmitButton>
         </form>
       </div>
     </div>
