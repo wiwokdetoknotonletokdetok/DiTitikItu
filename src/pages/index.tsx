@@ -179,7 +179,6 @@ export default function Home() {
           {loadingBook ? (
             <p className="text-sm text-gray-500">Memuat detail buku...</p>
           ) : selectedBook && (
-            <div>
               <HomeSidePanel
                 book={selectedBook}
                 locations={selectedBookLocations}
@@ -209,7 +208,6 @@ export default function Home() {
                 onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
                 onUpdateLocations={() => refreshLocations(selectedBook?.id)}
               />
-            </div>
           )}
         </div>
 
