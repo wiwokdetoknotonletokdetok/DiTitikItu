@@ -88,11 +88,13 @@ export default function BookUpdatePage() {
         <Navbar/>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Buku</h1>
-          <BookImageUploader
-            onUpload={(file) => setNewImage(file)}
-            initialUrl={form.bookPicture}
-            isUploading={isUploading}
-          />
+          {!loading && (
+            <BookImageUploader
+              onUpload={(file) => setNewImage(file)}
+              initialUrl={form.bookPicture}
+              isUploading={isUploading}
+            />
+          )}
           <div className="rounded-lg overflow-hidden shadow mt-4">
             <FieldItemWithLoading
               label="Judul buku"
