@@ -107,14 +107,6 @@ export default function NewBookPage() {
 
   const isNotEmpty = useCallback((value: string) => value.trim() !== '', [])
   const maxLength = useCallback((value: string, len: number) => value.length <= len, [])
-  const isPositiveInt = useCallback((value: string) => {
-    const n = parseInt(value)
-    return !isNaN(n) && n > 0
-  }, [])
-  const isValidYear = useCallback((value: string) => {
-    const n = parseInt(value)
-    return !isNaN(n) && n >= 0
-  }, [])
   const validateAuthors = useCallback((value: string) => {
     const arr = value.split(',').map(v => v.trim())
     return (
@@ -126,8 +118,10 @@ export default function NewBookPage() {
   const errors = useMemo(() => {
     const errs: Partial<Record<keyof FormState, string>> = {}
 
-    if ((touched.title || submitAttempted) && !isNotEmpty(form.title)) errs.title = 'Judul buku tidak boleh kosong'
-    else if (form.title.length > MAX_TITLE_LENGTH) errs.title = `Judul buku tidak boleh lebih dari ${MAX_TITLE_LENGTH} karakter`
+    if ((touched.title || submitAttempted)) {
+      if (!isNotEmpty(form.title)) errs.title = 'Judul buku tidak boleh kosong'
+      else if (form.title.length > MAX_TITLE_LENGTH) errs.title = `Judul buku tidak boleh lebih dari ${MAX_TITLE_LENGTH} karakter`
+    }
 
     if ((touched.isbn || submitAttempted)) {
       if (!isNotEmpty(form.isbn)) errs.isbn = 'ISBN tidak boleh kosong'
@@ -139,14 +133,18 @@ export default function NewBookPage() {
       else if(!maxLength(form.synopsis, SYNOPSIS_MAX_LENGTH)) errs.synopsis = `Sinopsis tidak boleh lebih dari ${SYNOPSIS_MAX_LENGTH} karakter`
     }
 
+    const positifNumber = /^[1-9][0-9]*$/
     if ((touched.totalPages || submitAttempted)) {
       if (!isNotEmpty(form.totalPages)) errs.totalPages = 'Jumlah halaman tidak boleh kosong'
-      else if (!isPositiveInt(form.totalPages)) errs.totalPages = 'Jumlah halaman harus lebih dari 0'
+      else if (!positifNumber.test(form.totalPages)) errs.totalPages = 'Jumlah halaman harus lebih dari 0'
     }
 
+    const validYear = /^[1-9][0-9]{3}$/
+    const currentYear = new Date().getFullYear()
     if ((touched.publishedYear || submitAttempted)) {
       if (!isNotEmpty(form.publishedYear)) errs.publishedYear = 'Tahun terbit tidak boleh kosong'
-      else if (!isValidYear(form.publishedYear)) errs.publishedYear = 'Tahun terbit tidak valid'
+      else if (!validYear.test(form.publishedYear)) errs.publishedYear = 'Tahun terbit harus berupa angka 4 digit yang valid!'
+      else if (parseInt(form.publishedYear) > currentYear) errs.publishedYear = `Tahun terbit tidak boleh lebih dari tahun ${currentYear}!`
     }
 
     if ((touched.language || submitAttempted)) {
@@ -167,7 +165,7 @@ export default function NewBookPage() {
     if ((touched.genreId || submitAttempted) && !isNotEmpty(form.genreId)) errs.genreId = 'Genre tidak boleh kosong'
 
     return errs
-  }, [form, touched, submitAttempted, isNotEmpty, maxLength, isPositiveInt, isValidYear, validateAuthors, isValidISBN])
+  }, [form, touched, submitAttempted, isNotEmpty, maxLength, validateAuthors, isValidISBN])
 
   const isFormValid = useMemo(() => Object.keys(errors).length === 0, [errors])
 
@@ -235,7 +233,7 @@ export default function NewBookPage() {
               name="isbn"
               value={form.isbn}
               onChange={handleIsbnChange}
-              placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-0)"
+              placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-7)"
               hasError={!!errors.isbn}
               validation={errors.isbn && <TextInputError message={errors.isbn} />}
             />

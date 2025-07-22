@@ -3,21 +3,29 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import AutocompleteInput from '@/components/AutocompleteInput.tsx'
 import Tooltip from '@/components/Tooltip.tsx'
 import { Info } from 'lucide-react'
 import { getAuthors } from '@/api/authors.ts'
-import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import TextInputError from '@/components/TextInputError.tsx'
+import Alert from '@/components/Alert.tsx'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+
+const MAX_AUTHOR_NAME = 50
 
 export default function BookUpdateAuthorsPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const book = (location.state?.value || null) as BookRequestDTO | null
-  const [authorNames, setAuthorNames] = useState(book?.authorNames.join(', ') || '')
-  const [message, setMessage] = useState<string | null>(null)
+  const book = (location.state?.value) as UpdateBookRequest | null
+  const [authorNames, setAuthorNames] = useState(book?.authorNames ? book?.authorNames.join(', ') : '')
+  const [touched, setTouched] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     if (!book) {
@@ -25,37 +33,75 @@ export default function BookUpdateAuthorsPage() {
     }
   }, [book, id, navigate])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateAuthors = useCallback((value: string) => {
+    const arr = value.split(',').map(v => v.trim())
+    return (
+      arr.length > 0 &&
+      arr.every(v => v !== '' && v.length <= MAX_AUTHOR_NAME)
+    )
+  }, [])
+
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    if (!authorNames.trim()) return  'Nama penulis tidak boleh kosong'
+    else if (!validateAuthors(authorNames)) return `Setiap nama penulis harus terisi dan tidak lebih dari ${MAX_AUTHOR_NAME} karakter`
+    return ''
+  }, [authorNames, touched, submitAttempted])
+
+  const isValid = useMemo(() => errorMessage === '', [errorMessage])
+
+  const handleAuthorNamesChange = useCallback((value: string) => {
+    setAuthorNames(value)
+    setTouched(true)
+    setApiMessage('')
+    setIsSuccess(false)
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitAttempted(true)
 
-    if (!id || !book) {
-      setMessage("Data buku tidak tersedia.")
+    if (!id) {
+      setApiMessage('Data buku tidak tersedia.')
       return
     }
 
-    if (!authorNames.trim()) {
-      setMessage('Penulis tidak boleh kosong!')
-      return
-    }
+    if (!isValid) return
 
+    setIsLoading(true)
     try {
-      await updateBook(id, { ...book, authorNames: authorNames.split(',').map(name => name.trim()) })
-      setMessage('Penulis berhasil diperbarui!')
-      navigate(`/books/${id}`)
+      await updateBook(id, { authorNames: authorNames.split(',').map(name => name.trim()) })
+      setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        setApiMessage(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [authorNames, isValid, id, navigate, book])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Penulis">
+        <UpdateFieldForm
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Penulis"
+          isLoading={isLoading}
+          isValid={isValid}
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
+            />
+          )}
           <AutocompleteInput
             label={
               <div className="flex items-center">
@@ -67,9 +113,11 @@ export default function BookUpdateAuthorsPage() {
             }
             name="authorNames"
             value={authorNames}
-            onChange={setAuthorNames}
+            onChange={handleAuthorNamesChange}
             fetchSuggestions={getAuthors}
             placeholder="Masukkan nama penulis, pisahkan dengan koma"
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
             multi
           />
         </UpdateFieldForm>

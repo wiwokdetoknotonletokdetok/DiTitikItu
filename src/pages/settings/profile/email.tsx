@@ -40,7 +40,7 @@ export default function SettingsProfileEmailPage() {
     return ''
   }, [email, touched, submitAttempted, isValidEmail])
 
-  const isFormValid = useMemo(() => {
+  const isValid = useMemo(() => {
     return errorMessage === '' && isValidEmail(email)
   }, [email, isValidEmail])
 
@@ -55,7 +55,7 @@ export default function SettingsProfileEmailPage() {
     e.preventDefault()
     setSubmitAttempted(true)
 
-    if (!isFormValid) return
+    if (!isValid) return
 
     setIsLoading(true)
     try {
@@ -70,7 +70,7 @@ export default function SettingsProfileEmailPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [email, isFormValid])
+  }, [email, isValid])
 
   return (
     <PrivateRoute>
@@ -81,6 +81,7 @@ export default function SettingsProfileEmailPage() {
           onSubmit={handleSubmit}
           buttonText="Simpan"
           isLoading={isLoading}
+          isValid={isValid}
           title="Edit Email"
           info={
             <div className="text-xs text-gray-500 mt-1">

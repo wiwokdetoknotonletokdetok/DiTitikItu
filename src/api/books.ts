@@ -3,6 +3,7 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import { ApiError } from '@/exception/ApiError.ts'
 import type { BookResponseDTO } from '@/dto/BookResponseDTO'
 import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -58,7 +59,7 @@ export async function createBook(data: BookRequestDTO): Promise<void> {
   }
 }
 
-export async function updateBook(id: string, data: BookRequestDTO): Promise<void> {
+export async function updateBook(id: string, data: UpdateBookRequest): Promise<void> {
   const res = await fetch(`${BASE_URL}/books/${id}`, {
     method: 'PATCH',
     headers: {

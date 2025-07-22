@@ -8,9 +8,10 @@ interface UpdateFieldFormProps {
   info?: React.ReactNode
   isLoading?: boolean
   isSuccess?: boolean
+  isValid?: boolean
 }
 
-const UpdateFieldForm = ({ isSuccess, isLoading, children, title, onSubmit, buttonText, info }: UpdateFieldFormProps) => {
+const UpdateFieldForm = ({ isValid = true, isSuccess, isLoading, children, title, onSubmit, buttonText, info }: UpdateFieldFormProps) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">{title}</h1>
@@ -19,7 +20,7 @@ const UpdateFieldForm = ({ isSuccess, isLoading, children, title, onSubmit, butt
           {children}
           {info}
         </div>
-        <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading || isSuccess}>
+        <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading || isSuccess || !isValid}>
           {!isSuccess ? buttonText : 'Tersimpan'}
         </SubmitButton>
       </form>

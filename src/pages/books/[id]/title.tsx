@@ -3,89 +3,104 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
 import TextInput from '@/components/TextInput.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
-import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import Alert from '@/components/Alert.tsx'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
 
 export default function BookUpdateTitlePage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const book = (location.state?.value || null) as BookRequestDTO | null
+  const book = (location.state?.value) as UpdateBookRequest
   const [title, setTitle] = useState(book?.title || '')
-  const [error, setError] = useState<string | null>(null)
+  const [touched, setTouched] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!book) {
       navigate(`/books/${id}`)
     }
   }, [book, id, navigate])
 
-  const validateTitle = (title: string) => {
-    if (title.trim().length === 0) {
-      return 'Judul buku tidak boleh kosong'
-    }
-    if (title.length < 3) {
-      return 'Judul buku harus memiliki setidaknya 3 karakter'
-    }
-    if (title.length > 100) {
-      return 'Judul buku tidak boleh lebih dari 100 karakter'
-    }
-    return null
-  }
+  const validateTitle= useCallback(() => {
+    if (!title.trim()) return 'Judul buku tidak boleh kosong'
+    else if (title.length > 50) return `Judul buku tidak boleh lebih dari 50 karakter`
+    return ''
+  }, [title])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    return validateTitle()
+  }, [title, touched, submitAttempted])
+
+  const isValid = useMemo(() => errorMessage === '', [errorMessage])
+
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value)
+    setTouched(true)
+    setApiMessage('')
+    setIsSuccess(false)
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitAttempted(true)
 
-    if (!id || !book) {
-      setError("Data buku tidak tersedia.")
+    if (!id) {
+      setApiMessage('Data buku tidak tersedia.')
       return
     }
 
-    const validationError = validateTitle(title)
-    if (validationError) {
-      setError(validationError)
-      return
-    }
+    if (!isValid) return
 
-    setError(null)
-
+    setIsLoading(true)
     try {
-      await updateBook(id, { ...book, title: title })
-      console.log('Judul buku berhasil diperbarui!')
-      navigate(`/books/${id}`)
+      await updateBook(id, { title })
+      setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {
-        console.error(err.message)
+        setApiMessage(err.message)
       } else {
-        console.error('Terjadi kesalahan, coba lagi nanti.')
+        setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  }
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setTitle(value)
-
-    const validationError = validateTitle(value)
-    setError(validationError)
-  }
+  }, [title, isValid, id, navigate])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Judul Buku">
+        <UpdateFieldForm
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Judul Buku"
+          isLoading={isLoading}
+          isValid={isValid}
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
+            />
+          )}
           <TextInput
             name="title"
             label="Judul buku"
             placeholder="Masukkan judul buku"
             value={title}
             onChange={handleTitleChange}
-            hasError={error !== null}
-            validation={error ? <TextInputError message={error} /> : null}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
       </>

@@ -3,20 +3,25 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import Navbar from '@/components/Navbar.tsx'
 import { updateBook } from '@/api/books.ts'
 import { ApiError } from '@/exception/ApiError.ts'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UpdateFieldForm from '@/components/UpdateFieldForm.tsx'
-import { getGenres } from '@/api/genres.ts'
 import SelectGenre from '@/components/SelectGenre.tsx'
-import type { BookRequestDTO } from '@/dto/BookRequestDTO'
+import TextInputError from '@/components/TextInputError.tsx'
+import Alert from '@/components/Alert.tsx'
+import { getGenres } from '@/api/genres.ts'
+import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
 
 export default function BookUpdateGenresPage() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const location = useLocation()
-
-  const book = (location.state?.value || null) as BookRequestDTO | null
-  const [genreId, setGenreId] = useState<string>(book?.genreIds[0]?.toString() || '')
-  const [message, setMessage] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const book = (location.state?.value) as UpdateBookRequest
+  const [genreId, setGenreId] = useState<string>(book?.genreIds ? book?.genreIds[0]?.toString() : '')
+  const [touched, setTouched] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     if (!book) {
@@ -24,46 +29,78 @@ export default function BookUpdateGenresPage() {
     }
   }, [book, id, navigate])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const validateGenre = useCallback(() => {
+    if (!genreId || genreId.trim() === '') return 'Genre tidak boleh kosong!'
+    return ''
+  }, [genreId])
 
-    if (!id || !book) {
-      setMessage("Data buku tidak tersedia.")
+  const errorMessage = useMemo(() => {
+    if (!touched && !submitAttempted) return ''
+    return validateGenre()
+  }, [genreId, touched, submitAttempted])
+
+  const isValid = useMemo(() => errorMessage === '', [errorMessage])
+
+  const handleGenreChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setGenreId(e.target.value)
+    setTouched(true)
+    setApiMessage('')
+    setIsSuccess(false)
+  }, [])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitAttempted(true)
+
+    if (!id) {
+      setApiMessage('Data buku tidak tersedia.')
       return
     }
 
+    if (!isValid) return
+
+    setIsLoading(true)
     try {
-      console.log("The Moment of thruth")
-      await updateBook(id, {
-        ...book,
-        genreIds: [parseInt(genreId)],
-      })
-      console.log('Genre buku berhasil diperbarui!')
-      setMessage('Genre berhasil diperbarui!')
-      navigate(`/books/${id}`)
+      await updateBook(id, { genreIds: [parseInt(genreId)] })
+      setIsSuccess(true)
     } catch (err) {
-      console.error(err)
       if (err instanceof ApiError) {
-        setMessage(err.message)
+        setApiMessage(err.message)
       } else {
-        setMessage('Terjadi kesalahan, coba lagi nanti.')
+        setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [genreId, isValid, id, navigate, book])
 
   return (
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm onSubmit={handleSubmit} buttonText="Simpan" title="Edit Genre">
+        <UpdateFieldForm
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Genre"
+          isLoading={isLoading}
+          isValid={isValid}
+        >
+          {apiMessage && (
+            <Alert
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
+            />
+          )}
           <SelectGenre
             label="Genre"
             name="genre"
             value={genreId}
-            onChange={e => setGenreId(e.target.value)}
+            onChange={handleGenreChange}
             placeholder="Pilih genre"
             fetchOptions={getGenres}
           />
+          {errorMessage && <TextInputError message={errorMessage} />}
         </UpdateFieldForm>
       </>
     </PrivateRoute>
