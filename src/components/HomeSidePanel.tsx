@@ -159,7 +159,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
             <div className="flex flex-col items-center">
               <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
               <StarRating rating={book.totalRatings} size={5} />
-              <p className="text-sm text-gray-500 mt-1">{book.totalRatings} ulasan</p>
+              <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
             </div>
 
             <div className="mb-4">
