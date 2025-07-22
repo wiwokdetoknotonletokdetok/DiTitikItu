@@ -10,6 +10,9 @@ import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { Pencil } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import Modal from './Modal'
+import LoginPromptContent from './LoginPromptContent'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -34,19 +37,31 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
   const [isExpanded, setIsExpanded] = useState(false)
   const { isLoggedIn, user } = useAuth()
   const existingReview = reviews.find((r) => r.userId === user?.id)
+  const navigate = useNavigate();
+  const handleEdit = () => {
+    if (isLoggedIn()) {
+      navigate(`/books/${book.id}`);
+    } else {
+      navigate('#login-required');
+    }
+  };
 
   return (
     <div className="relative lg:w-[30%]">
       <div className="absolute top-2 right-2 z-10">
         <Tooltip message="Edit buku ini">
           <button
-            onClick={() => window.location.href = `/books/${book.id}`}
+            onClick={handleEdit}
             className="p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
             aria-label="Edit buku"
           >
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
+        <Modal hash="#login-required">
+          <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
+          <LoginPromptContent />
+        </Modal>
       </div>
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
         <Tooltip message="Tutup panel samping">
@@ -182,13 +197,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
             </div>
             <hr className="border-t border-gray-300" />
             <div className="flex flex-col">
-              {reviews.length > 0 ? (
-                <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />
-              ) : (
-                <p className="text-sm text-center text-gray-500">
-                  Belum ada ulasan tersedia untuk buku ini.
-                </p>
-              )}
+              {reviews.length > 0 && <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />}
             </div>
           </TabPanel>
         </Tab>
