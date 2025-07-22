@@ -40,6 +40,31 @@ export default function NewBookPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!form.title.trim()) return setMessage('Judul buku tidak boleh kosong')
+    if (form.title.length > 255) return setMessage('Judul buku tidak boleh lebih dari 255 karakter')
+    if (!isbn.trim()) return setMessage('ISBN tidak boleh kosong')
+    if (isbn.length > 17) return setMessage('ISBN tidak boleh lebih dari 17 karakter')
+    if (!form.synopsis.trim()) return setMessage('Sinopsis tidak boleh kosong')
+    if (!form.totalPages.trim()) return setMessage('Jumlah halaman tidak boleh kosong')
+    const totalPages = parseInt(form.totalPages)
+    if (isNaN(totalPages) || parseInt(form.totalPages) < 1) return setMessage('Jumlah halaman harus lebih dari 0')
+
+    if (!form.publishedYear.trim()) return setMessage('Tahun terbit tidak boleh kosong')
+    const publishedYear = parseInt(form.publishedYear)
+    if (isNaN(publishedYear) || publishedYear < 0) return setMessage('Tahun terbit tidak valid')
+
+    if (!language.trim()) return setMessage('Bahasa tidak boleh kosong')
+
+    if (!publisherName.trim()) return setMessage('Nama penerbit tidak boleh kosong')
+    if (publisherName.length > 50) return setMessage('Nama penerbit tidak boleh lebih dari 50 karakter')
+
+    if (!authorNames.trim()) return setMessage('Nama penulis tidak boleh kosong')
+    const authorArray = authorNames.split(',').map(a => a.trim())
+    if (authorArray.some(name => name === '')) return setMessage('Setiap nama penulis harus diisi')
+
+    if (!genreId.trim()) return setMessage('Genre tidak boleh kosong')
+      
     try {
       await createBook({
         ...form,
@@ -91,7 +116,6 @@ export default function NewBookPage() {
         <Navbar/>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Tambah Buku Baru</h1>
-          {message && <p className="mt-4 text-[#E53935] font-semibold">{message}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
             <TextInput
@@ -100,6 +124,10 @@ export default function NewBookPage() {
               value={form.title}
               onChange={handleChange}
               placeholder="Masukkan judul buku"
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <TextInput
@@ -108,6 +136,10 @@ export default function NewBookPage() {
               value={isbn}
               onChange={handleIsbnChange}
               placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-0)"
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <TextArea
@@ -116,6 +148,10 @@ export default function NewBookPage() {
               value={form.synopsis}
               onChange={handleChange}
               placeholder="Ringkas sinopsis buku"
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -125,6 +161,10 @@ export default function NewBookPage() {
                 value={form.totalPages}
                 onChange={handleChange}
                 placeholder="(misal: 100)"
+                hasError={!!message}
+                validation={message && (
+                  <p className="text-red-500 text-xs mt-1">{message}</p>
+                )}
               />
               <TextInput
                 label="Tahun terbit"
@@ -132,6 +172,10 @@ export default function NewBookPage() {
                 value={form.publishedYear}
                 onChange={handleChange}
                 placeholder="(misal: 2025)"
+                hasError={!!message}
+                validation={message && (
+                  <p className="text-red-500 text-xs mt-1">{message}</p>
+                )}
               />
             </div>
 
@@ -142,6 +186,10 @@ export default function NewBookPage() {
               onChange={setLanguage}
               fetchSuggestions={getLanguages}
               placeholder="Masukkan bahasa buku (misal: Indonesia)"
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <AutocompleteInput
@@ -151,6 +199,10 @@ export default function NewBookPage() {
               onChange={setPublisherName}
               fetchSuggestions={getPublishers}
               placeholder="Masukkan nama penerbit"
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <AutocompleteInput
@@ -168,6 +220,10 @@ export default function NewBookPage() {
               fetchSuggestions={getAuthors}
               placeholder="Masukkan nama penulis, pisahkan dengan koma"
               multi
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <SelectGenre
@@ -177,6 +233,10 @@ export default function NewBookPage() {
               onChange={e => setGenreId(e.target.value)}
               placeholder="Pilih genre"
               fetchOptions={getGenres}
+              hasError={!!message}
+              validation={message && (
+                <p className="text-red-500 text-xs mt-1">{message}</p>
+              )}
             />
 
             <SubmitButton type="submit">
