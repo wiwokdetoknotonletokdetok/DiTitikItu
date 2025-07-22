@@ -9,6 +9,7 @@ import Tooltip from '@/components/Tooltip.tsx'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
+import { Pencil } from 'lucide-react'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -36,6 +37,17 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
 
   return (
     <div className="relative lg:w-[30%]">
+      <div className="absolute top-2 right-2 z-10">
+        <Tooltip message="Edit buku ini">
+          <button
+            onClick={() => window.location.href = `/books/${book.id}`}
+            className="p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+            aria-label="Edit buku"
+          >
+            <Pencil size={16} className="text-gray-600" />
+          </button>
+        </Tooltip>
+      </div>
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
         <Tooltip message="Tutup panel samping">
           <button
@@ -56,6 +68,7 @@ export default function HomeSidePanel({ onUpdateLocations, onUpdateReviews, onSa
       >
 
         <div className="relative group w-full mb-4 rounded overflow-hidden">
+
           <img
             src={book.bookPicture}
             alt={book.title}
