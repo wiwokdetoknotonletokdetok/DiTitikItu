@@ -11,6 +11,7 @@ import { logoutUser } from '@/api/logoutUser.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import { useNavigate } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
+import SettingsHeader from '@/components/SettingsHeader.tsx'
 
 function SettingsPage() {
   const { token, logout } = useAuth()
@@ -35,7 +36,9 @@ function SettingsPage() {
       <div>
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Pengaturan</h1>
+          <SettingsHeader>
+            Pengaturan
+          </SettingsHeader>
           <div className="space-y-4">
 
             <SettingsItem

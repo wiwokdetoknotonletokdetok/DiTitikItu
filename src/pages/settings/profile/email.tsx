@@ -77,6 +77,7 @@ export default function SettingsProfileEmailPage() {
       <>
         <Navbar />
         <UpdateFieldForm
+          to="/settings/profile"
           isSuccess={isSuccess}
           onSubmit={handleSubmit}
           buttonText="Simpan"

@@ -79,6 +79,7 @@ export default function BookUpdateTitlePage() {
       <>
         <Navbar />
         <UpdateFieldForm
+          to={`/books/${id}`}
           isSuccess={isSuccess}
           onSubmit={handleSubmit}
           buttonText="Simpan"

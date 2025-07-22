@@ -1,4 +1,5 @@
 import SubmitButton from '@/components/SubmitButton.tsx'
+import SettingsHeader from '@/components/SettingsHeader.tsx'
 
 interface UpdateFieldFormProps {
   title: string
@@ -9,12 +10,15 @@ interface UpdateFieldFormProps {
   isLoading?: boolean
   isSuccess?: boolean
   isValid?: boolean
+  to?: string
 }
 
-const UpdateFieldForm = ({ isValid = true, isSuccess, isLoading, children, title, onSubmit, buttonText, info }: UpdateFieldFormProps) => {
+const UpdateFieldForm = ({ to, isValid = true, isSuccess, isLoading, children, title, onSubmit, buttonText, info }: UpdateFieldFormProps) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">{title}</h1>
+      <SettingsHeader to={to}>
+        {title}
+      </SettingsHeader>
       <form className="max-w-md space-y-4" onSubmit={onSubmit}>
         <div>
           {children}

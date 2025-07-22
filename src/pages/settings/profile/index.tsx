@@ -7,6 +7,7 @@ import { getUserProfile } from '@/api/getUserProfile.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
+import SettingsHeader from '@/components/SettingsHeader.tsx'
 
 export default function SettingsProfilePage() {
   const { user } = useAuth()
@@ -41,7 +42,9 @@ export default function SettingsProfilePage() {
       <div>
         <Navbar/>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Profil</h1>
+          <SettingsHeader to="/settings">
+            Profil
+          </SettingsHeader>
           <div className="rounded-lg overflow-hidden shadow mt-4">
             <FieldItemWithLoading
               label="Email"

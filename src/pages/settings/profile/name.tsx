@@ -70,6 +70,7 @@ export default function SettingsProfileNamePage() {
       <>
         <Navbar />
         <UpdateFieldForm
+          to="/settings/profile"
           isSuccess={isSuccess}
           onSubmit={handleSubmit}
           buttonText="Simpan"

@@ -5,6 +5,7 @@ import { deleteRecommendationsBooks } from '@/api/recommendationsBooks.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
 import { ApiError } from '@/exception/ApiError.ts'
 import TextInputError from '@/components/TextInputError.tsx'
+import SettingsHeader from '@/components/SettingsHeader.tsx'
 
 function SettingsPreferencesRecommendationsPage() {
   const { token } = useAuth()
@@ -35,7 +36,9 @@ function SettingsPreferencesRecommendationsPage() {
       <div>
         <Navbar/>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Reset Rekomendasi</h1>
+          <SettingsHeader to="/settings/preferences">
+            Reset Rekomendasi
+          </SettingsHeader>
           <p className="text-gray-700 mb-4 text-base">
             Dengan mereset rekomendasi, kami akan menghapus data preferensi dan riwayat aktivitas Anda yang digunakan
             untuk memberikan rekomendasi buku.
