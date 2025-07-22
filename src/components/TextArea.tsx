@@ -9,9 +9,10 @@ interface TextInputProps {
   onBlur?: () => void
   validation?: React.ReactNode
   hasError?: boolean
+  heightClassName?: string
 }
 
-const TextArea: React.FC<TextInputProps> = ({ onBlur, label, name, value, onChange, placeholder, onFocus, className, validation, hasError }) => {
+const TextArea: React.FC<TextInputProps> = ({ heightClassName, onBlur, label, name, value, onChange, placeholder, onFocus, className, validation, hasError }) => {
   return (
     <div className={className}>
       <label className="mb-1 block text-sm font-medium text-gray-700 " htmlFor={name}>{label}</label>
@@ -19,8 +20,9 @@ const TextArea: React.FC<TextInputProps> = ({ onBlur, label, name, value, onChan
         name={name}
         id={name}
         placeholder={placeholder}
-        className={`h-40 resize-none text-sm w-full border rounded-md py-2 px-3 outline-none placeholder:text-sm
-          ${hasError ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-[#1E497C]'}`}
+        className={`block resize-none text-sm w-full border rounded-md py-2 px-3 outline-none placeholder:text-sm
+          ${hasError ? 'border-red-500 focus:border-red-600' : 'border-gray-300 focus:border-[#1E497C]'}
+          ${!heightClassName ? 'h-40': heightClassName}`}
         value={value}
         onChange={onChange}
         onFocus={onFocus}
