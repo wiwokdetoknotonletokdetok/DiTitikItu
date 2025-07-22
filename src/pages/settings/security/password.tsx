@@ -15,8 +15,9 @@ import type { UpdatePasswordRequest } from '@/dto/UpdatePasswordRequest.ts'
 function SettingsSecurityPasswordPage() {
   const { token } = useAuth()
   const [submitAttempted, setSubmitAttempted] = useState(false)
-  const [apiMessage, setApiMessage] = useState<{message: string, type: 'error' | 'success'}>({message: '', type: 'error'})
+  const [apiMessage, setApiMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const [form, setForm] = useState<UpdatePasswordRequest>({
     currentPassword: '',
@@ -69,7 +70,8 @@ function SettingsSecurityPasswordPage() {
     (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm(prev => ({ ...prev, [key]: e.target.value }))
       setTouched(prev => ({ ...prev, [key]: true }))
-      setApiMessage({message: '', type: 'error'})
+      setApiMessage('')
+      setIsSuccess(false)
     }, []
   )
 
@@ -84,7 +86,6 @@ function SettingsSecurityPasswordPage() {
 
       try {
         await authPassword(form, token)
-        setApiMessage({message: 'Kata sandi berhasil diubah.', type: 'success'})
         setSubmitAttempted(false)
         setTouched({
           currentPassword: false,
@@ -96,10 +97,11 @@ function SettingsSecurityPasswordPage() {
           newPassword: '',
           confirmNewPassword: ''
         })
+        setIsSuccess(true)
       } catch (err) {
-        if (err instanceof ApiError) setApiMessage({message: err.message, type: 'error'})
+        if (err instanceof ApiError) setApiMessage(err.message)
         else {
-          setApiMessage({message: 'Terjadi kesalahan. Silakan coba lagi.', type: 'error'})
+          setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
         }
       } finally {
         setIsLoading(false)
@@ -119,9 +121,9 @@ function SettingsSecurityPasswordPage() {
           <div className="max-w-md">
             {apiMessage && (
               <Alert
-                message={apiMessage.message}
-                type={apiMessage.type}
-                onClose={() => setApiMessage({message: '', type: 'error'})}
+                message={apiMessage}
+                type="error"
+                onClose={() => setApiMessage('')}
               />
             )}
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -182,8 +184,8 @@ function SettingsSecurityPasswordPage() {
                 validation={errors.confirmNewPassword && <TextInputError message={errors.confirmNewPassword} />}
               />
 
-              <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
-                Ubah kata sandi
+              <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading || isSuccess}>
+                {!isSuccess ? 'Ubah kata sandi' : 'Tersimpan'}
               </SubmitButton>
             </form>
 

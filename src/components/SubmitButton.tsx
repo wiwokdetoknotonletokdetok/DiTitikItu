@@ -22,7 +22,7 @@ const SubmitButton: React.FC<SumbitButtonProps> = ({
       onClick={onClick}
       className={`w-full h-[42px] bg-[#1E497C] text-white rounded-md hover:bg-[#5C8BC1] 
       text-sm font-semibold tracking-wide transition duration-200 ease-in-out ${className} 
-      ${isLoading ? 'bg-[#5C8BC1]' : null} ${disabled ? 'cursor-not-allowed' : null}`}
+      ${disabled ? 'bg-[#5C8BC1] cursor-not-allowed' : null}`}
     >
       {isLoading ? 'Memproses...' : children}
     </button>

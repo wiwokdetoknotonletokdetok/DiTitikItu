@@ -19,7 +19,8 @@ export default function SettingsProfileNamePage() {
   const [touched, setTouched] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [apiMessage, setApiMessage] = useState<{message: string, type: 'error' | 'success'}>({message: '', type: 'error'})
+  const [apiMessage, setApiMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     if (!location.state?.value) {
@@ -39,7 +40,8 @@ export default function SettingsProfileNamePage() {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value)
     setTouched(true)
-    setApiMessage({message: '', type: 'error'})
+    setApiMessage('')
+    setIsSuccess(false)
   }, [])
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -51,12 +53,12 @@ export default function SettingsProfileNamePage() {
     setIsLoading(true)
     try {
       await patchUsersMe({ name }, token)
-      setApiMessage({message: 'Nama berhasil diubah.', type: 'success'})
+      setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {
-        setApiMessage({message: err.message, type: 'error'})
+        setApiMessage(err.message)
       } else {
-        setApiMessage({message: 'Terjadi kesalahan. Silakan coba lagi.', type: 'error'})
+        setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
       }
     } finally {
       setIsLoading(false)
@@ -68,6 +70,7 @@ export default function SettingsProfileNamePage() {
       <>
         <Navbar />
         <UpdateFieldForm
+          isSuccess={isSuccess}
           onSubmit={handleSubmit}
           buttonText="Simpan"
           title="Edit Nama"
@@ -80,9 +83,9 @@ export default function SettingsProfileNamePage() {
         >
           {apiMessage && (
             <Alert
-              type={apiMessage.type}
-              message={apiMessage.message}
-              onClose={() => setApiMessage({message: '', type: 'error'})}
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
             />
           )}
           <TextInput
