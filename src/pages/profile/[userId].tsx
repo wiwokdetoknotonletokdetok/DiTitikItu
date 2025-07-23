@@ -159,7 +159,7 @@ function UserProfilePage() {
   return (
     <div className="px-4 bg-[#FAFAFA] min-h-screen">
       <Navbar/>
-      <div className="flex h-[85vh] w-screen gap-4 max-w-7xl mx-auto">
+      <div className="flex flex-col lg:flex-row gap-4 max-w-7xl w-full mx-auto">
         <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
           <div className={`flex flex-col md:flex-row gap-8 items-center ${profile.bio ? 'md:items-start' : ''}`}>
             <img
@@ -197,7 +197,7 @@ function UserProfilePage() {
           )}
 
           <div className="mt-10 border-t pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-8">
+          <div className="flex flex-row flex-wrap justify-around text-center gap-6 mb-8">
             <div
               onClick={profile.followers > 0 ? () => navigate('#followers') : undefined}
               className={`cursor-pointer group ${profile.followers === 0 ? 'pointer-events-none opacity-50' : ''}`}
@@ -240,7 +240,7 @@ function UserProfilePage() {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-16">
             <h3 className="text-lg font-semibold mb-4 text-left px-1">Koleksi</h3>
             {books.length === 0 ? (
               <p className="text-gray-500 px-1">Belum ada buku.</p>
@@ -270,7 +270,7 @@ function UserProfilePage() {
           onConfirm={handleRemove}
           onCancel={() => setPendingDelete(null)}
         />
-        <div className="w-80 rounded-3xl shadow-lg overflow-y-auto bg-white">
+        <div className="w-full lg:w-80 mt-4 lg:mt-0 rounded-3xl shadow-lg overflow-y-auto bg-white">
           <div className="sticky top-0 bg-white z-10 p-6 border-b">
             <h2 className="text-xl font-semibold text-center">Peringkat</h2>
           </div>
