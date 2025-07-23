@@ -13,22 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t dititikitu:latest .
-
-      - name: Save Docker image to file
-        run: docker save dititikitu:latest -o dititikitu.tar
-
       - name: Create .env file from secrets
         run: |
           cat <<EOF > .env
           VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
           EOF
 
+      - name: Build Docker image
+        run: docker build -t dititikitu:latest .
+
+      - name: Save Docker image to file
+        run: docker save dititikitu:latest -o dititikitu.tar
+
       - name: Prepare deploy files
         run: |
           mkdir dititikitu
-          mv dititikitu.tar .env docker-compose.yml dititikitu/
+          mv dititikitu.tar docker-compose.yml dititikitu/
 
       - name: Copy Docker image and .env to server
         uses: appleboy/scp-action@v0.1.4

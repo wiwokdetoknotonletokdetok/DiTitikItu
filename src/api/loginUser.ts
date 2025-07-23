@@ -3,7 +3,7 @@ import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function loginUser(loginUserRequest: LoginUserRequest): Promise<WebResponse<LoginUserResponse>> {
   const res = await fetch(`${BASE_URL}/auth/login`, {

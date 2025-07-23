@@ -6,5 +6,3 @@ services:
     container_name: dititikitu
     ports:
       - "127.0.0.1:5173:80"
-    env_file:
-      - .env
