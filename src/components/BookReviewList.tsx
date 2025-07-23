@@ -64,7 +64,7 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   }
 
 const showPreviewTimeout = useRef<NodeJS.Timeout | null>(null)
-  // Handler untuk hover pada review
+
 const handleReviewMouseEnter = (e: React.MouseEvent, review: ReviewWithUserDTO) => {
   if (hoverTimeout.current) {
     clearTimeout(hoverTimeout.current)
@@ -97,7 +97,6 @@ const handleReviewMouseEnter = (e: React.MouseEvent, review: ReviewWithUserDTO) 
   }
   if (y < 10) y = 10
 
-  // Delay muncul modal 300ms
   showPreviewTimeout.current = setTimeout(() => {
     setModalPosition({ x, y })
     setPreviewUser(review)
@@ -255,8 +254,7 @@ const handleReviewMouseLeave = () => {
         ))}
         
         {error && <p className="text-red-500 mt-2">{error}</p>}
-
-        {/* Modal Preview User */}
+        
         {previewUser && modalPosition && (
           <div
             className="absolute z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-64 max-h-64 overflow-hidden transition-opacity"
@@ -267,7 +265,6 @@ const handleReviewMouseLeave = () => {
             onMouseEnter={handleModalMouseEnter}
             onMouseLeave={handleModalMouseLeave}
           >
-            {/* Header: Foto dan Nama */}
             <div className="flex items-center gap-3 mb-2">
               <img
                 src={previewUser.profilePicture}
@@ -280,7 +277,6 @@ const handleReviewMouseLeave = () => {
               </div>
             </div>
 
-            {/* Bio */}
             <p className="text-xs italic text-gray-600 mb-2 line-clamp-2">
               {previewUser.bio || 'Tidak ada bio'}
             </p>
