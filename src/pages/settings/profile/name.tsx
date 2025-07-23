@@ -11,7 +11,7 @@ import { patchUsersMe } from '@/api/usersMe.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 
 export default function SettingsProfileNamePage() {
-  const { token } = useAuth()
+  const { token, updateUser } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const value = location.state?.value
@@ -53,6 +53,7 @@ export default function SettingsProfileNamePage() {
     setIsLoading(true)
     try {
       await patchUsersMe({ name }, token)
+      updateUser({ name })
       setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {

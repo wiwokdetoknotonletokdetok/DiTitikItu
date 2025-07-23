@@ -11,17 +11,19 @@ import ToContentButton from '@/components/ToContentButton'
 import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '@/components/Navbar.tsx'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import Modal from '@/components/Modal.tsx'
-import TextInput from '@/components/TextInput.tsx'
-import SubmitButton from '@/components/SubmitButton.tsx'
 import BookToolbar from '@/components/BookToolbar.tsx'
 import LocateMeButton from '@/components/LocateMebutton.tsx'
-import {fetchBookLocations} from "@/api/bookLocation.ts";
+import { fetchBookLocations } from '@/api/bookLocation.ts'
+import LocationForm from '@/components/LocationForm.tsx'
+import { Check, X } from 'lucide-react'
+import Tooltip from '@/components/Tooltip.tsx'
 
 export default function Home() {
+  const { id: bookId } = useParams<{ id: string }>()
   const [userPosition, setUserPosition] = useState<UserPosition>()
   const navigate = useNavigate()
   const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
@@ -35,6 +37,12 @@ export default function Home() {
   const [newMarkerPosition, setNewMarkerPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
   const [flyTrigger, setFlyTrigger] = useState(0)
+
+  useEffect(() => {
+    if (bookId && (!selectedBook || selectedBook.id !== bookId)) {
+      handleSelectBook(bookId)
+    }
+  }, [bookId])
 
   function handleFlyTo() {
     setFlyTrigger(prev => prev + 1)
@@ -72,6 +80,10 @@ export default function Home() {
   }, [])
 
   const handleSelectBook = async (bookId: string) => {
+    if (window.location.pathname !== `/${bookId}`) {
+      navigate(`/${bookId}`)
+    }
+
     setLoadingBook(true)
     try {
       const bookDetail = await getBooksId(bookId)
@@ -115,8 +127,8 @@ export default function Home() {
       })
       navigate(-1)
       setLocationName('')
+      await refreshLocations(selectedBook!.id)
       setNewMarkerPosition(null)
-      refreshLocations(selectedBook!.id)
     } catch (err) {
       setLocationName('')
       setNewMarkerPosition(null)
@@ -148,58 +160,83 @@ export default function Home() {
 
         <div className="mb-6 flex flex-col lg:flex-row gap-4">
           <div className={`transition-all duration-500 ${selectedBook ? 'lg:w-[70%]' : 'lg:w-full'}`}>
-            {userPosition && (
-              <MapsView
-                selectedBook={selectedBook}
-                userPosition={userPosition}
-                bookLocations={selectedBookLocations}
-                flyToLocation={flyToLocation}
-                flyToTrigger={flyTrigger}
-                newMarkerPosition={newMarkerPosition}
-                onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
-                onRefreshLocations={() => {
-                  if (selectedBook?.id) {
-                    refreshLocations(selectedBook.id)
-                  }
-                }}
-              >
-                <>
-                  <BookToolbar onSelectBook={handleSelectBook} />
-                  <LocateMeButton
-                    onClick={() => {
-                      if (userPosition) {
-                        setFlyToLocation({
-                          latitude: userPosition.latitude,
-                          longitude: userPosition.longitude
-                        })
-                        handleFlyTo()
-                      }
-                    }}
-                  />
-                </>
-              </MapsView>
-            )}
+            <MapsView
+              selectedBook={selectedBook}
+              userPosition={userPosition}
+              bookLocations={selectedBookLocations}
+              flyToLocation={flyToLocation}
+              flyToTrigger={flyTrigger}
+              newMarkerPosition={newMarkerPosition}
+              onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
+              onRefreshLocations={() => {
+                if (selectedBook?.id) {
+                  refreshLocations(selectedBook.id)
+                }
+              }}
+            >
+              <>
+                <BookToolbar onSelectBook={handleSelectBook} />
+                <LocateMeButton
+                  onClick={() => {
+                    if (userPosition) {
+                      setFlyToLocation({
+                        latitude: userPosition.latitude,
+                        longitude: userPosition.longitude
+                      })
+                      handleFlyTo()
+                    }
+                  }}
+                />
+                {newMarkerPosition && (
+                  <div className="absolute z-[2001] top-2.5 right-2.5">
+                    <div className="flex justify-between space-x-2">
+                      <Tooltip message="Simpan lokasi">
+                        <button
+                          type="button"
+                          onClick={() => navigate('#locations')}
+                          className="w-[46px] h-[46px] rounded-full bg-[#1E497C] text-white hover:bg-[#5C8BC1] shadow-md flex items-center justify-center transition-colors"
+                        >
+                          <Check/>
+                        </button>
+                      </Tooltip>
+                      <Tooltip message="Batalkan">
+                        <button
+                          onClick={() => {
+                            setNewMarkerPosition(null)
+                            setLocationName('')
+                          }}
+                          className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white shadow-md flex items-center justify-center border border-gray-300 transition-colors"
+                        >
+                          <X />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                )}
+              </>
+            </MapsView>
           </div>
 
           {loadingBook ? (
             <p className="text-sm text-gray-500">Memuat detail buku...</p>
           ) : selectedBook && (
-              <HomeSidePanel
-                book={selectedBook}
-                locations={selectedBookLocations}
-                reviews={reviews}
-                onClose={() => {
-                  setSelectedBook(null)
-                  setSelectedBookLocations([])
-                }}
-                onAddLocationClick={() => {
-                  if (userPosition) {
-                    setNewMarkerPosition({ lat: userPosition.latitude, lng: userPosition.longitude })
-                    setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
-                    handleFlyTo()
-                  }
-                }}
-                newMarkerPosition={newMarkerPosition}
+            <HomeSidePanel
+              book={selectedBook}
+              locations={selectedBookLocations}
+              reviews={reviews}
+              onClose={() => {
+                setSelectedBook(null)
+                setSelectedBookLocations([])
+                navigate('/')
+              }}
+              onAddLocationClick={() => {
+                if (userPosition) {
+                  setNewMarkerPosition({lat: userPosition.latitude, lng: userPosition.longitude})
+                  setFlyToLocation({latitude: userPosition.latitude, longitude: userPosition.longitude})
+                  handleFlyTo()
+                }
+              }}
+              newMarkerPosition={newMarkerPosition}
                 onCancelAddLocation={() => {
                   setNewMarkerPosition(null)
                   setLocationName('')
@@ -223,20 +260,11 @@ export default function Home() {
           />
         </div>
         <Modal hash="#locations">
-          <form onSubmit={handleNewLocation}>
-            <TextInput
-              label="Nama lokasi"
-              name="location"
-              value={locationName}
-              onChange={(e) => {
-                setLocationName(e.target.value)
-              }}
-              placeholder="Masukkann nama lokasi"
-            />
-            <SubmitButton type="submit">
-              Simpan
-            </SubmitButton>
-          </form>
+          <LocationForm
+            onSubmit={handleNewLocation}
+            locationName={locationName}
+            setLocationName={setLocationName}
+          />
         </Modal>
       </div>
     </div>

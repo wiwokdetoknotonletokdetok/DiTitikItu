@@ -5,6 +5,8 @@ import StarRatingInput from '@/components/StarRatingInput'
 import { ApiError } from '@/exception/ApiError'
 import { useAuth } from '@/context/AuthContext.tsx'
 import { Link } from 'react-router-dom'
+import { useRef } from 'react'
+
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -16,6 +18,7 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   const { user } = useAuth()
   const myReview = reviews.find((r) => r.userId === user?.id)
   const otherReviews = reviews.filter((r) => r.userId !== user?.id)
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (myReview) {
@@ -28,7 +31,8 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   const [editMessage, setEditMessage] = useState(myReview?.message || '')
   const [editRating, setEditRating] = useState(myReview?.rating || 0)
   const [error, setError] = useState<string | null>(null)
-  
+  const [previewUser, setPreviewUser] = useState<ReviewWithUserDTO | null>(null)
+  const [modalPosition, setModalPosition] = useState<{ x: number; y: number } | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -59,21 +63,82 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
     }
   }
 
+const showPreviewTimeout = useRef<NodeJS.Timeout | null>(null)
+
+const handleReviewMouseEnter = (e: React.MouseEvent, review: ReviewWithUserDTO) => {
+  if (hoverTimeout.current) {
+    clearTimeout(hoverTimeout.current)
+  }
+  if (showPreviewTimeout.current) {
+    clearTimeout(showPreviewTimeout.current)
+  }
+
+  const target = e.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const containerRect = target.closest('.relative')?.getBoundingClientRect()
+  if (!containerRect) return
+
+  const modalWidth = 256
+  const modalHeight = 192
+
+  let x = rect.left - containerRect.left + rect.width + 8
+  let y: number
+
+  const isMyReview = review.userId === user?.id
+  if (isMyReview) {
+    y = rect.top - containerRect.top - modalHeight - 10
+  } else {
+    y = rect.top - containerRect.top - 10
+  }
+
+  if (x < 10) x = 10
+  if (x + modalWidth > containerRect.width - 10) {
+    x = containerRect.width - modalWidth - 10
+  }
+  if (y < 10) y = 10
+
+  showPreviewTimeout.current = setTimeout(() => {
+    setModalPosition({ x, y })
+    setPreviewUser(review)
+  }, 300)
+}
+
+
+const handleReviewMouseLeave = () => {
+  if (hoverTimeout.current) {
+    clearTimeout(hoverTimeout.current)
+  }
+  if (showPreviewTimeout.current) {
+    clearTimeout(showPreviewTimeout.current)
+  }
+
+  hoverTimeout.current = setTimeout(() => {
+    setPreviewUser(null)
+    setModalPosition(null)
+  }, 300)
+}
+
+  const handleModalMouseEnter = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current)
+    }
+  }
+
+  const handleModalMouseLeave = () => {
+    setPreviewUser(null)
+    setModalPosition(null)
+  }
+
   return (
-      <div>
-        {reviews.length === 0 && (
-          <p className="text-sm text-center text-gray-500 pt-2">
-            Belum ada ulasan tersedia untuk buku ini.
-          </p>
-        )}
+      <div className="relative">
         {myReview && (
           <div className="pt-3 mb-3">
             <div className="flex items-center gap-2 mb-1">
-            <Link to={`/profile/${myReview.userId}`}>
+              <Link to={`/profile/${myReview.userId}`}>
                 <img
                   src={myReview.profilePicture}
                   alt={myReview.name}
-                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
                 />
               </Link>
               <span>
@@ -149,13 +214,20 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
         )}
 
         {otherReviews.map((r, i) => (
-          <div key={i} className="pt-3 mt-3 border-gray-300">
-            <div className="flex items-center gap-2 mb-1">
+          <div
+            key={i}
+            className="pt-3 mt-3 border-gray-300 hover:bg-gray-50 rounded-md p-2 transition-colors"
+          >
+            <div
+              className="inline-flex items-center gap-2 mb-1 cursor-pointer"
+              onMouseEnter={(e) => handleReviewMouseEnter(e, r)}
+              onMouseLeave={handleReviewMouseLeave}
+            >
               <Link to={`/profile/${r.userId}`}>
                 <img
                   src={r.profilePicture}
                   alt={r.name}
-                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
                 />
               </Link>
               <span>
@@ -181,7 +253,36 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
           </div>
         ))}
         {error && <p className="text-red-500 mt-2">{error}</p>}
-    </div>
+        {previewUser && modalPosition && (
+          <Link to={`/profile/${previewUser.userId}`}>
+            <div
+              className="absolute z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-64 max-h-64 overflow-hidden transition-opacity"
+              style={{
+                top: modalPosition.y,
+                left: modalPosition.x,
+              }}
+              onMouseEnter={handleModalMouseEnter}
+              onMouseLeave={handleModalMouseLeave}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <img
+                  src={previewUser.profilePicture}
+                  alt={previewUser.name}
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-[#1C2C4C]">{previewUser.name}</p>
+                  <p className="text-xs text-gray-500">{previewUser.points} poin</p>
+                </div>
+              </div>
+
+              <p className="text-xs italic text-gray-600 mb-2 line-clamp-2">
+                {previewUser.bio || 'Tidak ada bio'}
+              </p>
+            </div>
+          </Link>
+        )}
+      </div>
   )
 }
 
