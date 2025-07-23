@@ -186,7 +186,7 @@ export default function NewBookPage() {
 
       setIsLoading(true)
       try {
-        await createBook({
+        const bookId = await createBook({
           title: form.title,
           isbn: form.isbn.replace(/-/g, ''),
           synopsis: form.synopsis,
@@ -198,7 +198,7 @@ export default function NewBookPage() {
           genreIds: [parseInt(form.genreId)],
           bookPicture: 'https://placehold.co/300x450?text=Book'
         })
-        navigate('/')
+        navigate(`/books/${bookId}`)
       } catch (err) {
         if (err instanceof ApiError) setApiMessage(err.message)
         else setApiMessage('Terjadi kesalahan. Silakan coba lagi.')
