@@ -234,9 +234,9 @@ function UserProfilePage() {
           </div>
 
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4 text-left px-1">Koleksi Buku</h3>
+            <h3 className="text-lg font-semibold mb-4 text-left px-1">Koleksi</h3>
             {books.length === 0 ? (
-              <p className="text-gray-500 px-1">Belum ada buku dalam koleksi.</p>
+              <p className="text-gray-500 px-1">Belum ada buku.</p>
             ) : (
               <div className="overflow-x-auto px-1">
                 <div className="inline-flex gap-4 w-max">
