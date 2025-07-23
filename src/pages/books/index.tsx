@@ -167,7 +167,18 @@ export default function NewBookPage() {
     return errs
   }, [form, touched, submitAttempted, isNotEmpty, maxLength, validateAuthors, isValidISBN])
 
-  const isFormValid = useMemo(() => Object.keys(errors).length === 0, [errors])
+  const isFormValid = useMemo(() =>
+    Object.keys(errors).length === 0
+    && form.title !== ''
+    && form.isbn !== ''
+    && form.synopsis !== ''
+    && form.totalPages !== ''
+    && form.publishedYear !== ''
+    && form.language !== ''
+    && form.publishedYear !== ''
+    && form.genreId !== '',
+    [errors, form]
+  )
 
   const handleChange = useCallback(
     (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -314,7 +325,7 @@ export default function NewBookPage() {
               validation={errors.genreId && <TextInputError message={errors.genreId} />}
             />
 
-            <SubmitButton type="submit" isLoading={isLoading} disabled={!isFormValid || isLoading}>
+            <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
               Simpan buku
             </SubmitButton>
           </form>
