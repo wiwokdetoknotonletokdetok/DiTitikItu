@@ -2,8 +2,6 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import BookCard from '@/components/BookCard'
 import { useEffect, useState } from 'react'
 import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
-import { addBookToCollection } from '@/api/collections'
-import toast from 'react-hot-toast'
 
 type Props = {
   onSelectBook: (id: string) => void
@@ -39,16 +37,6 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
             key={book.id}
             book={book}
             onClick={() => onSelectBook(book.id)}
-            showAddToCollectionButton
-            onAddToCollection={async (bookId) => {
-              try {
-                await addBookToCollection(bookId)
-                toast.success('Buku berhasil ditambahkan ke koleksi!')
-              } catch (error) {
-                console.error(error)
-                toast.error('Gagal menambahkan buku ke koleksi.')
-              }
-            }}
           />
         ))
       )}

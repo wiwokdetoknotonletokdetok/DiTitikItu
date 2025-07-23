@@ -11,7 +11,7 @@ export default function FlyToLocation({ latitude, longitude, trigger }: FlyToLoc
   const map = useMap()
 
   useEffect(() => {
-    map.flyTo([latitude, longitude], 16, {
+    map.flyTo([latitude, longitude], 18, {
       duration: 1.5
     })
   }, [trigger, map])

@@ -1,5 +1,6 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
-import { Plus, X } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
 
 interface Props {
   book: BookSummaryDTO
@@ -57,12 +58,13 @@ export default function BookCard({
             e.stopPropagation()
             onRemove?.()
           }}
-          className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 z-10 flex items-center space-x-1"
+          title="Hapus dari koleksi"
+          className="absolute top-2 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
         >
-          <X size={14} />
-          <span>Hapus</span>
+          <BookmarkSolid className="w-6 h-6" />
         </button>
       )}
+
     </div>
   )
 }
