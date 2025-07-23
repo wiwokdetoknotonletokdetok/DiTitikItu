@@ -104,7 +104,7 @@ function UserProfilePage() {
 
   if (loading) {
     return (
-      <div>
+      <div className="px-4 bg-[#FAFAFA] min-h-screen">
         <Navbar />
         <UserProfilePageSkeleton />
       </div>
@@ -115,9 +115,9 @@ function UserProfilePage() {
   if (!profile || !userId) return <p>User profile tidak ditemukan.</p>
 
   return (
-    <div>
+    <div className="px-4 bg-[#FAFAFA] min-h-screen">
       <Navbar/>
-      <div className="flex h-screen w-screen p-8 gap-4 bg-gray-50">
+      <div className="flex h-[85vh] w-screen gap-4 max-w-7xl mx-auto">
         <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
           <div className={`flex flex-col md:flex-row gap-8 items-center ${profile.bio ? 'md:items-start' : ''}`}>
             <img
@@ -208,7 +208,7 @@ export default UserProfilePage
 
 function UserProfilePageSkeleton() {
   return (
-    <div className="flex h-screen w-screen p-8 gap-4 bg-gray-50 animate-pulse">
+    <div className="flex h-[85vh] w-screen gap-4 max-w-7xl mx-auto bg-gray-50 animate-pulse">
       <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
           <div className="rounded-full w-36 h-36 bg-gray-200"/>

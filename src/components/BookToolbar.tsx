@@ -25,7 +25,7 @@ export default function BookToolbar({ onSelectBook }: BookToolbarProps) {
   return (
     <div className="absolute z-[2001] top-2.5 left-2.5 max-w-md w-full">
       <div className="flex items-center space-x-2">
-        <div className="flex-1">
+        <div className="flex-1 z-[2001]">
           <LiveSearch onSelectBook={onSelectBook}/>
         </div>
         <Tooltip message="Tambah buku baru">
