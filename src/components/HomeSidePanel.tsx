@@ -51,7 +51,6 @@ export default function HomeSidePanel({
   const [isExpanded, setIsExpanded] = useState(false)
 
   const { isLoggedIn, user } = useAuth()
-  const existingReview = reviews.find((r) => r.userId === user?.id)
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false)
 
@@ -112,7 +111,7 @@ const handleRemoveFromCollection = async () => {
 
   return (
     <div className="relative lg:w-[30%]">
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-2 right-2 z-10  px-4">
         <Tooltip message="Edit buku ini">
           <button
             onClick={handleEdit}
@@ -122,6 +121,10 @@ const handleRemoveFromCollection = async () => {
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
+        <Modal hash="#edit">
+          <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
+          <LoginPromptContent/>
+        </Modal>
       </div>
       
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
@@ -141,7 +144,8 @@ const handleRemoveFromCollection = async () => {
       <div
         className="transition-all duration-500 transform translate-x-0 opacity-100 bg-white rounded p-4 shadow relative"
         style={{maxHeight: '85vh', overflowY: 'auto'}}
-      ><div className="relative group w-full mb-4 rounded overflow-hidden">
+      >
+        <div className="relative group w-full mb-4 rounded overflow-hidden">
           <img
             src={book.bookPicture}
             alt={book.title}
@@ -164,7 +168,7 @@ const handleRemoveFromCollection = async () => {
 
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
-          <div className="z-[2001]">
+          <div className="flex items-center px-4">
             <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
               <button
                 onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
@@ -252,10 +256,8 @@ const handleRemoveFromCollection = async () => {
                   <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
                 </div>
 
-                <div className="mb-4">
-                  {isLoggedIn() && !existingReview && (
-                    <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
-                )}
+              <div className="mb-4">
+                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
               </div>
               
               <hr className="border-t border-gray-300 mb-4" />
@@ -270,10 +272,6 @@ const handleRemoveFromCollection = async () => {
           </Tab>
         </div>
       </div>
-      <Modal hash="#login-required">
-        <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
-        <LoginPromptContent />
-      </Modal>
     </div>
   )
 }

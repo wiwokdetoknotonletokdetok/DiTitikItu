@@ -74,11 +74,10 @@ export default function SettingsProfilePage() {
     try {
       await deleteProfilePicture(token)
 
-      // Ambil ulang data user
       if (user?.id) {
         const res: WebResponse<UserProfileResponse> = await getUserProfile(user.id)
         setPhotoUrl(res.data.profilePicture)
-        updateUser({ ...user, profilePicture: res.data.profilePicture }) // 🔄 sync ke context
+        updateUser({ ...user, profilePicture: res.data.profilePicture })
       }
     } catch (e) {
       console.error("Gagal menghapus foto:", e)
