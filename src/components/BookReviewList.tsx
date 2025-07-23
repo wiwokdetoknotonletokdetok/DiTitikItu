@@ -63,8 +63,74 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
     }
   }
 
+const showPreviewTimeout = useRef<NodeJS.Timeout | null>(null)
+
+const handleReviewMouseEnter = (e: React.MouseEvent, review: ReviewWithUserDTO) => {
+  if (hoverTimeout.current) {
+    clearTimeout(hoverTimeout.current)
+  }
+  if (showPreviewTimeout.current) {
+    clearTimeout(showPreviewTimeout.current)
+  }
+
+  const target = e.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const containerRect = target.closest('.relative')?.getBoundingClientRect()
+  if (!containerRect) return
+
+  const modalWidth = 256
+  const modalHeight = 192
+
+  let x = rect.left - containerRect.left + rect.width + 8
+  let y: number
+
+  const isMyReview = review.userId === user?.id
+  if (isMyReview) {
+    y = rect.top - containerRect.top - modalHeight - 10
+  } else {
+    y = rect.top - containerRect.top - 10
+  }
+
+  if (x < 10) x = 10
+  if (x + modalWidth > containerRect.width - 10) {
+    x = containerRect.width - modalWidth - 10
+  }
+  if (y < 10) y = 10
+
+  showPreviewTimeout.current = setTimeout(() => {
+    setModalPosition({ x, y })
+    setPreviewUser(review)
+  }, 300)
+}
+
+
+const handleReviewMouseLeave = () => {
+  if (hoverTimeout.current) {
+    clearTimeout(hoverTimeout.current)
+  }
+  if (showPreviewTimeout.current) {
+    clearTimeout(showPreviewTimeout.current)
+  }
+
+  hoverTimeout.current = setTimeout(() => {
+    setPreviewUser(null)
+    setModalPosition(null)
+  }, 300)
+}
+
+  const handleModalMouseEnter = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current)
+    }
+  }
+
+  const handleModalMouseLeave = () => {
+    setPreviewUser(null)
+    setModalPosition(null)
+  }
+
   return (
-      <div>
+      <div className="relative">
         {myReview && (
           <div className="pt-3 mb-3">
             <div className="flex items-center gap-2 mb-1">
@@ -148,29 +214,26 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
         )}
 
         {otherReviews.map((r, i) => (
-          <div key={i} className="pt-3 mt-3 border-gray-300">
-            <div className="flex items-center gap-2 mb-1">
-               <Link to={`/profile/${r.userId}`}>
+          <div
+            key={i}
+            className="pt-3 mt-3 border-gray-300 hover:bg-gray-50 rounded-md p-2 transition-colors"
+          >
+            <div
+              className="flex items-center gap-2 mb-1"
+              onMouseEnter={(e) => handleReviewMouseEnter(e, r)}
+              onMouseLeave={handleReviewMouseLeave}
+            >
+              <Link to={`/profile/${r.userId}`}>
                 <img
                   src={r.profilePicture}
                   alt={r.name}
                   className="w-10 h-10 rounded-full object-cover border border-white shadow"
                 />
-               </Link>
+              </Link>
               <span>
                 <Link
                   to={`/profile/${r.userId}`}
-                  onMouseEnter={(e) => {
-                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                    setModalPosition({ x: rect.right + 10, y: rect.top })
-                    setPreviewUser(r)
-                  }}
-                  onMouseLeave={() => {
-                    hoverTimeout.current = setTimeout(() => {
-                      setPreviewUser(null)
-                    }, 300)
-                  }}
-                  className="text-sm font-semibold text-[#1C2C4C]"
+                  className="text-sm font-semibold text-[#1C2C4C] hover:underline"
                 >
                   {r.name}
                 </Link>
@@ -190,33 +253,31 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
           </div>
         ))}
         {error && <p className="text-red-500 mt-2">{error}</p>}
-
         {previewUser && modalPosition && (
           <div
-            className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-64"
+            className="absolute z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-64 max-h-64 overflow-hidden transition-opacity"
             style={{
               top: modalPosition.y,
               left: modalPosition.x,
-              position: 'absolute',
             }}
-            onMouseEnter={() => {
-              if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
-            }}
-            onMouseLeave={() => {
-              setPreviewUser(null)
-            }}
+            onMouseEnter={handleModalMouseEnter}
+            onMouseLeave={handleModalMouseLeave}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-2">
               <img
                 src={previewUser.profilePicture}
                 alt={previewUser.name}
-                className="w-12 h-12 rounded-full object-cover border"
+                className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
               />
-              <div>
-                <p className="font-semibold text-sm">{previewUser.name}</p>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-[#1C2C4C]">{previewUser.name}</p>
+                <p className="text-xs text-gray-500">{previewUser.points} poin</p>
               </div>
             </div>
-            <p className="mt-2 text-sm text-gray-600 italic">"{previewUser.message}"</p>
+
+            <p className="text-xs italic text-gray-600 mb-2 line-clamp-2">
+              {previewUser.bio || 'Tidak ada bio'}
+            </p>
           </div>
         )}
     </div>
