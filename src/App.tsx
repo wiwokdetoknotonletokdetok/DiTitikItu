@@ -1,8 +1,16 @@
 import {useRoutes} from 'react-router-dom'
 import routes from '~react-pages'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
-  return useRoutes(routes)
+  const element = useRoutes(routes)
+
+  return (
+    <>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      {element}
+    </>
+  )
 }
 
 export default App
