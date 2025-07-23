@@ -82,6 +82,7 @@ export default function BookUpdatePublishedYearPage() {
       <>
         <Navbar />
         <UpdateFieldForm
+          to={`/books/${id}`}
           isSuccess={isSuccess}
           onSubmit={handleSubmit}
           buttonText="Simpan"

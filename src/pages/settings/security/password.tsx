@@ -11,6 +11,7 @@ import Alert from '@/components/Alert.tsx'
 import { authPassword } from '@/api/authPassword.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
 import type { UpdatePasswordRequest } from '@/dto/UpdatePasswordRequest.ts'
+import SettingsHeader from '@/components/SettingsHeader.tsx'
 
 function SettingsSecurityPasswordPage() {
   const { token } = useAuth()
@@ -117,7 +118,9 @@ function SettingsSecurityPasswordPage() {
       <div>
         <Navbar/>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Ubah Kata Sandi</h1>
+          <SettingsHeader to="/settings/security">
+            Ubah Kata Sandi
+          </SettingsHeader>
           <div className="max-w-md">
             {apiMessage && (
               <Alert

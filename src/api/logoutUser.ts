@@ -3,7 +3,7 @@ import { ApiError } from '@/exception/ApiError.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function logoutUser(token: string): Promise<WebResponse<string>> {
+export async function logoutUser(token: string | null): Promise<WebResponse<string>> {
   const res = await fetch(`${BASE_URL}/auth/logout`, {
     method: 'POST',
     headers: {
