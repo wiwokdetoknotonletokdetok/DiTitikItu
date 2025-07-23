@@ -19,6 +19,8 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import toast from 'react-hot-toast'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { removeBookFromUser } from '@/api/collections'
+import { fetchUserRanking } from '@/api/ranking'
+import type { UserRankingDTO } from '@/dto/UserRankingDTO'
 
 function UserProfilePage() {
   const navigate = useNavigate()
@@ -31,6 +33,7 @@ function UserProfilePage() {
   const [isFollowed, setIsFollowed] = useState(false)
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
+  const [ranking, setRanking] = useState<UserRankingDTO[]>([])
 
   const handleRemove = async () => {
   if (!pendingDelete) return
@@ -45,6 +48,10 @@ function UserProfilePage() {
       setPendingDelete(null)
     }
   }
+
+  useEffect(() => {
+    fetchUserRanking().then(setRanking).catch(console.error)
+  }, [])
 
   useEffect(() => {
     async function fetchBooks() {
@@ -262,7 +269,28 @@ function UserProfilePage() {
           onConfirm={handleRemove}
           onCancel={() => setPendingDelete(null)}
         />
-        <div className="w-80 rounded-3xl shadow-lg overflow-y-auto">
+        <div className="w-80 rounded-3xl shadow-lg overflow-y-auto bg-white p-6">
+          <h2 className="text-xl font-semibold mb-8 text-center">Peringkat</h2>
+          <ul className="space-y-4">
+            {ranking.map((user, index) => (
+              <li
+                key={user.id}
+                className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 hover:scale-[1.02] transition-transform"
+                onClick={() => navigate(`/profile/${user.id}`)}
+              >
+                <span className="text-gray-500 w-5 text-right">{index + 1}.</span>
+                <img
+                  src={user.profilePicture}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full object-cover border"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.points} poin</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
