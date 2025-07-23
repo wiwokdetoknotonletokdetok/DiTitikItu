@@ -4,6 +4,9 @@ import { fetchUserBooks, removeBookFromUser, countUserBooks } from '@/api/collec
 import { useNavigate } from 'react-router-dom'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import BookCard from '@/components/BookCard'
+import toast from 'react-hot-toast'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Navbar from '@/components/Navbar'
 
 export default function UserCollection() {
   const { user } = useAuth()
@@ -11,6 +14,7 @@ export default function UserCollection() {
   const navigate = useNavigate()
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [total, setTotal] = useState<number>(0)
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
 
   useEffect(() => {
     if (userId) {
@@ -24,24 +28,28 @@ export default function UserCollection() {
     }
   }, [userId])
 
-  const handleRemove = async (bookId: string, bookTitle: string) => {
-    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus "${bookTitle}" dari koleksi?`)
-    if (!confirmDelete) return
+  const handleRemove = async () => {
+    if (!pendingDelete) return
+    const { id: bookId } = pendingDelete
+    const toastId = toast.loading('Menghapus buku...')
 
     try {
-      await removeBookFromUser(bookId)
-      setBooks(prev => prev.filter(book => book.id !== bookId))
-      setTotal(prev => prev - 1)
-      alert('Buku berhasil dihapus dari koleksi.')
-    } catch (error) {
-      console.error('Gagal hapus buku:', error)
-      alert('Gagal menghapus buku dari koleksi.')
+        await removeBookFromUser(bookId)
+        setBooks(prev => prev.filter(book => book.id !== bookId))
+        setTotal(prev => prev - 1)
+        toast.success('Buku berhasil dihapus.', { id: toastId })
+    } catch (err) {
+        toast.error('Gagal menghapus buku.', { id: toastId })
+    } finally {
+        setPendingDelete(null)
     }
-  }
+    }
 
   if (!userId) return <p>Anda belum login.</p>
 
   return (
+  <>
+    <Navbar />
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-2">Koleksi Buku Saya</h2>
       <p className="mb-4 text-gray-600">Total koleksi: {total} buku</p>
@@ -56,7 +64,7 @@ export default function UserCollection() {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  handleRemove(book.id, book.title)
+                  setPendingDelete({ id: book.id, title: book.title })
                 }}
                 className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 z-10"
               >
@@ -67,5 +75,14 @@ export default function UserCollection() {
         </div>
       )}
     </div>
-  )
+
+    <ConfirmDialog
+      open={!!pendingDelete}
+      message={`Apakah Anda yakin ingin menghapus "${pendingDelete?.title}" dari koleksi?`}
+      onConfirm={handleRemove}
+      onCancel={() => setPendingDelete(null)}
+    />
+  </>
+)
+
 }
