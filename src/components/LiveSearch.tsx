@@ -32,8 +32,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
             const response: WebResponse<BookSummaryDTO[]> = await getBooksSemantic(query)
             setResults(response.data)
             setIsOpen(true)
-          } catch (err) {
-            console.error('Error saat ambil data', err)
+          } catch {
             setResults([])
             setIsOpen(false)
           } finally {
@@ -63,16 +62,6 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const SkeletonItem = () => (
-    <div className="flex items-center space-x-4 p-3 border-b border-gray-200 animate-pulse bg-white">
-      <div className="w-24 h-36 bg-gray-300 rounded-md" />
-      <div className="flex-1 space-y-3 py-1">
-        <div className="h-5 bg-gray-300 rounded w-3/4" />
-        <div className="h-4 bg-gray-300 rounded w-1/2" />
-      </div>
-    </div>
-  )
 
   return (
     <div className="relative" ref={containerRef}>
@@ -123,7 +112,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
           )}
 
           {!loading && !isTyping && query.length > 2 && results.length === 0 && (
-            <Link to="/books/new">
+            <Link to="/books">
               <p className="py-4 px-8 text-center text-sm text-gray-500 hover:bg-gray-100">
                 Judul belum tersedia. Mau tambahkan?
               </p>
@@ -153,6 +142,18 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+function SkeletonItem(){
+  return (
+    <div className="flex items-center space-x-4 p-3 border-b border-gray-200 animate-pulse bg-white">
+      <div className="w-24 h-36 bg-gray-300 rounded-md" />
+      <div className="flex-1 space-y-3 py-1">
+        <div className="h-5 bg-gray-300 rounded w-3/4" />
+        <div className="h-4 bg-gray-300 rounded w-1/2" />
+      </div>
     </div>
   )
 }

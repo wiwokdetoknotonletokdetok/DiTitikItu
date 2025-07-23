@@ -68,8 +68,8 @@ export default function Navbar() {
               className="flex items-center space-x-2"
             >
               <img
-                src={user.profilePicture}
-                alt={user.name}
+                src={user?.profilePicture}
+                alt={user?.name}
                 className="w-9 h-9 rounded-full object-cover border"
               />
               <ChevronDown size={16} className="text-gray-600" />
@@ -77,7 +77,7 @@ export default function Navbar() {
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-[1000]">
-                <div className="px-4 py-2 text-sm text-gray-700">{user.name}</div>
+                <div className="px-4 py-2 text-sm text-gray-700">{user?.name}</div>
                 <hr className="border-gray-200" />
                 <Link
                   to="/"
@@ -86,7 +86,7 @@ export default function Navbar() {
                   Beranda
                 </Link>
                 <Link
-                  to={`/profile/${user.id}`}
+                  to={`/profile/${user?.id}`}
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Profil
