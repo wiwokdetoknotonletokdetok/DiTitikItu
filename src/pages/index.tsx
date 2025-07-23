@@ -11,7 +11,7 @@ import ToContentButton from '@/components/ToContentButton'
 import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '@/components/Navbar.tsx'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import Modal from '@/components/Modal.tsx'
@@ -23,6 +23,7 @@ import { Check, X } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
 
 export default function Home() {
+  const { id: bookId } = useParams<{ id: string }>()
   const [userPosition, setUserPosition] = useState<UserPosition>()
   const navigate = useNavigate()
   const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
@@ -36,6 +37,12 @@ export default function Home() {
   const [newMarkerPosition, setNewMarkerPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
   const [flyTrigger, setFlyTrigger] = useState(0)
+
+  useEffect(() => {
+    if (bookId && (!selectedBook || selectedBook.id !== bookId)) {
+      handleSelectBook(bookId)
+    }
+  }, [bookId])
 
   function handleFlyTo() {
     setFlyTrigger(prev => prev + 1)
@@ -73,6 +80,10 @@ export default function Home() {
   }, [])
 
   const handleSelectBook = async (bookId: string) => {
+    if (window.location.pathname !== `/${bookId}`) {
+      navigate(`/${bookId}`)
+    }
+
     setLoadingBook(true)
     try {
       const bookDetail = await getBooksId(bookId)
