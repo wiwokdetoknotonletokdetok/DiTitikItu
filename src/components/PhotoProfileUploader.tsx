@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { UploadCloud, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
@@ -52,12 +52,16 @@ export default function PhotoProfileUploader({
 
   const handleDelete = async () => {
     if (onDelete) {
-      await onDelete()
+      await onDelete?.()
     }
     setPreviewUrl(user?.profilePicture ?? null)
     setErrorMessage(null)
   }
 
+  useEffect(() => {
+    setPreviewUrl(initialUrl ?? null)
+  }, [initialUrl])
+  
   return (
     <div
       onClick={() => inputRef.current?.click()}
