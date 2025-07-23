@@ -4,15 +4,14 @@ import BookReviewForm from '@/components/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/components/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
-import { ChevronRight, MapPin } from 'lucide-react'
+import { ChevronRight, MapPin, Pencil } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
-import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import Modal from './Modal'
-import LoginPromptContent from './LoginPromptContent'
+import Modal from '@/components/Modal'
+import LoginPromptContent from '@/components/LoginPromptContent'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -34,10 +33,7 @@ type Props = {
 }
 
 export default function HomeSidePanel({ 
-  onUpdateLocations, 
-  onUpdateReviews, 
-  onSaveAddLocation, 
-  onCancelAddLocation, 
+  onUpdateReviews,
   newMarkerPosition, 
   onAddLocationClick, 
   book, 
@@ -165,27 +161,7 @@ export default function HomeSidePanel({
                 <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
               )}
               <div className="sticky bottom-0 left-0 right-0 pt-4 pb-6">
-                {newMarkerPosition ? (
-                  <div className="flex justify-between space-x-4 px-4">
-                    <button
-                      onClick={() => {
-                        onSaveAddLocation?.()
-                        onUpdateLocations?.()
-                      }}
-                      className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition flex-1"
-                    >
-                      Simpan Lokasi
-                    </button>
-                    <button
-                      onClick={() => {
-                        onCancelAddLocation?.()
-                      }}
-                      className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-300 transition flex-1"
-                    >
-                      Batal
-                    </button>
-                  </div>
-                ) : (
+                {!newMarkerPosition && (
                   <div className="flex justify-end px-4">
                     <Tooltip message="Tambah lokasi">
                       <button
@@ -193,7 +169,7 @@ export default function HomeSidePanel({
                         className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
                         aria-label="Tambah lokasi"
                       >
-                        <MapPin size={20} />
+                        <MapPin size={20}/>
                       </button>
                     </Tooltip>
                   </div>
@@ -201,17 +177,17 @@ export default function HomeSidePanel({
               </div>
             </TabPanel>
 
-          <TabPanel id="reviews">
-            <div>
-              <div className="flex flex-col items-center mb-6">
-                <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
-                <StarRating rating={book.totalRatings} size={5} />
-                <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
-              </div>
+            <TabPanel id="reviews">
+              <div>
+                <div className="flex flex-col items-center mb-6">
+                  <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
+                  <StarRating rating={book.totalRatings} size={5}/>
+                  <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
+                </div>
 
-              <div className="mb-4">
-                {isLoggedIn() && !existingReview && (
-                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
+                <div className="mb-4">
+                  {isLoggedIn() && !existingReview && (
+                    <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
                 )}
               </div>
               

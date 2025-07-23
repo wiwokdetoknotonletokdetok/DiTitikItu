@@ -1,5 +1,5 @@
 import {MapContainer, Marker, Popup, TileLayer, useMap} from 'react-leaflet'
-import {useEffect, useState} from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
 import type { UserPosition } from '@/dto/UserPosition.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
@@ -56,7 +56,7 @@ function CustomZoomControl() {
 interface MapViewProps {
   selectedBook: BookResponseDTO | null
   bookLocations: BookLocationResponse[]
-  userPosition: UserPosition
+  userPosition: UserPosition | undefined
   flyToLocation?: { latitude: number, longitude: number } | null
   flyToTrigger: number
   children?: React.ReactNode
@@ -72,6 +72,15 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
   const [editedPosition, setEditedPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [editedLocationName, setEditedLocationName] = useState("")
   const [localLocations, setLocalLocations] = useState<BookLocationResponse[]>(bookLocations)
+  const markerRef = useRef<L.Marker>(null)
+
+  useEffect(() => {
+    if (newMarkerPosition && markerRef.current) {
+      setTimeout(() => {
+        markerRef.current?.openPopup()
+      }, 0)
+    }
+  }, [newMarkerPosition])
 
   async function handleSaveEditedLocation(bookId: string, locationId: number) {
     if (!editedPosition || !editedLocationName.trim()) return
@@ -130,6 +139,7 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
 
         {newMarkerPosition && (
           <Marker
+            ref={markerRef}
             position={[newMarkerPosition.lat, newMarkerPosition.lng]}
             draggable={true}
             eventHandlers={{
@@ -140,7 +150,10 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
               }
             }}
           >
-            <Popup>Lokasi baru (geser pin ini)</Popup>
+            <Popup>
+              <p className="font-medium">Lokasi baru (geser pin ini)</p>
+              <p className="italic">Gunakan tombol di kanan atas peta untuk menyimpan atau membatalkan.</p>
+            </Popup>
           </Marker>
         )}
 
