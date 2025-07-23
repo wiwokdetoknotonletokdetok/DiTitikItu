@@ -1,18 +1,22 @@
-import type { WebResponse } from '@/dto/WebResponse'
-import { ApiError } from '@/exception/ApiError.ts'
+import type { WebResponse } from "@/dto/WebResponse"
+import { ApiError } from "@/exception/ApiError"
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function uploadBookPicture(bookId: string, file: File): Promise<void> {
+export async function uploadProfilePicture(file: File, token: string | null): Promise<void> {
   const formData = new FormData()
-  formData.append("bookPicture", file)
+  formData.append("profilePicture", file)
 
-  const res = await fetch(`${BASE_URL}/books/${bookId}/book-picture`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token") || ""}`
-    },
+  for (let [key, value] of formData.entries()) {
+    console.log("FormData field:", key, value);
+  }
+
+  const res = await fetch(`${BASE_URL}/users/me/profile-picture`, {
+    method: 'POST',
     body: formData,
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
   })
 
   if (!res.ok) {

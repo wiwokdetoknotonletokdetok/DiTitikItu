@@ -12,6 +12,7 @@ type AuthContextType = {
   logout: () => void
   isLoggedIn: () => boolean
   isLoading: boolean
+  updateUser: (user: Partial<UserPrincipal>) => void
 }
 
 interface JwtPayload {
@@ -78,6 +79,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const updateUser = (updatedFields: Partial<UserPrincipal>) => {
+    const newUser = { ...user, ...updatedFields } as UserPrincipal
+    setUser(newUser)
+    if (updatedFields.name) {
+      localStorage.setItem('name', updatedFields.name)
+    }
+    if (updatedFields.profilePicture) {
+      localStorage.setItem('profilePicture', updatedFields.profilePicture)
+    }
+  }
+
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('id')
@@ -92,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, isLoggedIn, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ token, user, isLoggedIn, login, logout, isLoading, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

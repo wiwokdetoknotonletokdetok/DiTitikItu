@@ -19,6 +19,7 @@
     "react-hook-form": "^7.60.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.6.3",
+    "react-toastify": "^11.0.5",
     "vite-plugin-pages": "^0.33.1"
   },
   "devDependencies": {
