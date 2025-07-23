@@ -5,6 +5,8 @@ import StarRatingInput from '@/components/StarRatingInput'
 import { ApiError } from '@/exception/ApiError'
 import { useAuth } from '@/context/AuthContext.tsx'
 import { Link } from 'react-router-dom'
+import { useRef } from 'react'
+
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
@@ -16,6 +18,7 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   const { user } = useAuth()
   const myReview = reviews.find((r) => r.userId === user?.id)
   const otherReviews = reviews.filter((r) => r.userId !== user?.id)
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (myReview) {
@@ -28,7 +31,8 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   const [editMessage, setEditMessage] = useState(myReview?.message || '')
   const [editRating, setEditRating] = useState(myReview?.rating || 0)
   const [error, setError] = useState<string | null>(null)
-  
+  const [previewUser, setPreviewUser] = useState<ReviewWithUserDTO | null>(null)
+  const [modalPosition, setModalPosition] = useState<{ x: number; y: number } | null>(null)
 
   const handleDelete = async () => {
     try {
@@ -59,13 +63,9 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
     }
   }
 
+
   return (
       <div>
-        {reviews.length === 0 && (
-          <p className="text-sm text-center text-gray-500 pt-2">
-            Belum ada ulasan tersedia untuk buku ini.
-          </p>
-        )}
         {myReview && (
           <div className="pt-3 mb-3">
             <div className="flex items-center gap-2 mb-1">
@@ -151,17 +151,27 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
         {otherReviews.map((r, i) => (
           <div key={i} className="pt-3 mt-3 border-gray-300">
             <div className="flex items-center gap-2 mb-1">
-              <Link to={`/profile/${r.userId}`}>
+              {/* <Link to={`/profile/${r.userId}`}> */}
                 <img
                   src={r.profilePicture}
                   alt={r.name}
                   className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
                 />
-              </Link>
+              {/* </Link> */}
               <span>
                 <Link
-                  to={`/profile/${r.userId}`}
-                  className="text-sm font-semibold text-[#1C2C4C]"
+                  to="#"
+                  onMouseEnter={(e) => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    setModalPosition({ x: rect.right + 10, y: rect.top })
+                    setPreviewUser(r)
+                  }}
+                  onMouseLeave={() => {
+                    hoverTimeout.current = setTimeout(() => {
+                      setPreviewUser(null)
+                    }, 300)
+                  }}
+                  className="text-sm font-semibold text-[#1C2C4C] hover:underline"
                 >
                   {r.name}
                 </Link>
@@ -181,6 +191,35 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
           </div>
         ))}
         {error && <p className="text-red-500 mt-2">{error}</p>}
+
+        {previewUser && modalPosition && (
+          <div
+            className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-64"
+            style={{
+              top: modalPosition.y,
+              left: modalPosition.x,
+              position: 'absolute',
+            }}
+            onMouseEnter={() => {
+              if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+            }}
+            onMouseLeave={() => {
+              setPreviewUser(null)
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <img
+                src={previewUser.profilePicture}
+                alt={previewUser.name}
+                className="w-12 h-12 rounded-full object-cover border"
+              />
+              <div>
+                <p className="font-semibold text-sm">{previewUser.name}</p>
+              </div>
+            </div>
+            <p className="mt-2 text-sm text-gray-600 italic">"{previewUser.message}"</p>
+          </div>
+        )}
     </div>
   )
 }

@@ -11,8 +11,8 @@ import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import Modal from './Modal'
-import LoginPromptContent from './LoginPromptContent'
+import Modal from '@/components/Modal.tsx'
+import LoginPromptContent from '@/components/LoginPromptContent'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -72,9 +72,9 @@ export default function HomeSidePanel({
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
-        <Modal hash="#login-required">
+        <Modal hash="#edit">
           <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
-          <LoginPromptContent />
+          <LoginPromptContent/>
         </Modal>
       </div>
       
@@ -210,9 +210,7 @@ export default function HomeSidePanel({
               </div>
 
               <div className="mb-4">
-                {isLoggedIn() && !existingReview && (
-                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
-                )}
+                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
               </div>
               
               <hr className="border-t border-gray-300 mb-4" />
