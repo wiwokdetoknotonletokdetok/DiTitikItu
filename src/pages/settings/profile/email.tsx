@@ -15,7 +15,7 @@ export default function SettingsProfileEmailPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const value = location.state?.value
-  const [email, setEmail] = useState(value ?? '')
+  const [email, setEmail] = useState(value ?? null)
   const [touched, setTouched] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -23,7 +23,7 @@ export default function SettingsProfileEmailPage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!(typeof email == 'string')) {
       navigate(`/settings/profile`)
     }
   }, [location.state?.value, navigate])

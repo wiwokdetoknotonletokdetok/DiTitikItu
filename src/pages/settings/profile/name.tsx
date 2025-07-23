@@ -15,7 +15,7 @@ export default function SettingsProfileNamePage() {
   const location = useLocation()
   const navigate = useNavigate()
   const value = location.state?.value
-  const [name, setName] = useState(value ?? '')
+  const [name, setName] = useState(value ?? null)
   const [touched, setTouched] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -23,7 +23,7 @@ export default function SettingsProfileNamePage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    if (!location.state?.value) {
+    if (!(typeof name == 'string')) {
       navigate(`/settings/profile`)
     }
   }, [location.state?.value, navigate])
