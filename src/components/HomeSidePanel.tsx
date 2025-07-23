@@ -6,13 +6,18 @@ import BookReviewList from '@/components/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { ChevronRight, MapPin } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Modal from './Modal'
 import LoginPromptContent from './LoginPromptContent'
+import toast from 'react-hot-toast'
+import { addBookToCollection } from '@/api/collections'
+import { fetchUserBooks } from '@/api/collections'
+import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -51,6 +56,22 @@ export default function HomeSidePanel({
   const { isLoggedIn, user } = useAuth()
   const existingReview = reviews.find((r) => r.userId === user?.id)
   const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(false)
+
+  useEffect(() => {
+  const checkIfSaved = async () => {
+    if (!isLoggedIn() || !user) return
+    try {
+      const books = await fetchUserBooks(user.id)
+      const saved = books.some((b) => b.id === book.id)
+      setIsSaved(saved)
+    } catch (err) {
+      console.error('Gagal memuat koleksi pengguna:', err)
+    }
+  }
+
+  checkIfSaved()
+}, [book.id, isLoggedIn, user])
   
   const handleEdit = () => {
     if (isLoggedIn()) {
@@ -59,6 +80,22 @@ export default function HomeSidePanel({
       navigate('#login-required');
     }
   };
+
+  const handleAddToCollection = async () => {
+  if (!isLoggedIn()) {
+    navigate('#login-required')
+    return
+  }
+
+  try {
+    await addBookToCollection(book.id)
+    toast.success('Buku berhasil ditambahkan ke koleksi!')
+    setIsSaved(true)
+  } catch (error) {
+    console.error(error)
+    toast.error('Gagal menambahkan buku ke koleksi.')
+  }
+}
 
   return (
     <div className="relative lg:w-[30%]">
@@ -117,7 +154,23 @@ export default function HomeSidePanel({
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-[#1C2C4C] mb-2">{book.title}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
+          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
+            <button
+              onClick={handleAddToCollection}
+              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+              aria-label="Simpan buku"
+            >
+              {isSaved ? (
+                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
+              ) : (
+                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
+              )}
+
+            </button>
+          </Tooltip>
+        </div>
 
         <div className="text-sm text-gray-700 mb-4">
           <p><span className="font-medium">Penulis:</span> {book.authorNames.join(', ')}</p>
