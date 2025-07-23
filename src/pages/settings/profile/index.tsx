@@ -14,7 +14,7 @@ import { deleteProfilePicture, uploadProfilePicture } from '@/api/profilePicture
 export default function SettingsProfilePage() {
   const { user, token } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [photoUrl, setPhotoUrl] = useState('')
+  const [, setPhotoUrl] = useState('')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [bio, setBio] = useState('')

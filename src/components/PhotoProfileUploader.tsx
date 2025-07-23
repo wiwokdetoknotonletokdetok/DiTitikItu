@@ -18,12 +18,13 @@ export default function PhotoProfileUploader({
   const [, setUploadedFile] = useState<File | null>(null)
   const MIN_WIDTH = 320;
   const MIN_HEIGHT = 320;
-  const { user, updateUser } = useAuth()
+  const { user } = useAuth()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleFile = (file: File) => {
     const allowedTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      alert("Hanya gambar JPG atau PNG yang diperbolehkan.");
+      setErrorMessage("Hanya gambar JPG, JPEG, WebP, atau PNG yang diperbolehkan.");
       return;
     }
 
@@ -32,10 +33,11 @@ export default function PhotoProfileUploader({
 
     img.onload = () => {
       if (img.width < MIN_WIDTH || img.height < MIN_HEIGHT) {
-        alert(`Ukuran gambar minimal ${MIN_WIDTH}x${MIN_HEIGHT} piksel.`);
+        setErrorMessage(`Ukuran gambar minimal ${MIN_WIDTH}x${MIN_HEIGHT} piksel.`);
         return;
       }
 
+      setErrorMessage(null)
       setPreviewUrl(img.src);
       setUploadedFile(file);
       onUpload(file);
@@ -53,6 +55,7 @@ export default function PhotoProfileUploader({
       await onDelete()
     }
     setPreviewUrl(user?.profilePicture ?? null)
+    setErrorMessage(null)
   }
 
   return (
@@ -114,6 +117,9 @@ export default function PhotoProfileUploader({
           100% { transform: rotate(360deg);}
         }
       `}</style>
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+      )}
     </div>
   )
 }
