@@ -1,23 +1,23 @@
+import type { WebResponse } from '@/dto/WebResponse.ts'
+import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 import axios from 'axios'
 import { ApiError } from '@/exception/ApiError.ts'
-import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
-import type {WebResponse} from '@/dto/WebResponse.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function getBooksSemantic(query: string, max = 4, threshold = 0.4): Promise<WebResponse<BookSummaryDTO[]>> {
+
+export async function getBooksKeyword(query: string, limit = 5): Promise<WebResponse<BookSummaryDTO[]>> {
   try {
     const response = await axios.get<WebResponse<BookSummaryDTO[]>>(
       `${BASE_URL}/books`, {
-      params: {
-        q: query,
-        max,
-        threshold
-      },
-      headers: {
-        Accept: "application/json"
-      },
-    })
+        params: {
+          k: query,
+          limit
+        },
+        headers: {
+          Accept: "application/json"
+        },
+      })
 
     return response.data
   } catch (error) {
