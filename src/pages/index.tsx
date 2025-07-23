@@ -227,6 +227,7 @@ export default function Home() {
               onClose={() => {
                 setSelectedBook(null)
                 setSelectedBookLocations([])
+                navigate('/')
               }}
               onAddLocationClick={() => {
                 if (userPosition) {

@@ -12,12 +12,23 @@ import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
 
 const MAX_ISBN_LENGTH = 17
 
+const formatISBN = (value: string | undefined) => {
+  if (value === undefined) return ''
+  const cleaned = value.replace(/[^0-9Xx]/g, '')
+  if (cleaned.length <= 3) return cleaned
+  if (cleaned.length <= 4) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
+  if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4)}`
+  if (cleaned.length <= 12) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6)}`
+  if (cleaned.length <= 13) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 12)}-${cleaned.slice(12)}`
+  return cleaned
+}
+
 export default function BookUpdateIsbnPage() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
   const book = (location.state?.value) as UpdateBookRequest
-  const [isbn, setIsbn] = useState(book?.isbn || '')
+  const [isbn, setIsbn] = useState(formatISBN(book?.isbn) || '')
   const [touched, setTouched] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -30,15 +41,7 @@ export default function BookUpdateIsbnPage() {
     }
   }, [book, id, navigate])
 
-  const formatISBN = (value: string) => {
-    const cleaned = value.replace(/[^0-9Xx]/g, '')
-    if (cleaned.length <= 3) return cleaned
-    if (cleaned.length <= 4) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-    if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4)}`
-    if (cleaned.length <= 12) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6)}`
-    if (cleaned.length <= 13) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 12)}-${cleaned.slice(12)}`
-    return cleaned
-  }
+
 
   const handleIsbnChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value
@@ -110,7 +113,7 @@ export default function BookUpdateIsbnPage() {
 
     setIsLoading(true)
     try {
-      await updateBook(id, { isbn })
+      await updateBook(id, { isbn: isbn.replace(/-/g, ''), })
       setIsSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {

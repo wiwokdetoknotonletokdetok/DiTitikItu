@@ -243,8 +243,9 @@ function UserProfilePage() {
                   {books.map((book) => (
                     <div key={book.id} className="w-32 sm:w-40 flex-shrink-0 relative">
                       <BookCard
+                        showTitle={false}
                         book={book}
-                        onClick={() => navigate(`/books/${book.id}`)}
+                        onClick={() => navigate(`/${book.id}`)}
                         showRemoveButton={user?.id === userId}
                         onRemove={() => setPendingDelete({ id: book.id, title: book.title })}
                       />

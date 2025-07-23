@@ -122,10 +122,6 @@ const handleRemoveFromCollection = async () => {
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
-        <Modal hash="#login-required">
-          <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
-          <LoginPromptContent />
-        </Modal>
       </div>
       
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
@@ -145,8 +141,7 @@ const handleRemoveFromCollection = async () => {
       <div
         className="transition-all duration-500 transform translate-x-0 opacity-100 bg-white rounded p-4 shadow relative"
         style={{maxHeight: '85vh', overflowY: 'auto'}}
-      >
-        <div className="relative group w-full mb-4 rounded overflow-hidden">
+      ><div className="relative group w-full mb-4 rounded overflow-hidden">
           <img
             src={book.bookPicture}
             alt={book.title}
@@ -169,20 +164,22 @@ const handleRemoveFromCollection = async () => {
 
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
-          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
-            <button
-              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
-              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
-              aria-label="Simpan buku"
-            >
-              {isSaved ? (
-                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
-              ) : (
-                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
-              )}
+          <div className="z-[2001]">
+            <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
+              <button
+                onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
+                className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+                aria-label="Simpan buku"
+              >
+                {isSaved ? (
+                  <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
+                ) : (
+                  <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
+                )}
 
-            </button>
-          </Tooltip>
+              </button>
+            </Tooltip>
+          </div>
         </div>
 
         <div className="text-sm text-gray-700 mb-4">
@@ -273,6 +270,10 @@ const handleRemoveFromCollection = async () => {
           </Tab>
         </div>
       </div>
+      <Modal hash="#login-required">
+        <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
+        <LoginPromptContent />
+      </Modal>
     </div>
   )
 }

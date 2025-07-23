@@ -1,6 +1,7 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import { Plus } from 'lucide-react'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import Tooltip from '@/components/Tooltip.tsx'
 
 interface Props {
   book: BookSummaryDTO
@@ -9,9 +10,11 @@ interface Props {
   onAddToCollection?: (bookId: string) => void
   showRemoveButton?: boolean
   onRemove?: () => void
+  showTitle?: boolean
 }
 
 export default function BookCard({
+  showTitle = true,
   book,
   onClick,
   showAddToCollectionButton,
@@ -35,9 +38,12 @@ export default function BookCard({
         style={{ aspectRatio: '300 / 450' }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black opacity-40 group-hover:opacity-30 transition-all"></div>
-      <div className="absolute bottom-4 left-4 right-4 text-white group-hover:text-opacity-100 opacity-80 transition-all">
-        <h3 className="font-semibold text-xl">{book.title}</h3>
-      </div>
+      {showTitle && (
+        <div
+          className="absolute bottom-4 left-4 right-4 text-white group-hover:text-opacity-100 opacity-80 transition-all">
+          <h3 className="font-semibold text-xl">{book.title}</h3>
+        </div>
+      )}
 
       {showAddToCollectionButton && (
         <button
@@ -59,12 +65,13 @@ export default function BookCard({
             onRemove?.()
           }}
           title="Hapus dari koleksi"
-          className="absolute top-2 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
+          className="absolute top-0 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
         >
-          <BookmarkSolid className="w-6 h-6" />
+          <Tooltip message="Hapus dari koleksi">
+            <BookmarkSolid className="w-6 h-6" style={{ transform: 'scaleY(2)'}}/>
+          </Tooltip>
         </button>
       )}
-
     </div>
   )
 }
