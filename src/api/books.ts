@@ -43,7 +43,7 @@ export async function fetchBookById(id: string): Promise<BookResponseDTO> {
   return json.data
 }
 
-export async function createBook(data: BookRequestDTO): Promise<void> {
+export async function createBook(data: BookRequestDTO): Promise<string> {
   const res = await fetch(`${BASE_URL}/books`, {
     method: 'POST',
     headers: {
@@ -57,6 +57,16 @@ export async function createBook(data: BookRequestDTO): Promise<void> {
     const data: WebResponse<string> = await res.json()
     throw new ApiError(data.errors, res.status, data.errors)
   }
+
+  const location = res.headers.get('Location')
+  if (!location) {
+    const message = 'Terjadi kesalahan. Silakan coba lagi.'
+    throw new ApiError(message, res.status, message)
+  }
+
+  const url = new URL(location)
+  const segments = url.pathname.split('/')
+  return segments[segments.length - 1]
 }
 
 export async function updateBook(id: string, data: UpdateBookRequest): Promise<void> {
