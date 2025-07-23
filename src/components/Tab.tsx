@@ -1,4 +1,5 @@
-import { useState, ReactNode, ReactElement, Children, isValidElement, cloneElement } from 'react'
+import { useState, Children, isValidElement, cloneElement } from 'react'
+import type { ReactNode, ReactElement } from 'react'
 
 interface TabProps {
   children: ReactNode
@@ -8,6 +9,8 @@ interface TabProps {
 interface TabButtonProps {
   id: string
   children: ReactNode
+  active?: boolean
+  onClick?: () => void
 }
 
 interface TabPanelProps {
@@ -44,7 +47,7 @@ export function Tab({ children, defaultTab }: TabProps) {
   )
 }
 
-export function TabButton({id, children, active, onClick}: TabButtonProps & { active?: boolean, onClick?: () => void }) {
+export function TabButton({children, active, onClick}: TabButtonProps & { active?: boolean, onClick?: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -58,7 +61,7 @@ export function TabButton({id, children, active, onClick}: TabButtonProps & { ac
 }
 TabButton.displayName = 'TabButton'
 
-export function TabPanel({ id, children }: TabPanelProps) {
+export function TabPanel({ children }: TabPanelProps) {
   return <>{children}</>
 }
 TabPanel.displayName = 'TabPanel'

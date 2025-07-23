@@ -6,7 +6,7 @@ import BookReviewList from '@/pages/books/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { ChevronRight, MapPin } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
-import { act, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { Pencil } from 'lucide-react'
@@ -26,7 +26,7 @@ type Props = {
   onFlyTo: (lat: number, lng: number) => void
   onUpdate: () => void
   onAddLocationClick: () => void
-  newMarkerPosition?: { lat: number; lng: number }
+  newMarkerPosition?: { lat: number; lng: number } | null
   onCancelAddLocation?: () => void
   onSaveAddLocation?: () => void
   onUpdateReviews: () => void
@@ -51,7 +51,6 @@ export default function HomeSidePanel({
   const { isLoggedIn, user } = useAuth()
   const existingReview = reviews.find((r) => r.userId === user?.id)
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('locations')
   
   const handleEdit = () => {
     if (isLoggedIn()) {

@@ -10,8 +10,9 @@ import {deleteBookLocation, updateBookLocation} from "@/api/bookLocation.ts";
 import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
 import { useAuth } from '@/context/AuthContext'
 import L from 'leaflet'
+import type { LatLngTuple } from 'leaflet'
 
-function SetViewTo({ position }) {
+function SetViewTo({ position }: { position: LatLngTuple }) {
   const map = useMap()
   useEffect(() => {
     if (position) {
@@ -65,7 +66,7 @@ interface MapViewProps {
 }
 
 export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation, onRefreshLocations }: MapViewProps) {
-  const center = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
+  const center: [number, number] = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
   const { token } = useAuth()
   const [editingLocationId, setEditingLocationId] = useState<number | null>(null)
   const [editedPosition, setEditedPosition] = useState<{ lat: number; lng: number } | null>(null)
@@ -165,7 +166,7 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
                 ? [editedPosition.lat, editedPosition.lng]
                 : [location.coordinates[0], location.coordinates[1]]
               }
-              draggable={token && location.id === editingLocationId} // hanya bisa drag saat edit
+              draggable={!!(token && location.id === editingLocationId)}
               eventHandlers={
                 token && location.id === editingLocationId
                   ? {

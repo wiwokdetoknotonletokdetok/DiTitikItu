@@ -1,5 +1,5 @@
 interface TextInputProps {
-  label: string
+  label: React.ReactNode
   name: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void

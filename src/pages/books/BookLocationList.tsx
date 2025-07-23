@@ -16,7 +16,7 @@ export default function BookLocationList({
   const [editName, setEditName] = useState('')
   const [editLat, setEditLat] = useState('')
   const [editLng, setEditLng] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const MAX_VISIBLE = 3
 
@@ -49,8 +49,7 @@ export default function BookLocationList({
 
   const handleDelete = async (id: number) => {
     try {
-      console.log('Buku id:', bookId, 'Lokasi id:', id)
-      await deleteBookLocation(bookId, id.toString())
+      await deleteBookLocation(bookId, id)
       onRefresh()
     } catch (e) {
       if (e instanceof ApiError) {

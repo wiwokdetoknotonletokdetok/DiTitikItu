@@ -104,7 +104,7 @@ export default function Home() {
     }
   }
 
-  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>, bookId: string) {
+  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     try {
@@ -148,32 +148,37 @@ export default function Home() {
 
         <div className="mb-6 flex flex-col lg:flex-row gap-4">
           <div className={`transition-all duration-500 ${selectedBook ? 'lg:w-[70%]' : 'lg:w-full'}`}>
-            <MapsView
-              selectedBook={selectedBook}
-              userPosition={userPosition}
-              bookLocations={selectedBookLocations}
-              flyToLocation={flyToLocation}
-              flyToTrigger={flyTrigger}
-              newMarkerPosition={newMarkerPosition}
-              onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
-              onRefreshLocations={() => {
-                if (selectedBook?.id) {
-                  refreshLocations(selectedBook.id)
-                }
-              }}
-            >
-              <>
-                <BookToolbar onSelectBook={handleSelectBook}/>
-                <LocateMeButton
-                  onClick={() => {
-                    if (userPosition) {
-                      setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
-                      handleFlyTo()
-                    }
-                  }}
-                />
-              </>
-            </MapsView>
+            {userPosition && (
+              <MapsView
+                selectedBook={selectedBook}
+                userPosition={userPosition}
+                bookLocations={selectedBookLocations}
+                flyToLocation={flyToLocation}
+                flyToTrigger={flyTrigger}
+                newMarkerPosition={newMarkerPosition}
+                onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
+                onRefreshLocations={() => {
+                  if (selectedBook?.id) {
+                    refreshLocations(selectedBook.id)
+                  }
+                }}
+              >
+                <>
+                  <BookToolbar onSelectBook={handleSelectBook} />
+                  <LocateMeButton
+                    onClick={() => {
+                      if (userPosition) {
+                        setFlyToLocation({
+                          latitude: userPosition.latitude,
+                          longitude: userPosition.longitude
+                        })
+                        handleFlyTo()
+                      }
+                    }}
+                  />
+                </>
+              </MapsView>
+            )}
           </div>
 
           {loadingBook ? (
@@ -205,7 +210,7 @@ export default function Home() {
                   handleFlyTo()
                 }}
                 onUpdate={() => refreshBookAndReviews(selectedBook.id)}
-                onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)} // supaya ulasan langsung update setelah submit
+                onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)}
                 onUpdateLocations={() => refreshLocations(selectedBook?.id)}
               />
           )}

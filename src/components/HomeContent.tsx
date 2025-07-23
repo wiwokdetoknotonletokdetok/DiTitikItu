@@ -5,7 +5,7 @@ import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
 
 type Props = {
   onSelectBook: (id: string) => void
-  contentRef: React.RefObject<HTMLDivElement>
+  contentRef: React.RefObject<HTMLDivElement | null> 
 }
 
 export default function HomeContent({ onSelectBook, contentRef }: Props) {
