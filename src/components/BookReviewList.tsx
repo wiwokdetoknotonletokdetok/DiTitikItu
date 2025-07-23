@@ -219,7 +219,7 @@ const handleReviewMouseLeave = () => {
             className="pt-3 mt-3 border-gray-300 hover:bg-gray-50 rounded-md p-2 transition-colors"
           >
             <div
-              className="flex items-center gap-2 mb-1"
+              className="inline-flex items-center gap-2 mb-1 cursor-pointer"
               onMouseEnter={(e) => handleReviewMouseEnter(e, r)}
               onMouseLeave={handleReviewMouseLeave}
             >
@@ -233,7 +233,7 @@ const handleReviewMouseLeave = () => {
               <span>
                 <Link
                   to={`/profile/${r.userId}`}
-                  className="text-sm font-semibold text-[#1C2C4C] hover:underline"
+                  className="text-sm font-semibold text-[#1C2C4C]"
                 >
                   {r.name}
                 </Link>
@@ -254,33 +254,35 @@ const handleReviewMouseLeave = () => {
         ))}
         {error && <p className="text-red-500 mt-2">{error}</p>}
         {previewUser && modalPosition && (
-          <div
-            className="absolute z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-64 max-h-64 overflow-hidden transition-opacity"
-            style={{
-              top: modalPosition.y,
-              left: modalPosition.x,
-            }}
-            onMouseEnter={handleModalMouseEnter}
-            onMouseLeave={handleModalMouseLeave}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <img
-                src={previewUser.profilePicture}
-                alt={previewUser.name}
-                className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-[#1C2C4C]">{previewUser.name}</p>
-                <p className="text-xs text-gray-500">{previewUser.points} poin</p>
+          <Link to={`/profile/${previewUser.userId}`}>
+            <div
+              className="absolute z-50 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-64 max-h-64 overflow-hidden transition-opacity"
+              style={{
+                top: modalPosition.y,
+                left: modalPosition.x,
+              }}
+              onMouseEnter={handleModalMouseEnter}
+              onMouseLeave={handleModalMouseLeave}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <img
+                  src={previewUser.profilePicture}
+                  alt={previewUser.name}
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-[#1C2C4C]">{previewUser.name}</p>
+                  <p className="text-xs text-gray-500">{previewUser.points} poin</p>
+                </div>
               </div>
-            </div>
 
-            <p className="text-xs italic text-gray-600 mb-2 line-clamp-2">
-              {previewUser.bio || 'Tidak ada bio'}
-            </p>
-          </div>
+              <p className="text-xs italic text-gray-600 mb-2 line-clamp-2">
+                {previewUser.bio || 'Tidak ada bio'}
+              </p>
+            </div>
+          </Link>
         )}
-    </div>
+      </div>
   )
 }
 

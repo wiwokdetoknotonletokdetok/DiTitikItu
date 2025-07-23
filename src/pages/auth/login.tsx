@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { loginUser } from '@/api/loginUser.ts'
 import type { WebResponse } from '@/dto/WebResponse.ts'
 import type { LoginUserResponse } from '@/dto/LoginUserResponse.ts'
@@ -107,6 +107,18 @@ export default function LoginUser() {
             Masuk
           </SubmitButton>
         </form>
+        <div className="flex items-center my-4">
+          <div className="flex-grow border-t border-gray-300"/>
+          <span className="mx-4 text-sm text-gray-500 uppercase">atau</span>
+          <div className="flex-grow border-t border-gray-300"/>
+        </div>
+        <Link
+          to="/"
+          className="flex items-center justify-center w-full h-[42px] text-gray-500 rounded-md border border-gray-300 hover:bg-gray-100 shadow
+            font-semibold transition duration-200 ease-in-out"
+        >
+          Gunakan sebagai tamu
+        </Link>
 
         <FormRedirectLink
           className="mt-4 text-center"
