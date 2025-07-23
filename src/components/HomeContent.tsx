@@ -2,6 +2,7 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import BookCard from '@/components/BookCard'
 import { useEffect, useState } from 'react'
 import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
+import { addBookToCollection } from '@/api/collections'
 
 type Props = {
   onSelectBook: (id: string) => void
@@ -33,7 +34,21 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
         <p>Loading...</p>
       ) : (
         recommendations.map((book) => (
-          <BookCard key={book.id} book={book} onClick={() => onSelectBook(book.id)} />
+          <BookCard
+            key={book.id}
+            book={book}
+            onClick={() => onSelectBook(book.id)}
+            showAddToCollectionButton
+            onAddToCollection={async (bookId) => {
+              try {
+                await addBookToCollection(bookId)
+                alert('Buku berhasil ditambahkan ke koleksi!')
+              } catch (error) {
+                alert('Gagal menambahkan buku ke koleksi.')
+                console.error(error)
+              }
+            }}
+          />
         ))
       )}
     </div>
