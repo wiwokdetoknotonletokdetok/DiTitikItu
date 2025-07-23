@@ -18,6 +18,7 @@ import { addBookToCollection } from '@/api/collections'
 import { fetchUserBooks } from '@/api/collections'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
 import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
+import { removeBookFromUser } from '@/api/collections'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -97,6 +98,22 @@ export default function HomeSidePanel({
   }
 }
 
+const handleRemoveFromCollection = async () => {
+  if (!isLoggedIn()) {
+    navigate('#login-required')
+    return
+  }
+
+  try {
+    await removeBookFromUser(book.id)
+    toast.success('Buku dihapus dari koleksi.')
+    setIsSaved(false)
+  } catch (error) {
+    console.error(error)
+    toast.error('Gagal menghapus buku dari koleksi.')
+  }
+}
+
   return (
     <div className="relative lg:w-[30%]">
       <div className="absolute top-2 right-2 z-10">
@@ -158,7 +175,7 @@ export default function HomeSidePanel({
           <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
           <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
             <button
-              onClick={handleAddToCollection}
+              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
               className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
               aria-label="Simpan buku"
             >
