@@ -73,13 +73,13 @@ export default function HomeSidePanel({
     if (isLoggedIn()) {
       navigate(`/books/${book.id}`);
     } else {
-      navigate('#login-required');
+      navigate('#edit');
     }
   };
 
   const handleAddToCollection = async () => {
   if (!isLoggedIn()) {
-    navigate('#login-required')
+    navigate('#collection')
     return
   }
 
@@ -95,7 +95,7 @@ export default function HomeSidePanel({
 
 const handleRemoveFromCollection = async () => {
   if (!isLoggedIn()) {
-    navigate('#login-required')
+    navigate('#collection')
     return
   }
 
@@ -111,7 +111,7 @@ const handleRemoveFromCollection = async () => {
 
   return (
     <div className="relative lg:w-[30%]">
-      <div className="absolute top-2 right-2 z-10  px-4">
+      <div className="absolute top-2 right-2 z-10">
         <Tooltip message="Edit buku ini">
           <button
             onClick={handleEdit}
@@ -121,10 +121,6 @@ const handleRemoveFromCollection = async () => {
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
-        <Modal hash="#edit">
-          <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
-          <LoginPromptContent/>
-        </Modal>
       </div>
       
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
@@ -157,9 +153,11 @@ const handleRemoveFromCollection = async () => {
             `}
           />
 
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition duration-300 pointer-events-none"/>
+          <div
+            className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition duration-300 pointer-events-none"/>
 
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
+          <div
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
             <span className="text-white text-sm font-medium">
               {isExpanded ? 'Klik untuk perkecil' : 'Klik untuk perbesar'}
             </span>
@@ -168,22 +166,19 @@ const handleRemoveFromCollection = async () => {
 
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
-          <div className="flex items-center px-4">
-            <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
-              <button
-                onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
-                className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
-                aria-label="Simpan buku"
-              >
-                {isSaved ? (
-                  <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
-                ) : (
-                  <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
-                )}
-
-              </button>
-            </Tooltip>
-          </div>
+          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
+            <button
+              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
+              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+              aria-label="Simpan buku"
+            >
+              {isSaved ? (
+                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors"/>
+              ) : (
+                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors"/>
+              )}
+            </button>
+          </Tooltip>
         </div>
 
         <div className="text-sm text-gray-700 mb-4">
@@ -256,22 +251,39 @@ const handleRemoveFromCollection = async () => {
                   <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
                 </div>
 
-              <div className="mb-4">
-                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
+                <div className="mb-4">
+                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                </div>
+
+                <div className="flex flex-col">
+                  {reviews.length > 0 && (
+                    <>
+                      <hr className="border-t border-gray-300 mb-4"/>
+                      <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                    </>
+                  )}
+                </div>
               </div>
-              
-              <hr className="border-t border-gray-300 mb-4" />
-              
-              <div className="flex flex-col">
-                {reviews.length > 0 && (
-                  <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />
-                )}
-              </div>
-            </div>
-          </TabPanel>
+            </TabPanel>
           </Tab>
         </div>
       </div>
+      {!isLoggedIn() && (
+        <>
+          <Modal hash="#edit">
+            <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
+            <LoginPromptContent/>
+          </Modal>
+          <Modal hash="#collection">
+            <h2 className="text-xl font-semibold mb-4">Simpan ke koleksi</h2>
+            <LoginPromptContent/>
+          </Modal>
+          <Modal hash="#review">
+            <h2 className="text-xl font-semibold mb-4">Menambah ulasan</h2>
+            <LoginPromptContent/>
+          </Modal>
+        </>
+      )}
     </div>
   )
 }

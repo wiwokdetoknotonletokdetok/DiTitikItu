@@ -63,17 +63,16 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
     }
   }
 
-
   return (
       <div>
         {myReview && (
           <div className="pt-3 mb-3">
             <div className="flex items-center gap-2 mb-1">
-            <Link to={`/profile/${myReview.userId}`}>
+              <Link to={`/profile/${myReview.userId}`}>
                 <img
                   src={myReview.profilePicture}
                   alt={myReview.name}
-                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
                 />
               </Link>
               <span>
@@ -151,16 +150,16 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
         {otherReviews.map((r, i) => (
           <div key={i} className="pt-3 mt-3 border-gray-300">
             <div className="flex items-center gap-2 mb-1">
-              {/* <Link to={`/profile/${r.userId}`}> */}
+               <Link to={`/profile/${r.userId}`}>
                 <img
                   src={r.profilePicture}
                   alt={r.name}
-                  className="w-10 h-10 rounded-full object-cover border border-[#1E497C]"
+                  className="w-10 h-10 rounded-full object-cover border border-white shadow"
                 />
-              {/* </Link> */}
+               </Link>
               <span>
                 <Link
-                  to="#"
+                  to={`/profile/${r.userId}`}
                   onMouseEnter={(e) => {
                     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
                     setModalPosition({ x: rect.right + 10, y: rect.top })
@@ -171,7 +170,7 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
                       setPreviewUser(null)
                     }, 300)
                   }}
-                  className="text-sm font-semibold text-[#1C2C4C] hover:underline"
+                  className="text-sm font-semibold text-[#1C2C4C]"
                 >
                   {r.name}
                 </Link>

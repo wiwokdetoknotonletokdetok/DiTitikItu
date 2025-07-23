@@ -7,6 +7,7 @@ import { Send } from 'lucide-react'
 import Modal from '@/components/Modal.tsx'
 import LoginPromptContent from '@/components/LoginPromptContent'
 import { useAuth } from '@/context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 interface AddBookReviewFormProps {
   bookId: string
@@ -18,13 +19,14 @@ export default function BookReviewForm({ bookId, onUpdateReviews }: AddBookRevie
   const [rating, setRating] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
     try {
-      await postReview(bookId, { message, rating })
+      await postReview(bookId, { message: message.trim(), rating })
       setMessage('')
       setRating(0)
       onUpdateReviews()
@@ -44,43 +46,37 @@ export default function BookReviewForm({ bookId, onUpdateReviews }: AddBookRevie
 
       <form onSubmit={handleSubmit} className="space-y-2">
         <div className="relative">
-          <textarea
-            className="w-5/6 border border-gray-300 rounded-lg p-3 pr-10 resize-none focus:outline-none focus:ring-2 focus:ring-[#1E497C]"
-            rows={3}
-            placeholder="Apa pendapatmu tentang buku ini?"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            required
-          />
+          <div className="mr-12">
+            <textarea
+              className="w-full block resize-none text-sm border rounded-md py-2 px-3 outline-none placeholder:text-sm border-gray-300 focus:border-[#1E497C]"
+              rows={3}
+              placeholder="Apa pendapatmu tentang buku ini?"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+            />
+          </div>
 
-          <div className="absolute bottom-4 right-4">
+          <div className="absolute bottom-1 right-1">
             <Tooltip message="Kirim ulasan">
-              {isLoggedIn() ? (
               <button
-                type="submit"
+                type={!isLoggedIn() ? 'button' : 'submit'}
+                onClick={!isLoggedIn() ? () => navigate('#review') : () => {
+                }}
                 className="w-[36px] h-[36px] rounded-full text-white bg-[#1E497C] hover:bg-[#5C8BC1] shadow flex items-center justify-center transition"
-                aria-label="Kirim ulasan"
+                aria-label="Login untuk mengulas"
               >
-                  <Send className="w-4 h-4" />
-                </button>
-              ) : (
-                <a
-                  href="#login-required"
-                  className="w-[36px] h-[36px] rounded-full text-white bg-[#1E497C] hover:bg-[#5C8BC1] shadow flex items-center justify-center transition"
-                  aria-label="Login untuk mengulas"
-                >
-                  <Send className="w-4 h-4" />
-                </a>
-              )}
+                <Send size={20} style={{ transform: 'translate(-1px, 1px)' }} />
+              </button>
             </Tooltip>
-              </div>
-            </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
-          </form>
-        <Modal hash="#reviews">
-          <h2 className="text-xl font-semibold mb-4">Ulasan</h2>
-          <LoginPromptContent />
-        </Modal>
+          </div>
+        </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+      </form>
+      <Modal hash="#reviews">
+        <h2 className="text-xl font-semibold mb-4">Ulasan</h2>
+        <LoginPromptContent/>
+      </Modal>
     </div>
   )
 }
