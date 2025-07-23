@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import { getBooksSemantic } from '@/api/getBooksSemantic.ts'
-import type { WebResponse } from '@/dto/WebResponse.ts'
+import { useEffect, useRef, useState } from 'react'
+import { getBooksSemantic } from '@/api/BooksSemantic.ts'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 import Tooltip from '@/components/Tooltip.tsx'
-import { X, Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { getBooksKeyword } from '@/api/BooksKeyword.ts'
 
 interface LiveSearchProps {
   onSelectBook: (bookId: string) => void
@@ -25,20 +25,38 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
     if (query.length > 2) {
       setLoading(true)
       setIsTyping(true)
+      setIsOpen(true)
 
       typingTimeout = setTimeout(() => {
         const fetchData = async () => {
-          try {
-            const response: WebResponse<BookSummaryDTO[]> = await getBooksSemantic(query)
-            setResults(response.data)
-            setIsOpen(true)
-          } catch {
-            setResults([])
-            setIsOpen(false)
-          } finally {
-            setLoading(false)
-            setIsTyping(false)
+          const result: BookSummaryDTO[] = []
+
+          const addUniqueBooks = (books: BookSummaryDTO[]) => {
+            const seenIds = new Set(result.map(b => b.id))
+            for (const book of books) {
+              if (!seenIds.has(book.id)) {
+                result.push(book)
+                seenIds.add(book.id)
+                if (result.length >= 5) break
+              }
+            }
           }
+
+          try {
+            const semanticResponse = await getBooksSemantic(query)
+            addUniqueBooks(semanticResponse.data)
+          } catch { /* silently fail */ }
+
+          if (result.length < 5) {
+            try {
+              const keywordResponse = await getBooksKeyword(query)
+              addUniqueBooks(keywordResponse.data)
+            } catch { /* silently fail */ }
+          }
+
+          setResults(result)
+          setLoading(false)
+          setIsTyping(false)
         }
 
         fetchData()
@@ -148,7 +166,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
 
 function SkeletonItem(){
   return (
-    <div className="flex items-center space-x-4 p-3 border-b border-gray-200 animate-pulse bg-white">
+    <div className="flex items-center space-x-4 p-3 animate-pulse bg-white">
       <div className="w-24 h-36 bg-gray-300 rounded-md" />
       <div className="flex-1 space-y-3 py-1">
         <div className="h-5 bg-gray-300 rounded w-3/4" />
