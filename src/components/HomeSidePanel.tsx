@@ -166,22 +166,24 @@ const handleRemoveFromCollection = async () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
-          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
-            <button
-              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
-              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
-              aria-label="Simpan buku"
-            >
-              {isSaved ? (
-                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
-              ) : (
-                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
-              )}
+          <div className="flex items-center px-4">
+            <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
+              <button
+                onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
+                className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+                aria-label="Simpan buku"
+              >
+                {isSaved ? (
+                  <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors" />
+                ) : (
+                  <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors" />
+                )}
 
-            </button>
-          </Tooltip>
+              </button>
+            </Tooltip>
+          </div>
         </div>
 
         <div className="text-sm text-gray-700 mb-4">
