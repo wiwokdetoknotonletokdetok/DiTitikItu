@@ -4,15 +4,20 @@ import BookReviewForm from '@/components/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/components/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
-import { ChevronRight, MapPin } from 'lucide-react'
+import { ChevronRight, MapPin, Pencil } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
-import { Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import Modal from './Modal'
-import LoginPromptContent from './LoginPromptContent'
+import Modal from '@/components/Modal'
+import LoginPromptContent from '@/components/LoginPromptContent'
+import toast from 'react-hot-toast'
+import { addBookToCollection } from '@/api/collections'
+import { fetchUserBooks } from '@/api/collections'
+import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
+import { removeBookFromUser } from '@/api/collections'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -34,10 +39,7 @@ type Props = {
 }
 
 export default function HomeSidePanel({ 
-  onUpdateLocations, 
-  onUpdateReviews, 
-  onSaveAddLocation, 
-  onCancelAddLocation, 
+  onUpdateReviews,
   newMarkerPosition, 
   onAddLocationClick, 
   book, 
@@ -49,16 +51,63 @@ export default function HomeSidePanel({
   const [isExpanded, setIsExpanded] = useState(false)
 
   const { isLoggedIn, user } = useAuth()
-  const existingReview = reviews.find((r) => r.userId === user?.id)
   const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(false)
+
+  useEffect(() => {
+  const checkIfSaved = async () => {
+    if (!isLoggedIn() || !user) return
+    try {
+      const books = await fetchUserBooks(user.id)
+      const saved = books.some((b) => b.id === book.id)
+      setIsSaved(saved)
+    } catch (err) {
+      console.error('Gagal memuat koleksi pengguna:', err)
+    }
+  }
+
+  checkIfSaved()
+}, [book.id, isLoggedIn, user])
   
   const handleEdit = () => {
     if (isLoggedIn()) {
       navigate(`/books/${book.id}`);
     } else {
-      navigate('#login-required');
+      navigate('#edit');
     }
   };
+
+  const handleAddToCollection = async () => {
+  if (!isLoggedIn()) {
+    navigate('#collection')
+    return
+  }
+
+  try {
+    await addBookToCollection(book.id)
+    toast.success('Buku berhasil ditambahkan ke koleksi!')
+    setIsSaved(true)
+  } catch (error) {
+    console.error(error)
+    toast.error('Gagal menambahkan buku ke koleksi.')
+  }
+}
+
+const handleRemoveFromCollection = async () => {
+  if (!isLoggedIn()) {
+    navigate('#collection')
+    return
+  }
+
+  try {
+    await removeBookFromUser(book.id)
+    toast.success('Buku dihapus dari koleksi.')
+    setIsSaved(false)
+  } catch (error) {
+    console.error(error)
+    toast.error('Gagal menghapus buku dari koleksi.')
+  }
+}
 
   return (
     <div className="relative lg:w-[30%]">
@@ -72,10 +121,6 @@ export default function HomeSidePanel({
             <Pencil size={16} className="text-gray-600" />
           </button>
         </Tooltip>
-        <Modal hash="#login-required">
-          <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
-          <LoginPromptContent />
-        </Modal>
       </div>
       
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
@@ -108,16 +153,33 @@ export default function HomeSidePanel({
             `}
           />
 
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition duration-300 pointer-events-none"/>
+          <div
+            className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition duration-300 pointer-events-none"/>
 
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
+          <div
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
             <span className="text-white text-sm font-medium">
               {isExpanded ? 'Klik untuk perkecil' : 'Klik untuk perbesar'}
             </span>
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-[#1C2C4C] mb-2">{book.title}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
+          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
+            <button
+              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
+              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
+              aria-label="Simpan buku"
+            >
+              {isSaved ? (
+                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors"/>
+              ) : (
+                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors"/>
+              )}
+            </button>
+          </Tooltip>
+        </div>
 
         <div className="text-sm text-gray-700 mb-4">
           <p><span className="font-medium">Penulis:</span> {book.authorNames.join(', ')}</p>
@@ -165,27 +227,7 @@ export default function HomeSidePanel({
                 <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
               )}
               <div className="sticky bottom-0 left-0 right-0 pt-4 pb-6">
-                {newMarkerPosition ? (
-                  <div className="flex justify-between space-x-4 px-4">
-                    <button
-                      onClick={() => {
-                        onSaveAddLocation?.()
-                        onUpdateLocations?.()
-                      }}
-                      className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition flex-1"
-                    >
-                      Simpan Lokasi
-                    </button>
-                    <button
-                      onClick={() => {
-                        onCancelAddLocation?.()
-                      }}
-                      className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-300 transition flex-1"
-                    >
-                      Batal
-                    </button>
-                  </div>
-                ) : (
+                {!newMarkerPosition && (
                   <div className="flex justify-end px-4">
                     <Tooltip message="Tambah lokasi">
                       <button
@@ -193,7 +235,7 @@ export default function HomeSidePanel({
                         className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
                         aria-label="Tambah lokasi"
                       >
-                        <MapPin size={20} />
+                        <MapPin size={20}/>
                       </button>
                     </Tooltip>
                   </div>
@@ -201,32 +243,47 @@ export default function HomeSidePanel({
               </div>
             </TabPanel>
 
-          <TabPanel id="reviews">
-            <div>
-              <div className="flex flex-col items-center mb-6">
-                <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
-                <StarRating rating={book.totalRatings} size={5} />
-                <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
-              </div>
+            <TabPanel id="reviews">
+              <div>
+                <div className="flex flex-col items-center mb-6">
+                  <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
+                  <StarRating rating={book.totalRatings} size={5}/>
+                  <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
+                </div>
 
-              <div className="mb-4">
-                {isLoggedIn() && !existingReview && (
-                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} />
-                )}
+                <div className="mb-4">
+                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                </div>
+
+                <div className="flex flex-col">
+                  {reviews.length > 0 && (
+                    <>
+                      <hr className="border-t border-gray-300 mb-4"/>
+                      <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                    </>
+                  )}
+                </div>
               </div>
-              
-              <hr className="border-t border-gray-300 mb-4" />
-              
-              <div className="flex flex-col">
-                {reviews.length > 0 && (
-                  <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews} />
-                )}
-              </div>
-            </div>
-          </TabPanel>
+            </TabPanel>
           </Tab>
         </div>
       </div>
+      {!isLoggedIn() && (
+        <>
+          <Modal hash="#edit">
+            <h2 className="text-xl font-semibold mb-4">Edit buku</h2>
+            <LoginPromptContent/>
+          </Modal>
+          <Modal hash="#collection">
+            <h2 className="text-xl font-semibold mb-4">Simpan ke koleksi</h2>
+            <LoginPromptContent/>
+          </Modal>
+          <Modal hash="#review">
+            <h2 className="text-xl font-semibold mb-4">Menambah ulasan</h2>
+            <LoginPromptContent/>
+          </Modal>
+        </>
+      )}
     </div>
   )
 }

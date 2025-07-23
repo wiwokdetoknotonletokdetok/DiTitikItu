@@ -13,6 +13,12 @@ import Navbar from '@/components/Navbar.tsx'
 import FollowButton from '@/components/FollowButton.tsx'
 import { followUser, getUsersIdFollowStatus, unfollowUser } from '@/api/followUser.ts'
 import LinkButton from '@/components/LinkButton.tsx'
+import { fetchUserBooks } from '@/api/collections'
+import BookCard from '@/components/BookCard'
+import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
+import toast from 'react-hot-toast'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { removeBookFromUser } from '@/api/collections'
 
 function UserProfilePage() {
   const navigate = useNavigate()
@@ -23,6 +29,35 @@ function UserProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFollowed, setIsFollowed] = useState(false)
+  const [books, setBooks] = useState<BookSummaryDTO[]>([])
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
+
+  const handleRemove = async () => {
+  if (!pendingDelete) return
+    const toastId = toast.loading('Menghapus buku...')
+    try {
+      await removeBookFromUser(pendingDelete.id)
+      setBooks(prev => prev.filter(b => b.id !== pendingDelete.id))
+      toast.success('Buku berhasil dihapus.', { id: toastId })
+    } catch (err) {
+      toast.error('Gagal menghapus buku.', { id: toastId })
+    } finally {
+      setPendingDelete(null)
+    }
+  }
+
+  useEffect(() => {
+    async function fetchBooks() {
+      if (!userId) return
+      try {
+        const books = await fetchUserBooks(userId)
+        setBooks(books)
+      } catch (e) {
+        console.error('Gagal mengambil koleksi user:', e)
+      }
+    }
+    fetchBooks()
+  }, [userId])
 
   useEffect(() => {
     async function fetchUserProfile(userId: string) {
@@ -154,7 +189,8 @@ function UserProfilePage() {
             </Modal>
           )}
 
-          <div className="mt-10 border-t pt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          <div className="mt-10 border-t pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-8">
             <div
               onClick={profile.followers > 0 ? () => navigate('#followers') : undefined}
               className={`cursor-pointer group ${profile.followers === 0 ? 'pointer-events-none opacity-50' : ''}`}
@@ -196,7 +232,37 @@ function UserProfilePage() {
               <p className="text-xl text-gray-900 font-bold">{profile.points}</p>
             </div>
           </div>
+
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-left px-1">Koleksi</h3>
+            {books.length === 0 ? (
+              <p className="text-gray-500 px-1">Belum ada buku.</p>
+            ) : (
+              <div className="overflow-x-auto px-1">
+                <div className="inline-flex gap-4 w-max">
+                  {books.map((book) => (
+                    <div key={book.id} className="w-32 sm:w-40 flex-shrink-0 relative">
+                      <BookCard
+                        showTitle={false}
+                        book={book}
+                        onClick={() => navigate(`/${book.id}`)}
+                        showRemoveButton={user?.id === userId}
+                        onRemove={() => setPendingDelete({ id: book.id, title: book.title })}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+        </div>
+        <ConfirmDialog
+          open={!!pendingDelete}
+          message={`Apakah Anda yakin ingin menghapus "${pendingDelete?.title}" dari koleksi?`}
+          onConfirm={handleRemove}
+          onCancel={() => setPendingDelete(null)}
+        />
         <div className="w-80 rounded-3xl shadow-lg overflow-y-auto">
         </div>
       </div>

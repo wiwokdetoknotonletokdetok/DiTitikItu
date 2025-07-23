@@ -118,7 +118,7 @@ export default function BookUpdatePage() {
             />
             <FieldItemWithLoading
               label="ISBN"
-              value={isbn}
+              value={formatISBN(isbn)}
               to={`/books/${id}/isbn`}
               state={{ value: bookRequest }}
               isLoading={loading}
@@ -178,4 +178,27 @@ export default function BookUpdatePage() {
       </>
     </PrivateRoute>
   )
+}
+
+function formatISBN(isbn: string) {
+  const cleanIsbn = isbn.replace(/[^0-9Xx]/g, '')
+
+  if (cleanIsbn.length === 13) {
+    return (
+      cleanIsbn.slice(0, 3) + '-' +
+      cleanIsbn.slice(3, 6) + '-' +
+      cleanIsbn.slice(6, 9) + '-' +
+      cleanIsbn.slice(9, 12) + '-' +
+      cleanIsbn.slice(12)
+    )
+  } else if (cleanIsbn.length === 10) {
+    return (
+      cleanIsbn.slice(0, 1) + '-' +
+      cleanIsbn.slice(1, 4) + '-' +
+      cleanIsbn.slice(4, 9) + '-' +
+      cleanIsbn.slice(9)
+    )
+  } else {
+    return isbn
+  }
 }

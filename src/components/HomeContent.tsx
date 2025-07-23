@@ -33,7 +33,11 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
         <p>Loading...</p>
       ) : (
         recommendations.map((book) => (
-          <BookCard key={book.id} book={book} onClick={() => onSelectBook(book.id)} />
+          <BookCard
+            key={book.id}
+            book={book}
+            onClick={() => onSelectBook(book.id)}
+          />
         ))
       )}
     </div>
