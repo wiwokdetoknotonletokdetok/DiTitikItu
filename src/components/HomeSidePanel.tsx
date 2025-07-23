@@ -126,7 +126,6 @@ export default function HomeSidePanel({
           <p><span className="font-medium">Tahun Terbit:</span> {book.publishedYear}</p>
           <p><span className="font-medium">Bahasa:</span> {book.language}</p>
           <p><span className="font-medium">Halaman:</span> {book.totalPages}</p>
-          <p><span className="font-medium">Rating:</span> {book.totalRatings.toFixed(1)} ⭐</p>
         </div>
 
         <div className="mb-4 text-sm text-gray-600 whitespace-pre-wrap">
@@ -150,15 +149,31 @@ export default function HomeSidePanel({
             <TabButton id="reviews">Ulasan</TabButton>
 
             <TabPanel id="locations">
-              <div className="pb-16">
-                {newMarkerPosition && (
-                  <div className="mb-3 space-y-2">
+              {locations.length > 0 ? (
+                <ul className="space-y-2 text-sm text-gray-600">
+                  {locations.map((loc) => (
+                    <li
+                      key={loc.id}
+                      className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
+                      onClick={() => onFlyTo(loc.coordinates[0], loc.coordinates[1])}
+                    >
+                      <p className="font-semibold text-gray-800">{loc.locationName}</p>
+                      <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
+              )}
+              <div className="sticky bottom-0 left-0 right-0 pt-4 pb-6">
+                {newMarkerPosition ? (
+                  <div className="flex justify-between space-x-4 px-4">
                     <button
                       onClick={() => {
                         onSaveAddLocation?.()
                         onUpdateLocations?.()
                       }}
-                      className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition w-full"
+                      className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition flex-1"
                     >
                       Simpan Lokasi
                     </button>
@@ -166,31 +181,13 @@ export default function HomeSidePanel({
                       onClick={() => {
                         onCancelAddLocation?.()
                       }}
-                      className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-300 transition w-full"
+                      className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-300 transition flex-1"
                     >
                       Batal
                     </button>
                   </div>
-                )}
-                
-                {locations.length > 0 ? (
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {locations.map((loc) => (
-                      <li
-                        key={loc.id}
-                        className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
-                        onClick={() => onFlyTo(loc.coordinates[0], loc.coordinates[1])}
-                      >
-                        <p className="font-semibold text-gray-800">{loc.locationName}</p>
-                        <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
-                      </li>
-                    ))}
-                  </ul>
                 ) : (
-                  <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
-                )}
-                {!newMarkerPosition && (
-                  <div className="sticky bottom-0 flex justify-end pr-4 mt-4">
+                  <div className="flex justify-end px-4">
                     <Tooltip message="Tambah lokasi">
                       <button
                         onClick={onAddLocationClick}
