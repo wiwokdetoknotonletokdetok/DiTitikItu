@@ -1,5 +1,5 @@
 import { useRef, useState} from 'react'
-import { UploadCloud, Trash2 } from 'lucide-react'
+import { UploadCloud } from 'lucide-react'
 
 export default function BookImageUploader({initialUrl, onUpload, isUploading = false}: {
   initialUrl?: string
@@ -57,7 +57,6 @@ export default function BookImageUploader({initialUrl, onUpload, isUploading = f
             }}
             className="absolute top-2 right-2 text-red-600 hover:text-red-800"
           >
-            <Trash2 size={18} />
           </button>
         </>
       ) : (
