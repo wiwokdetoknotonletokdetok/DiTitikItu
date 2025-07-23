@@ -1,17 +1,26 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 interface Props {
   book: BookSummaryDTO
   onClick?: () => void
   showAddToCollectionButton?: boolean
   onAddToCollection?: (bookId: string) => void
+  showRemoveButton?: boolean
+  onRemove?: () => void
 }
 
-export default function BookCard({ book, onClick, showAddToCollectionButton, onAddToCollection }: Props) {
+export default function BookCard({
+  book,
+  onClick,
+  showAddToCollectionButton,
+  onAddToCollection,
+  showRemoveButton,
+  onRemove
+}: Props) {
   return (
     <div
-      className='relative rounded-lg overflow-hidden group cursor-pointer'
+      className="relative rounded-lg overflow-hidden group cursor-pointer"
       onClick={onClick}
     >
       <img
@@ -39,6 +48,19 @@ export default function BookCard({ book, onClick, showAddToCollectionButton, onA
         >
           <Plus size={14} />
           <span>Tambah</span>
+        </button>
+      )}
+
+      {showRemoveButton && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove?.()
+          }}
+          className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 z-10 flex items-center space-x-1"
+        >
+          <X size={14} />
+          <span>Hapus</span>
         </button>
       )}
     </div>

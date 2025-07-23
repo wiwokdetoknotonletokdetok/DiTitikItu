@@ -34,25 +34,27 @@ export default function UserCollection() {
     const toastId = toast.loading('Menghapus buku...')
 
     try {
-        await removeBookFromUser(bookId)
-        setBooks(prev => prev.filter(book => book.id !== bookId))
-        setTotal(prev => prev - 1)
-        toast.success('Buku berhasil dihapus.', { id: toastId })
+      await removeBookFromUser(bookId)
+      setBooks(prev => prev.filter(book => book.id !== bookId))
+      setTotal(prev => prev - 1)
+      toast.success('Buku berhasil dihapus.', { id: toastId })
     } catch (err) {
-        toast.error('Gagal menghapus buku.', { id: toastId })
+      toast.error('Gagal menghapus buku.', { id: toastId })
     } finally {
-        setPendingDelete(null)
+      setPendingDelete(null)
     }
-    }
+  }
 
-  if (!userId) return <p>Anda belum login.</p>
+  if (!userId) return <p className="p-6">Anda belum login.</p>
 
   return (
   <>
     <Navbar />
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-2">Koleksi Buku Saya</h2>
-      <p className="mb-4 text-gray-600">Total koleksi: {total} buku</p>
+
+    {/* lebar sama seperti home (≥7xl) + padding */}
+    <div className="max-w-7xl mx-auto px-4 py-8">    
+      <h1 className="text-2xl font-bold mb-2 text-gray-800">Koleksi Buku Saya</h1>
+      <p className="mb-6 text-gray-600">Total koleksi: {total} buku</p>
 
       {books.length === 0 ? (
         <p>Belum ada buku dalam koleksi.</p>
@@ -60,16 +62,12 @@ export default function UserCollection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {books.map(book => (
             <div key={book.id} className="relative">
-              <BookCard book={book} onClick={() => navigate(`/books/${book.id}`)} />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setPendingDelete({ id: book.id, title: book.title })
-                }}
-                className="absolute top-2 right-2 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 z-10"
-              >
-                Hapus
-              </button>
+              <BookCard
+                book={book}
+                onClick={() => navigate(`/books/${book.id}`)}
+                showRemoveButton
+                onRemove={() => setPendingDelete({ id: book.id, title: book.title })}
+              />
             </div>
           ))}
         </div>
@@ -77,12 +75,11 @@ export default function UserCollection() {
     </div>
 
     <ConfirmDialog
-      open={!!pendingDelete}
-      message={`Apakah Anda yakin ingin menghapus "${pendingDelete?.title}" dari koleksi?`}
-      onConfirm={handleRemove}
-      onCancel={() => setPendingDelete(null)}
+    open={!!pendingDelete}
+    message={`Apakah Anda yakin ingin menghapus "${pendingDelete?.title}" dari koleksi?`}
+    onConfirm={handleRemove}
+    onCancel={() => setPendingDelete(null)}
     />
-  </>
-)
-
+    </>
+  )
 }
