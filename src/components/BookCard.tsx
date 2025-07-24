@@ -64,12 +64,9 @@ export default function BookCard({
             e.stopPropagation()
             onRemove?.()
           }}
-          title="Hapus dari koleksi"
           className="absolute top-0 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
         >
-          <Tooltip message="Hapus dari koleksi">
             <BookmarkSolid className="w-6 h-6" style={{ transform: 'scaleY(2)'}}/>
-          </Tooltip>
         </button>
       )}
     </div>
