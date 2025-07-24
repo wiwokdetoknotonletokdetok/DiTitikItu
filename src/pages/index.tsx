@@ -21,9 +21,11 @@ import { fetchBookLocations } from '@/api/bookLocation.ts'
 import LocationForm from '@/components/LocationForm.tsx'
 import { Check, X } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
+import { useAuth } from '@/context/AuthContext.tsx'
 
 export default function Home() {
   const { id: bookId } = useParams<{ id: string }>()
+  const { isLoggedIn } = useAuth()
   const [userPosition, setUserPosition] = useState<UserPosition>()
   const navigate = useNavigate()
   const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
@@ -230,9 +232,11 @@ export default function Home() {
                 navigate('/')
               }}
               onAddLocationClick={() => {
-                if (userPosition) {
-                  setNewMarkerPosition({lat: userPosition.latitude, lng: userPosition.longitude})
-                  setFlyToLocation({latitude: userPosition.latitude, longitude: userPosition.longitude})
+                if (!isLoggedIn()) {
+                  navigate('#location')
+                } else if (userPosition) {
+                  setNewMarkerPosition({ lat: userPosition.latitude, lng: userPosition.longitude })
+                  setFlyToLocation({ latitude: userPosition.latitude, longitude: userPosition.longitude })
                   handleFlyTo()
                 }
               }}

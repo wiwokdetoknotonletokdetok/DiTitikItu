@@ -4,20 +4,18 @@ import BookReviewForm from '@/components/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/components/BookReviewList'
 import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
-import { ChevronRight, MapPin, Pencil } from 'lucide-react'
+import { ChevronRight, MapPinPlus, Pencil } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { useNavigate } from 'react-router-dom'
 import Modal from '@/components/Modal'
 import LoginPromptContent from '@/components/LoginPromptContent'
 import toast from 'react-hot-toast'
-import { addBookToCollection } from '@/api/collections'
-import { fetchUserBooks } from '@/api/collections'
+import { addBookToCollection, fetchUserBooks, removeBookFromUser } from '@/api/collections'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
 import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
-import { removeBookFromUser } from '@/api/collections'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
@@ -204,69 +202,67 @@ const handleRemoveFromCollection = async () => {
           </div>
         </div>
 
-        <div className="relative">
-          <Tab defaultTab="locations">
-            <TabButton id="locations">Lokasi</TabButton>
-            <TabButton id="reviews">Ulasan</TabButton>
+        {!newMarkerPosition && (
+          <div className="flex justify-center mb-6">
+            <div className="block">
+              <button
+                onClick={onAddLocationClick}
+                className="px-4 h-[42px] w-full bg-[#1E497C] font-semibold text-white rounded-full shadow-md flex items-center justify-center hover:bg-[#5C8BC1] transition-colors"
+                aria-label="Tambah lokasi"
+              >
+                <MapPinPlus size={20}/>
+                <span className="ml-2">Tambah lokasi</span>
+              </button>
+            </div>
+          </div>
+        )}
 
-            <TabPanel id="locations">
-              {locations.length > 0 ? (
-                <ul className="space-y-2 text-sm text-gray-600">
-                  {locations.map((loc) => (
-                    <li
-                      key={loc.id}
-                      className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
-                      onClick={() => onFlyTo(loc.coordinates[0], loc.coordinates[1])}
-                    >
-                      <p className="font-semibold text-gray-800">{loc.locationName}</p>
-                      <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
-              )}
-              <div className="sticky bottom-0 left-0 right-0 pt-4 pb-6">
-                {!newMarkerPosition && (
-                  <div className="flex justify-end px-4">
-                    <Tooltip message="Tambah lokasi">
-                      <button
-                        onClick={onAddLocationClick}
-                        className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
-                        aria-label="Tambah lokasi"
-                      >
-                        <MapPin size={20}/>
-                      </button>
-                    </Tooltip>
-                  </div>
+        <Tab defaultTab="locations">
+          <TabButton id="locations">Lokasi</TabButton>
+          <TabButton id="reviews">Ulasan</TabButton>
+
+          <TabPanel id="locations">
+            {locations.length > 0 ? (
+              <ul className="space-y-2 text-sm text-gray-600">
+                {locations.map((loc) => (
+                  <li
+                    key={loc.id}
+                    className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
+                    onClick={() => onFlyTo(loc.coordinates[0], loc.coordinates[1])}
+                  >
+                    <p className="font-semibold text-gray-800">{loc.locationName}</p>
+                    <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-center text-gray-500">Belum ada lokasi tersedia untuk buku ini.</p>
+            )}
+          </TabPanel>
+
+          <TabPanel id="reviews">
+            <div>
+              <div className="flex flex-col items-center mb-6">
+                <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
+                <StarRating rating={book.totalRatings} size={5}/>
+                <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
+              </div>
+
+              <div className="mb-4">
+                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+              </div>
+
+              <div className="flex flex-col">
+                {reviews.length > 0 && (
+                  <>
+                    <hr className="border-t border-gray-300 mb-4"/>
+                    <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                  </>
                 )}
               </div>
-            </TabPanel>
-
-            <TabPanel id="reviews">
-              <div>
-                <div className="flex flex-col items-center mb-6">
-                  <p className="text-2xl font-bold text-gray-800">{book.totalRatings.toFixed(1)}</p>
-                  <StarRating rating={book.totalRatings} size={5}/>
-                  <p className="text-sm text-gray-500 mt-1">{book.totalReviews} ulasan</p>
-                </div>
-
-                <div className="mb-4">
-                  <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews}/>
-                </div>
-
-                <div className="flex flex-col">
-                  {reviews.length > 0 && (
-                    <>
-                      <hr className="border-t border-gray-300 mb-4"/>
-                      <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews}/>
-                    </>
-                  )}
-                </div>
-              </div>
-            </TabPanel>
-          </Tab>
-        </div>
+            </div>
+          </TabPanel>
+        </Tab>
       </div>
       {!isLoggedIn() && (
         <>
@@ -280,6 +276,10 @@ const handleRemoveFromCollection = async () => {
           </Modal>
           <Modal hash="#review">
             <h2 className="text-xl font-semibold mb-4">Menambah ulasan</h2>
+            <LoginPromptContent/>
+          </Modal>
+          <Modal hash="#location">
+            <h2 className="text-xl font-semibold mb-4">Menambah lokasi</h2>
             <LoginPromptContent/>
           </Modal>
         </>
