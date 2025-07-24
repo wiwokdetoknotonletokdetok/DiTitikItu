@@ -21,6 +21,8 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import { removeBookFromUser } from '@/api/collections'
 import { fetchUserRanking } from '@/api/ranking'
 import type { UserRankingDTO } from '@/dto/UserRankingDTO'
+import type { PageInfo } from '@/dto/PageInfo'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 function UserProfilePage() {
   const navigate = useNavigate()
@@ -34,6 +36,8 @@ function UserProfilePage() {
   const [books, setBooks] = useState<BookSummaryDTO[]>([])
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
   const [ranking, setRanking] = useState<UserRankingDTO[]>([])
+  const [pageInfo, setPageInfo] = useState<PageInfo>()
+  const [currentPage, setCurrentPage] = useState(1)
 
   const handleRemove = async () => {
   if (!pendingDelete) return
@@ -50,8 +54,15 @@ function UserProfilePage() {
   }
 
   useEffect(() => {
-    fetchUserRanking().then(setRanking).catch(console.error)
-  }, [])
+    fetchUserRanking(currentPage, 10)
+      .then((res) => {
+        setRanking(res.data)
+        setPageInfo(res.pageInfo)
+      })
+      .catch((err) => {
+        console.error('Gagal fetch ranking:', err)
+      })
+  }, [currentPage])
 
   useEffect(() => {
     async function fetchBooks() {
@@ -272,8 +283,33 @@ function UserProfilePage() {
         />
         <div className="w-full lg:w-80 mt-4 lg:mt-0 rounded-3xl shadow-lg overflow-y-auto bg-white">
           <div className="sticky top-0 bg-white z-10 p-6 border-b">
-            <h2 className="text-xl font-semibold text-center">Peringkat</h2>
-          </div>
+            <div className="sticky top-0 bg-white z-10 p-6 border-b">
+              <div className="flex items-center justify-between">
+                <button
+                  className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50"
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+
+                <div className="text-center flex-1">
+                  <h2 className="text-xl font-semibold">Peringkat</h2>
+                  <p className="text-gray-500 text-sm">
+                    Halaman {pageInfo?.currentPage} dari {pageInfo?.totalPages}
+                  </p>
+                </div>
+
+                <button
+                  className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50"
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  disabled={pageInfo && currentPage >= pageInfo.totalPages}
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+            </div>
+              </div>
           <div className="p-6 pt-4">
             <ul className="space-y-4">
               {ranking.map((user, index) => (
