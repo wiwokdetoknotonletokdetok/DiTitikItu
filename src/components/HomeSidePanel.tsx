@@ -231,7 +231,13 @@ const handleRemoveFromCollection = async () => {
                   <div className="flex justify-end px-4">
                     <Tooltip message="Tambah lokasi">
                       <button
-                        onClick={onAddLocationClick}
+                        onClick={() => {
+                          if (!isLoggedIn()) {
+                            navigate('#locations')
+                          } else {
+                            onAddLocationClick()
+                          }
+                        }}
                         className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
                         aria-label="Tambah lokasi"
                       >

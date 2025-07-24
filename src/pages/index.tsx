@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext'
 import { useEffect, useRef, useState } from 'react'
 import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getBooksId } from '@/api/getBooksId'
@@ -21,6 +22,7 @@ import { fetchBookLocations } from '@/api/bookLocation.ts'
 import LocationForm from '@/components/LocationForm.tsx'
 import { Check, X } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
+import LoginPromptContent from '@/components/LoginPromptContent'
 
 export default function Home() {
   const { id: bookId } = useParams<{ id: string }>()
@@ -37,6 +39,7 @@ export default function Home() {
   const [newMarkerPosition, setNewMarkerPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
   const [flyTrigger, setFlyTrigger] = useState(0)
+  const { isLoggedIn } = useAuth()
 
   useEffect(() => {
     if (bookId && (!selectedBook || selectedBook.id !== bookId)) {
@@ -260,11 +263,18 @@ export default function Home() {
           />
         </div>
         <Modal hash="#locations">
-          <LocationForm
-            onSubmit={handleNewLocation}
-            locationName={locationName}
-            setLocationName={setLocationName}
-          />
+          {isLoggedIn() ? (
+            <LocationForm
+              onSubmit={handleNewLocation}
+              locationName={locationName}
+              setLocationName={setLocationName}
+            />
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Menambah lokasi buku</h2>
+              <LoginPromptContent />
+            </>
+          )}
         </Modal>
       </div>
     </div>
