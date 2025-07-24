@@ -5,7 +5,7 @@ import { ApiError } from '@/exception/ApiError'
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export async function fetchUserRanking(page = 1, size = 10): Promise<WebResponse<UserRankingDTO[]>> {
-  const res = await fetch(`http://localhost:8080/rank?page=${page}&size=${size}`, {
+  const res = await fetch(`${BASE_URL}/rank?page=${page}&size=${size}`, {
     method: 'GET',
     headers: {
       Accept: 'application/json'
