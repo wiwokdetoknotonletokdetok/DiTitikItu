@@ -1,7 +1,6 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import { Plus } from 'lucide-react'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
-import Tooltip from '@/components/Tooltip.tsx'
 
 interface Props {
   book: BookSummaryDTO
