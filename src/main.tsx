@@ -4,6 +4,16 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import { AuthProvider } from '@/context/AuthContext.tsx'
 import './index.css'
+import L from 'leaflet'
+
+delete (L.Icon.Default.prototype as any)._getIconUrl
+
+L.Icon.Default.mergeOptions({
+  iconUrl: '/leaflet/marker-icon.png',
+  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+  shadowUrl: '/leaflet/marker-shadow.png',
+})
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
