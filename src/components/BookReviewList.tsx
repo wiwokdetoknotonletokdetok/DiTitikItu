@@ -132,7 +132,7 @@ const handleReviewMouseLeave = () => {
   return (
       <div className="relative">
         {myReview && (
-          <div className="pt-3 mb-3">
+          <div className="pt-3 mb-3 rounded-md p-2">
             <div className="flex items-center gap-2 mb-1">
               <Link to={`/profile/${myReview.userId}`}>
                 <img

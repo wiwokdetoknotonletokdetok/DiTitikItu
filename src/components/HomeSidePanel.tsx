@@ -206,7 +206,13 @@ const handleRemoveFromCollection = async () => {
           <div className="flex justify-center mb-6">
             <div className="block">
               <button
-                onClick={onAddLocationClick}
+                onClick={() => {
+                  if (!isLoggedIn()) {
+                    navigate('#locations')
+                  } else {
+                    onAddLocationClick()
+                  }
+                }}
                 className="px-4 h-[42px] w-full bg-[#1E497C] font-semibold text-white rounded-full shadow-md flex items-center justify-center hover:bg-[#5C8BC1] transition-colors"
                 aria-label="Tambah lokasi"
               >
@@ -276,10 +282,6 @@ const handleRemoveFromCollection = async () => {
           </Modal>
           <Modal hash="#review">
             <h2 className="text-xl font-semibold mb-4">Menambah ulasan</h2>
-            <LoginPromptContent/>
-          </Modal>
-          <Modal hash="#location">
-            <h2 className="text-xl font-semibold mb-4">Menambah lokasi</h2>
             <LoginPromptContent/>
           </Modal>
         </>
