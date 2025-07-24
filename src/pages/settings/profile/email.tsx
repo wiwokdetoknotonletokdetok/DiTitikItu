@@ -76,43 +76,45 @@ export default function SettingsProfileEmailPage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm
-          to="/settings/profile"
-          isSuccess={isSuccess}
-          onSubmit={handleSubmit}
-          buttonText="Simpan"
-          isLoading={isLoading}
-          isValid={isValid}
-          title="Edit Email"
-          info={
-            <div className="text-xs text-gray-500 mt-1">
-              <p>
-                Email Anda digunakan untuk login ke akun ini. Setelah mengganti email, Anda akan menggunakan alamat baru
-                untuk login ke akun.
-              </p>
-              <p className="mt-1">
-                Pengguna lain tidak akan dapat melihat email Anda.
-              </p>
-            </div>
-          }
-        >
-          {apiMessage && (
-            <Alert
-              type="error"
-              message={apiMessage}
-              onClose={() => setApiMessage('')}
+        <div className="flex justify-center pt-12 px-4 bg-gray-50 min-h-screen">
+          <UpdateFieldForm
+            to="/settings/profile"
+            isSuccess={isSuccess}
+            onSubmit={handleSubmit}
+            buttonText="Simpan"
+            isLoading={isLoading}
+            isValid={isValid}
+            title="Edit Email"
+            info={
+              <div className="text-xs text-gray-500 mt-1">
+                <p>
+                  Email Anda digunakan untuk login ke akun ini. Setelah mengganti email, Anda akan menggunakan alamat baru
+                  untuk login ke akun.
+                </p>
+                <p className="mt-1">
+                  Pengguna lain tidak akan dapat melihat email Anda.
+                </p>
+              </div>
+            }
+          >
+            {apiMessage && (
+              <Alert
+                type="error"
+                message={apiMessage}
+                onClose={() => setApiMessage('')}
+              />
+            )}
+            <TextInput
+              label="Alamat email"
+              name="email"
+              placeholder="contoh: email@domain.com"
+              value={email}
+              onChange={handleChange}
+              hasError={!!errorMessage}
+              validation={errorMessage && <TextInputError message={errorMessage} />}
             />
-          )}
-          <TextInput
-            label="Alamat email"
-            name="email"
-            placeholder="contoh: email@domain.com"
-            value={email}
-            onChange={handleChange}
-            hasError={!!errorMessage}
-            validation={errorMessage && <TextInputError message={errorMessage} />}
-          />
-        </UpdateFieldForm>
+          </UpdateFieldForm>
+        </div>
       </>
     </PrivateRoute>
   )

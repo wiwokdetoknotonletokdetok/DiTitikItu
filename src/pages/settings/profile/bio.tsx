@@ -68,39 +68,41 @@ export default function SettingsProfileNamePage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm
-          to="/settings/profile"
-          isSuccess={isSuccess}
-          onSubmit={handleSubmit}
-          buttonText="Simpan"
-          isLoading={isLoading}
-          isValid={isValid}
-          title="Edit Bio"
-          info={
-            <p className="text-xs text-gray-500 mt-1">
-              Bio Anda akan terlihat oleh pengguna lain. Jangan memasukkan informasi yang tidak relevan atau tidak
-              pantas.
-            </p>
-          }
-        >
-          {apiMessage && (
-            <Alert
-              type="error"
-              message={apiMessage}
-              onClose={() => setApiMessage('')}
+        <div className="flex justify-center pt-12 px-4 bg-gray-50 min-h-screen">
+          <UpdateFieldForm
+            to="/settings/profile"
+            isSuccess={isSuccess}
+            onSubmit={handleSubmit}
+            buttonText="Simpan"
+            isLoading={isLoading}
+            isValid={isValid}
+            title="Edit Bio"
+            info={
+              <p className="text-xs text-gray-500 mt-1">
+                Bio Anda akan terlihat oleh pengguna lain. Jangan memasukkan informasi yang tidak relevan atau tidak
+                pantas.
+              </p>
+            }
+          >
+            {apiMessage && (
+              <Alert
+                type="error"
+                message={apiMessage}
+                onClose={() => setApiMessage('')}
+              />
+            )}
+            <TextArea
+              heightClassName="h-20"
+              name="bio"
+              label="Bio"
+              placeholder=""
+              value={bio}
+              onChange={handleChange}
+              hasError={!!errorMessage}
+              validation={errorMessage && <TextInputError message={errorMessage} />}
             />
-          )}
-          <TextArea
-            heightClassName="h-20"
-            name="bio"
-            label="Bio"
-            placeholder=""
-            value={bio}
-            onChange={handleChange}
-            hasError={!!errorMessage}
-            validation={errorMessage && <TextInputError message={errorMessage} />}
-          />
-        </UpdateFieldForm>
+          </UpdateFieldForm>
+        </div>
       </>
     </PrivateRoute>
   )
