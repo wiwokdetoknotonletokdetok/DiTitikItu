@@ -34,7 +34,7 @@ function SettingsPage() {
   return (
     <PrivateRoute>
       <div className="px-4 bg-[#FAFAFA] min-h-screen">
-        <div className="max-w-7xl mx-auto"></div>
+        <div className="max-w-7xl mx-auto">
         <Navbar />
         <div className="max-w-4xl py-8">
           <SettingsHeader>
@@ -73,6 +73,7 @@ function SettingsPage() {
 
           </div>
         </div>
+      </div>
       </div>
     </PrivateRoute>
   )
