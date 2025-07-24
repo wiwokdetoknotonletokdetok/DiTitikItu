@@ -4,11 +4,12 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export async function getRecommendationsBooks(limit: number = 8): Promise<WebResponse<BookSummaryDTO[]>> {
+export async function getRecommendationsBooks(limit: number = 8, token: string | null): Promise<WebResponse<BookSummaryDTO[]>> {
   const res = await fetch(`${BASE_URL}/recommendations/books?limit=${limit}`, {
     method: 'GET',
     headers: {
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   })
 

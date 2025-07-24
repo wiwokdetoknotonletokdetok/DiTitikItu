@@ -2,6 +2,7 @@ import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import BookCard from '@/components/BookCard'
 import { useEffect, useState } from 'react'
 import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
+import { useAuth } from '@/context/AuthContext.tsx'
 
 type Props = {
   onSelectBook: (id: string) => void
@@ -11,12 +12,14 @@ type Props = {
 export default function HomeContent({ onSelectBook, contentRef }: Props) {
   const [recommendations, setRecommendations] = useState<BookSummaryDTO[]>([])
   const [loading, setLoading] = useState(false)
+  const { token, isLoggedIn } = useAuth()
 
   useEffect(() => {
+    if (!token && isLoggedIn()) return
     const fetchBooks = async () => {
       setLoading(true)
       try {
-        const res = await getRecommendationsBooks()
+        const res = await getRecommendationsBooks(8, token)
         setRecommendations(res.data)
       } catch (err) {
         console.error('Gagal mengambil data buku:', err)
@@ -25,7 +28,7 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
       }
     }
     fetchBooks()
-  }, [])
+  }, [token])
 
   return (
     <div ref={contentRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
