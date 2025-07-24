@@ -26,7 +26,7 @@ import LoginPromptContent from '@/components/LoginPromptContent'
 
 export default function Home() {
   const { id: bookId } = useParams<{ id: string }>()
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, token } = useAuth()
   const [userPosition, setUserPosition] = useState<UserPosition>()
   const navigate = useNavigate()
   const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
@@ -42,10 +42,11 @@ export default function Home() {
   const [flyTrigger, setFlyTrigger] = useState(0)
 
   useEffect(() => {
+    if (!token && isLoggedIn()) return
     if (bookId && (!selectedBook || selectedBook.id !== bookId)) {
       handleSelectBook(bookId)
     }
-  }, [bookId])
+  }, [bookId, token])
 
   function handleFlyTo() {
     setFlyTrigger(prev => prev + 1)
@@ -89,7 +90,7 @@ export default function Home() {
 
     setLoadingBook(true)
     try {
-      const bookDetail = await getBooksId(bookId)
+      const bookDetail = await getBooksId(bookId, token)
       setSelectedBook(bookDetail.data)
 
       if (userPosition) {
@@ -109,7 +110,7 @@ export default function Home() {
   const refreshBookAndReviews = async (bookId: string) => {
     try {
       const [bookDetail, reviewDataWithUser] = await Promise.all([
-        getBooksId(bookId),
+        getBooksId(bookId, null),
         fetchReviewsWithUser(bookId),
       ])
       setSelectedBook(bookDetail.data)
