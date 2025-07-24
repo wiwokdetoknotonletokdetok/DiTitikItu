@@ -117,7 +117,8 @@ function SettingsSecurityPasswordPage() {
     <PrivateRoute>
       <div>
         <Navbar/>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[calc(100vh-64px)] px-4">
+          <div className="w-full max-w-md">
           <SettingsHeader to="/settings/security">
             Ubah Kata Sandi
           </SettingsHeader>
@@ -196,6 +197,7 @@ function SettingsSecurityPasswordPage() {
               Dengan mengganti kata sandi, pastikan Anda mengingat kata sandi baru.
               Ganti kata sandi secara berkala untuk menjaga keamanan akun Anda.
             </p>
+          </div>
           </div>
         </div>
       </div>
