@@ -48,25 +48,31 @@ export default function HomeSidePanel({
 }: Props) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const { isLoggedIn, user } = useAuth()
+  const { token, isLoggedIn, user } = useAuth()
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
   const checkIfSaved = async () => {
-    if (!isLoggedIn() || !user) return
-    try {
-      const books = await fetchUserBooks(user.id)
-      const saved = books.some((b) => b.id === book.id)
-      setIsSaved(saved)
-    } catch (err) {
-      console.error('Gagal memuat koleksi pengguna:', err)
+      if (!isLoggedIn() || !user) return
+      try {
+        const books = await fetchUserBooks(user.id)
+        const saved = books.some((b) => b.id === book.id)
+        setIsSaved(saved)
+      } catch (err) {
+        console.error('Gagal memuat koleksi pengguna:', err)
+      }
     }
-  }
 
-  checkIfSaved()
-}, [book.id, isLoggedIn, user])
-  
+    checkIfSaved()
+  }, [book.id, isLoggedIn, user])
+
+  useEffect(() => {
+    if (!token || !isLoggedIn()) {
+      setIsSaved(false)
+    }
+  }, [token])
+    
   const handleEdit = () => {
     if (isLoggedIn()) {
       navigate(`/books/${book.id}`);
@@ -76,36 +82,36 @@ export default function HomeSidePanel({
   };
 
   const handleAddToCollection = async () => {
-  if (!isLoggedIn()) {
-    navigate('#collection')
-    return
+    if (!isLoggedIn()) {
+      navigate('#collection')
+      return
+    }
+
+    try {
+      await addBookToCollection(book.id)
+      toast.success('Buku berhasil ditambahkan ke koleksi!')
+      setIsSaved(true)
+    } catch (error) {
+      console.error(error)
+      toast.error('Gagal menambahkan buku ke koleksi.')
+    }
   }
 
-  try {
-    await addBookToCollection(book.id)
-    toast.success('Buku berhasil ditambahkan ke koleksi!')
-    setIsSaved(true)
-  } catch (error) {
-    console.error(error)
-    toast.error('Gagal menambahkan buku ke koleksi.')
-  }
-}
+  const handleRemoveFromCollection = async () => {
+    if (!isLoggedIn()) {
+      navigate('#collection')
+      return
+    }
 
-const handleRemoveFromCollection = async () => {
-  if (!isLoggedIn()) {
-    navigate('#collection')
-    return
+    try {
+      await removeBookFromUser(book.id)
+      toast.success('Buku dihapus dari koleksi.')
+      setIsSaved(false)
+    } catch (error) {
+      console.error(error)
+      toast.error('Gagal menghapus buku dari koleksi.')
+    }
   }
-
-  try {
-    await removeBookFromUser(book.id)
-    toast.success('Buku dihapus dari koleksi.')
-    setIsSaved(false)
-  } catch (error) {
-    console.error(error)
-    toast.error('Gagal menghapus buku dari koleksi.')
-  }
-}
 
   return (
     <div className="relative lg:w-[30%]">
