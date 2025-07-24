@@ -318,7 +318,9 @@ function UserProfilePage() {
                   className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 hover:scale-[1.02] transition-transform"
                   onClick={() => navigate(`/profile/${user.id}`)}
                 >
-                  <span className="text-gray-500 w-5 text-right">{index + 1}.</span>
+                  <span className="text-gray-500 w-5 text-right">
+                    {(pageInfo?.size || 10) * (currentPage - 1) + index + 1}.
+                  </span>
                   <img
                     src={user.profilePicture}
                     alt={user.name}

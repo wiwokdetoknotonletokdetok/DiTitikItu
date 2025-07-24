@@ -31,7 +31,10 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
   }, [token])
 
   return (
-    <div ref={contentRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div
+        ref={contentRef}
+        className="bg-white grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
       {loading ? (
         <p>Loading...</p>
       ) : (
