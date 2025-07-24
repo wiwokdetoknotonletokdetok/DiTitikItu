@@ -74,9 +74,10 @@ export default function SettingsProfileEmailPage() {
 
   return (
     <PrivateRoute>
-      <>
+      <div className="px-4 bg-[#FAFAFA] min-h-screen">
+      <div className="max-w-7xl mx-auto">
         <Navbar />
-        <div className="flex justify-center pt-12 px-4 bg-gray-50 min-h-screen">
+        <div className="max-w-4xl mx-auto py-8">
           <UpdateFieldForm
             to="/settings/profile"
             isSuccess={isSuccess}
@@ -115,7 +116,8 @@ export default function SettingsProfileEmailPage() {
             />
           </UpdateFieldForm>
         </div>
-      </>
+      </div>
+      </div>
     </PrivateRoute>
   )
 }

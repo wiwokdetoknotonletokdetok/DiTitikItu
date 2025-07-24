@@ -113,16 +113,17 @@ function SettingsSecurityPasswordPage() {
 
   const showPasswordRules = (touched.newPassword || submitAttempted)
 
+  
   return (
     <PrivateRoute>
-      <div>
-        <Navbar/>
-        <div className="flex justify-center items-center min-h-[calc(100vh-64px)] px-4">
-          <div className="w-full max-w-md">
-          <SettingsHeader to="/settings/security">
-            Ubah Kata Sandi
-          </SettingsHeader>
-          <div className="max-w-md">
+      <div className="px-4 bg-[#FAFAFA] min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <Navbar />
+          <div className="max-w-4xl mx-auto py-8">
+            <SettingsHeader to="/settings/security">
+              Ubah Kata Sandi
+            </SettingsHeader>
+
             {apiMessage && (
               <Alert
                 message={apiMessage}
@@ -200,7 +201,6 @@ function SettingsSecurityPasswordPage() {
           </div>
           </div>
         </div>
-      </div>
     </PrivateRoute>
   )
 }
