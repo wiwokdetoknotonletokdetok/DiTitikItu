@@ -70,37 +70,40 @@ export default function SettingsProfileNamePage() {
     <PrivateRoute>
       <>
         <Navbar />
-        <UpdateFieldForm
-          to="/settings/profile"
-          isSuccess={isSuccess}
-          onSubmit={handleSubmit}
-          buttonText="Simpan"
-          title="Edit Nama"
-          isLoading={isLoading}
-          isValid={isValid}
-          info={
-            <p className="text-xs text-gray-500 mt-1">
-              Nama Anda akan terlihat oleh pengguna lain, pastikan sesuai dengan yang diinginkan.
-            </p>
-          }
-        >
-          {apiMessage && (
-            <Alert
-              type="error"
-              message={apiMessage}
-              onClose={() => setApiMessage('')}
+
+        <div className="flex justify-center pt-12 px-4 bg-gray-50 min-h-screen">
+          <UpdateFieldForm
+            to="/settings/profile"
+            isSuccess={isSuccess}
+            onSubmit={handleSubmit}
+            buttonText="Simpan"
+            title="Edit Nama"
+            isLoading={isLoading}
+            isValid={isValid}
+            info={
+              <p className="text-xs text-gray-500 mt-1">
+                Nama Anda akan terlihat oleh pengguna lain, pastikan sesuai dengan yang diinginkan.
+              </p>
+            }
+          >
+            {apiMessage && (
+              <Alert
+                type="error"
+                message={apiMessage}
+                onClose={() => setApiMessage('')}
+              />
+            )}
+            <TextInput
+              name="name"
+              label="Nama"
+              placeholder=""
+              value={name}
+              onChange={handleChange}
+              hasError={!!errorMessage}
+              validation={errorMessage && <TextInputError message={errorMessage} />}
             />
-          )}
-          <TextInput
-            name="name"
-            label="Nama"
-            placeholder=""
-            value={name}
-            onChange={handleChange}
-            hasError={!!errorMessage}
-            validation={errorMessage && <TextInputError message={errorMessage} />}
-          />
-        </UpdateFieldForm>
+          </UpdateFieldForm>
+        </div>
       </>
     </PrivateRoute>
   )
