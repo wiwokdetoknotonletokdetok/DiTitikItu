@@ -98,10 +98,8 @@ export default function BookUpdatePage() {
   return (
     <PrivateRoute>
       <>
-        <div className="px-4 bg-[#FAFAFA] min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <Navbar />
-          <div className="py-8 max-w-4xl">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Buku</h1>
           {!loading && (
             <BookImageUploader
@@ -176,8 +174,6 @@ export default function BookUpdatePage() {
               isLoading={loading}
             />
           </div>
-        </div>
-        </div>
         </div>
       </>
     </PrivateRoute>

@@ -221,15 +221,13 @@ export default function NewBookPage() {
 
 
   return (
-    <PrivateRoute>
-    <div className="px-4 bg-[#FAFAFA] min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="py-8">
+  <PrivateRoute>
+    <div>
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Tambah Buku Baru</h1>
-
           {apiMessage && <Alert message={apiMessage} onClose={() => setApiMessage('')} />}
-          <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <TextInput
               label="Judul"
               name="title"
@@ -326,12 +324,13 @@ export default function NewBookPage() {
               validation={errors.genreId && <TextInputError message={errors.genreId} />}
             />
 
-            <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
-              Simpan buku
-            </SubmitButton>
+            <div className="flex justify-end">
+              <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
+                Simpan buku
+              </SubmitButton>
+            </div>
           </form>
         </div>
-      </div>
       </div>
     </PrivateRoute>
   )
