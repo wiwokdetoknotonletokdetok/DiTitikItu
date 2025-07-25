@@ -157,7 +157,7 @@ export default function Home() {
   }, [selectedBook?.id])
 
   return (
-    <div ref={topRef} className="px-4 bg-[#FAFAFA] min-h-screen">
+    <div ref={topRef} className="px-4 min-h-screen">
       {!isVisible && <ToContentButton onClick={() => contentRef.current?.scrollIntoView({ behavior: 'smooth' })} />}
       <div className="max-w-7xl mx-auto">
         <Navbar />

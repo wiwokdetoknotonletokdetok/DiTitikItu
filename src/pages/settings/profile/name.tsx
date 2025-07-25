@@ -68,7 +68,7 @@ export default function SettingsProfileNamePage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 bg-[#FAFAFA] min-h-screen">
+      <div className="px-4 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <Navbar />
 

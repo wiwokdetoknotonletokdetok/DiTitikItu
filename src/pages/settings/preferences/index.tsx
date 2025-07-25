@@ -6,7 +6,7 @@ import SettingsHeader from '@/components/SettingsHeader.tsx'
 function SettingPreferencesPage() {
   return (
     <PrivateRoute>
-      <div className="px-4 bg-[#FAFAFA] min-h-screen">
+      <div className="px-4 min-h-screen">
         <div className="max-w-7xl mx-auto">
           <Navbar />
           <div className="max-w-4xl mx-auto px-4 py-8">

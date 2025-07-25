@@ -64,7 +64,7 @@ export default function LoginUser() {
   }, [form, isValid, login, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="bg-white shadow-xl rounded-lg px-6 py-8 w-full max-w-md">
         <img
           src="/logo.jpg"

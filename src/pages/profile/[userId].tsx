@@ -157,7 +157,7 @@ function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="px-4 bg-[#FAFAFA] min-h-screen">
+      <div className="px-4 min-h-screen">
         <Navbar />
         <UserProfilePageSkeleton />
       </div>
@@ -168,7 +168,7 @@ function UserProfilePage() {
   if (!profile || !userId) return <p>User profile tidak ditemukan.</p>
 
   return (
-    <div className="px-4 bg-[#FAFAFA] min-h-screen">
+    <div className="px-4 min-h-screen">
       <Navbar/>
       <div className="flex flex-col lg:flex-row gap-4 max-w-7xl w-full mx-auto">
         <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">

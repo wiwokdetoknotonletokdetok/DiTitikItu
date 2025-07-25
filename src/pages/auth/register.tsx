@@ -118,7 +118,7 @@ export default function RegisterUser() {
   const showPasswordRules = (touched.password || submitAttempted)
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="bg-white shadow-xl rounded-lg px-6 py-8 w-full max-w-md">
         <h1 className="mb-2 text-2xl font-bold text-[#1C2C4C]">Daftar</h1>
         <FormRedirectLink
