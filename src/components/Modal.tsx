@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import ReactDOM from 'react-dom'
 
 type ModalProps = {
   hash: string
@@ -31,14 +32,13 @@ const Modal: React.FC<ModalProps> = ({ hash, children }) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
-      document.body.style.paddingRight = '' 
+      document.body.style.paddingRight = ''
     }
   }, [isOpen, navigate])
 
-
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-50"
       onClick={() => navigate(-1)}
@@ -57,6 +57,8 @@ const Modal: React.FC<ModalProps> = ({ hash, children }) => {
       </div>
     </div>
   )
+
+  return ReactDOM.createPortal(modalContent, document.body)
 }
 
 export default Modal
