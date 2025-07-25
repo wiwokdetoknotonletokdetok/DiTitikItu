@@ -28,6 +28,7 @@ export default function BookUpdatePage() {
   const [newImage, setNewImage] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isUploaded, setIsUploaded] = useState(false)
 
   const bookRequest = {
     isbn,
@@ -76,10 +77,11 @@ export default function BookUpdatePage() {
 
     const uploadImage = async () => {
       setIsUploading(true)
+      setIsUploaded(false)
 
       try {
         await uploadBookPicture(id, newImage)
-        console.log('Gambar berhasil diunggah.')
+        setIsUploaded(true)
       } catch (error) {
         console.error(error)
         if (error instanceof ApiError) {
@@ -107,6 +109,7 @@ export default function BookUpdatePage() {
               onUpload={(file) => setNewImage(file)}
               initialUrl={form.bookPicture}
               isUploading={isUploading}
+              isUploaded={isUploaded}
             />
           )}
           <div className="rounded-lg overflow-hidden shadow mt-4">

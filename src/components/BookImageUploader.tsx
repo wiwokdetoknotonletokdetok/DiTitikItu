@@ -1,26 +1,48 @@
-import { useRef, useState} from 'react'
-import { UploadCloud } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { UploadCloud, Trash2 } from 'lucide-react'
+import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
-export default function BookImageUploader({initialUrl, onUpload, isUploading = false}: {
+export default function BookImageUploader({
+  initialUrl,
+  onUpload,
+  isUploading = false,
+  isUploaded = false,
+}: {
   initialUrl?: string
   onUpload: (file: File) => void
   isUploading?: boolean
+  isUploaded?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl ?? null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [uploaded, setUploaded] = useState(false)
+
+  const MIN_WIDTH = 300
+  const MIN_HEIGHT = 450
+  const VALID_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) return
-
-    const maxSizeMB = 2
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      alert(`Ukuran gambar maksimal ${maxSizeMB}MB`)
+    if (!VALID_TYPES.includes(file.type)) {
+      setErrorMessage('Tipe gambar tidak valid. Hanya JPEG, PNG, atau WebP.')
       return
     }
 
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
-    onUpload(file)
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+
+    img.onload = () => {
+      if (img.width < MIN_WIDTH || img.height < MIN_HEIGHT) {
+        setUploaded(false)
+        setErrorMessage(`Ukuran gambar minimal ${MIN_WIDTH}x${MIN_HEIGHT}px.`)
+        return
+      }
+
+      setErrorMessage(null)
+      setPreviewUrl(img.src)
+      setUploaded(true)
+      onUpload(file)
+    }
   }
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -29,10 +51,15 @@ export default function BookImageUploader({initialUrl, onUpload, isUploading = f
     if (file) handleFile(file)
   }
 
-  const handleDelete = () => {
-    setPreviewUrl(null)
-    inputRef.current!.value = '' 
+  const handleResetToInitial = () => {
+    setPreviewUrl(initialUrl ?? null)
+    inputRef.current!.value = ''
+    setErrorMessage(null)
   }
+
+  useEffect(() => {
+    setPreviewUrl(initialUrl ?? null)
+  }, [initialUrl])
 
   return (
     <div
@@ -41,22 +68,35 @@ export default function BookImageUploader({initialUrl, onUpload, isUploading = f
       onDrop={handleDrop}
       className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition relative"
     >
+
       {isUploading && (
-        <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center rounded-2xl z-10">
-          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10"></div>
+        <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg z-10">
+          <div className="loader w-8 h-8 border-4 border-gray-300 rounded-full"></div>
+        </div>
+      )}
+
+      {uploaded && isUploaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg animate-fade-out z-10">
+          <CheckCircleIcon className="w-12 h-12 text-green-400 drop-shadow" />
         </div>
       )}
 
       {previewUrl ? (
         <>
-          <img src={previewUrl} alt="Preview" className="w-32 h-48 object-cover rounded-lg mb-2" />
+          <img
+            src={previewUrl}
+            alt="Gambar Buku"
+            className="w-32 h-48 object-cover rounded-lg mb-2"
+          />
           <button
             onClick={(e) => {
               e.stopPropagation()
-              handleDelete()
+              handleResetToInitial()
             }}
             className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+            title="Hapus gambar"
           >
+            <Trash2 size={18} />
           </button>
         </>
       ) : (
@@ -88,6 +128,10 @@ export default function BookImageUploader({initialUrl, onUpload, isUploading = f
           100% { transform: rotate(360deg);}
         }
       `}</style>
+
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+      )}
     </div>
   )
 }
