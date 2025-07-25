@@ -21,6 +21,7 @@ export default function SettingsProfilePage() {
   const [isUploading, setUploading] = useState(false)
   const [newImage, setNewImage] = useState<File | null>(null)
   const { updateUser } = useAuth()
+  const [isUploaded, setIsUploaded] = useState(false)
 
   useEffect(() => {
     if (!user?.id) return
@@ -48,9 +49,10 @@ export default function SettingsProfilePage() {
 
   const upload = async () => {
     setUploading(true)
+    setIsUploaded(false)
     try {
       await uploadProfilePicture(newImage, token)
-      console.log('Foto berhasil diunggah')
+      setIsUploaded(true)
       if (user?.id) {
         const res: WebResponse<UserProfileResponse> = await getUserProfile(user.id)
         setPhotoUrl(res.data.profilePicture)
@@ -99,6 +101,7 @@ export default function SettingsProfilePage() {
             onUpload={(file) => setNewImage(file)}
             onDelete={handleDeletePicture}
             isUploading={isUploading}
+            isUploaded={isUploaded}
           />
 
           <div className="rounded-lg overflow-hidden shadow mt-4">

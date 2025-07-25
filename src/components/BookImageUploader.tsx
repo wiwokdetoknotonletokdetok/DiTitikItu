@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { UploadCloud, Trash2 } from 'lucide-react'
+import { UploadCloud } from 'lucide-react'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
 export default function BookImageUploader({
@@ -21,6 +21,8 @@ export default function BookImageUploader({
   const MIN_WIDTH = 300
   const MIN_HEIGHT = 450
   const VALID_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+  const [showIcon, setShowIcon] = useState(false)
 
   const handleFile = (file: File) => {
     if (!VALID_TYPES.includes(file.type)) {
@@ -51,15 +53,21 @@ export default function BookImageUploader({
     if (file) handleFile(file)
   }
 
-  const handleResetToInitial = () => {
-    setPreviewUrl(initialUrl ?? null)
-    inputRef.current!.value = ''
-    setErrorMessage(null)
-  }
-
   useEffect(() => {
     setPreviewUrl(initialUrl ?? null)
   }, [initialUrl])
+
+  useEffect(() => {
+    if (uploaded) {
+      setShowIcon(true)
+      const timeout = setTimeout(() => {
+        setShowIcon(false)
+        const hideTimeout = setTimeout(() => setUploaded(false), 300) // delay hapus komponen
+        return () => clearTimeout(hideTimeout)
+      }, 2000)
+      return () => clearTimeout(timeout)
+    }
+  }, [uploaded])
 
   return (
     <div
@@ -76,7 +84,11 @@ export default function BookImageUploader({
       )}
 
       {uploaded && isUploaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg animate-fade-out z-10">
+        <div
+          className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300 ${
+            showIcon ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
           <CheckCircleIcon className="w-12 h-12 text-green-400 drop-shadow" />
         </div>
       )}
@@ -88,16 +100,6 @@ export default function BookImageUploader({
             alt="Gambar Buku"
             className="w-32 h-48 object-cover rounded-lg mb-2"
           />
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              handleResetToInitial()
-            }}
-            className="absolute top-2 right-2 text-red-600 hover:text-red-800"
-            title="Hapus gambar"
-          >
-            <Trash2 size={18} />
-          </button>
         </>
       ) : (
         <div className="flex flex-col items-center text-gray-500">
