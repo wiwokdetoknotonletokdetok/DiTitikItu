@@ -51,6 +51,7 @@ export default function HomeSidePanel({
   const { token, isLoggedIn, user } = useAuth()
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false)
+  const [hasUserReviewed, setHasUserReviewed] = useState(false)
 
   useEffect(() => {
   const checkIfSaved = async () => {
@@ -72,7 +73,13 @@ export default function HomeSidePanel({
       setIsSaved(false)
     }
   }, [token])
-    
+
+  useEffect(() => {
+    if (!isLoggedIn() || !user) return
+      const reviewed = reviews.some((r) => r.userId === user.id)
+      setHasUserReviewed(reviewed)
+  }, [reviews, user, isLoggedIn])
+      
   const handleEdit = () => {
     if (isLoggedIn()) {
       navigate(`/books/${book.id}`);
@@ -261,7 +268,7 @@ export default function HomeSidePanel({
               </div>
 
               <div className="mb-4">
-                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} isDisabled={hasUserReviewed}/>
               </div>
 
               <div className="flex flex-col">

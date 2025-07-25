@@ -12,9 +12,10 @@ import { useNavigate } from 'react-router-dom'
 interface AddBookReviewFormProps {
   bookId: string
   onUpdateReviews: () => void
+  isDisabled?: boolean
 }
 
-export default function BookReviewForm({ bookId, onUpdateReviews }: AddBookReviewFormProps) {
+export default function BookReviewForm({ bookId, onUpdateReviews, isDisabled }: AddBookReviewFormProps) {
   const [message, setMessage] = useState('')
   const [rating, setRating] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -48,27 +49,38 @@ export default function BookReviewForm({ bookId, onUpdateReviews }: AddBookRevie
         <div className="relative">
           <div className="mr-12">
             <textarea
-              className="w-full block resize-none text-sm border rounded-md py-2 px-3 outline-none placeholder:text-sm border-gray-300 focus:border-[#1E497C]"
-              rows={3}
-              placeholder="Apa pendapatmu tentang buku ini?"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-            />
+                disabled={isDisabled}
+                className={`w-full block resize-none text-sm border rounded-md py-2 px-3 outline-none placeholder:text-sm ${
+                  isDisabled
+                    ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'border-gray-300 focus:border-[#1E497C]'
+                }`}
+                rows={3}
+                placeholder="Apa pendapatmu tentang buku ini?"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                required
+              />
           </div>
 
           <div className="absolute bottom-1 right-1">
-            <Tooltip message="Kirim ulasan">
-              <button
-                type={!isLoggedIn() ? 'button' : 'submit'}
-                onClick={!isLoggedIn() ? () => navigate('#review') : () => {
-                }}
-                className="w-[36px] h-[36px] rounded-full text-white bg-[#1E497C] hover:bg-[#5C8BC1] shadow flex items-center justify-center transition"
-                aria-label="Login untuk mengulas"
-              >
-                <Send size={20} style={{ transform: 'translate(-1px, 1px)' }} />
-              </button>
-            </Tooltip>
+            <Tooltip message={isDisabled ? 'Kamu sudah memberikan ulasan' : (!isLoggedIn() ? 'Login untuk mengulas' : 'Kirim ulasan')}>
+                <button
+                  type={!isLoggedIn() || isDisabled ? 'button' : 'submit'}
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (!isLoggedIn()) navigate('#review')
+                  }}
+                  className={`w-[36px] h-[36px] rounded-full text-white shadow flex items-center justify-center transition ${
+                    isDisabled
+                      ? 'bg-gray-300 cursor-not-allowed'
+                      : 'bg-[#1E497C] hover:bg-[#5C8BC1]'
+                  }`}
+                  aria-label="Kirim ulasan"
+                >
+                  <Send size={20} style={{ transform: 'translate(-1px, 1px)' }} />
+                </button>
+              </Tooltip>
           </div>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}

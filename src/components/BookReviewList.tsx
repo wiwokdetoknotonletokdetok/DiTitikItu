@@ -133,7 +133,11 @@ const handleReviewMouseLeave = () => {
       <div className="relative">
         {myReview && (
           <div className="pt-3 mb-3 rounded-md p-2">
-            <div className="flex items-center gap-2 mb-1">
+            <div
+              className="inline-flex items-center gap-2 mb-1 cursor-pointer"
+              onMouseEnter={(e) => handleReviewMouseEnter(e, myReview)}
+              onMouseLeave={handleReviewMouseLeave}
+            >
               <Link to={`/profile/${myReview.userId}`}>
                 <img
                   src={myReview.profilePicture}
