@@ -53,18 +53,14 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(!entry.isIntersecting)
-      },
-      { threshold: 0.1 }
-    )
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting)
+    }, { threshold: 0.1 })
 
-    const target = topRef.current
+    const target = contentRef.current
     if (target) observer.observe(target)
     return () => { if (target) observer.unobserve(target) }
   }, [])
-
 
   useEffect(() => {
     const fallbackToIPLocation = async () => {
@@ -162,20 +158,7 @@ export default function Home() {
 
   return (
     <div ref={topRef} className="px-4 bg-[#FAFAFA] min-h-screen">
-      {isVisible ? (
-        <ToContentButton
-          direction="up"
-          onClick={() => topRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          ariaLabel="Kembali ke atas"
-        />
-      ) : (
-        <ToContentButton
-          direction="down"
-          onClick={() => contentRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          ariaLabel="Scroll ke konten"
-        />
-      )}
-
+      {!isVisible && <ToContentButton onClick={() => contentRef.current?.scrollIntoView({ behavior: 'smooth' })} />}
       <div className="max-w-7xl mx-auto">
         <Navbar />
 
