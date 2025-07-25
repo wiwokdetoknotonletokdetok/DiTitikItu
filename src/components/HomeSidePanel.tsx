@@ -71,6 +71,7 @@ export default function HomeSidePanel({
   useEffect(() => {
     if (!token || !isLoggedIn()) {
       setIsSaved(false)
+      setHasUserReviewed(false)
     }
   }, [token])
 
