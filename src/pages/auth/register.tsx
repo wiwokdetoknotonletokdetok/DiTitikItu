@@ -11,10 +11,14 @@ import TextInputError from '@/components/TextInputError.tsx'
 import { Info } from 'lucide-react'
 import ToolTip from '@/components/Tooltip.tsx'
 import Alert from '@/components/Alert.tsx'
+import type { LoginUserResponse } from '@/dto/LoginUserResponse'
+import { useAuth } from '@/context/AuthContext'
+import { loginUser } from '@/api/loginUser'
 
 export default function RegisterUser() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
   const [form, setForm] = useState({
     name: '',
@@ -94,8 +98,10 @@ export default function RegisterUser() {
 
       try {
         const res: WebResponse<string> = await registerUser(form)
+        const loginRes: WebResponse<LoginUserResponse> = await loginUser({ email: form.email, password: form.password })
+        await login(loginRes.data.token)
         setApiMessage(`Register berhasil: ${res.data}`)
-        navigate('/books')
+        navigate('/')
       } catch (err) {
         if (err instanceof ApiError) setApiMessage(err.message)
         else {
