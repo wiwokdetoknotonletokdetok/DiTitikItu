@@ -27,6 +27,7 @@ export default function BookImageUploader({
   const handleFile = (file: File) => {
     if (!VALID_TYPES.includes(file.type)) {
       setErrorMessage('Tipe gambar tidak valid. Hanya JPEG, PNG, atau WebP.')
+      setUploaded(false)
       return
     }
 
@@ -35,7 +36,6 @@ export default function BookImageUploader({
 
     img.onload = () => {
       if (img.width < MIN_WIDTH || img.height < MIN_HEIGHT) {
-        setUploaded(false)
         setErrorMessage(`Ukuran gambar minimal ${MIN_WIDTH}x${MIN_HEIGHT}px.`)
         return
       }
