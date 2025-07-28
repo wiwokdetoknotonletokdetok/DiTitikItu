@@ -9,6 +9,7 @@ import TextInput from '@/components/TextInput.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
 import Alert from '@/components/Alert.tsx'
 import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function BookUpdateTitlePage() {
   const { id } = useParams()
@@ -28,9 +29,11 @@ export default function BookUpdateTitlePage() {
     }
   }, [book, id, navigate])
 
+  const MAX_TITLE_LENGTH = 100
+
   const validateTitle= useCallback(() => {
     if (!title.trim()) return 'Judul buku tidak boleh kosong'
-    else if (title.length > 50) return `Judul buku tidak boleh lebih dari 50 karakter`
+    else if (title.length > MAX_TITLE_LENGTH) return `Judul buku tidak boleh lebih dari ${MAX_TITLE_LENGTH} karakter`
     return ''
   }, [title])
 
@@ -76,11 +79,8 @@ export default function BookUpdateTitlePage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-
+      <Navbar />
+      <InnerContainer>
         <UpdateFieldForm
           to={`/books/${id}`}
           isSuccess={isSuccess}
@@ -107,9 +107,7 @@ export default function BookUpdateTitlePage() {
             validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
-      </div>
-      </div>
-      </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

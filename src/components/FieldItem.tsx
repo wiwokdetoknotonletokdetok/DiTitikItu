@@ -38,7 +38,7 @@ export default function FieldItem<T>({state, label, value, to, onClick}: BookIte
           </p>
         </div>
       </div>
-      <ChevronRight className="w-4 h-4 text-gray-400" />
+      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
     </div>
   )
 

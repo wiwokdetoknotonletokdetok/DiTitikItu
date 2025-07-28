@@ -5,6 +5,7 @@ import App from './App.tsx'
 import { AuthProvider } from '@/context/AuthContext.tsx'
 import './index.css'
 import L from 'leaflet'
+import Container from '@/components/Container.tsx'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <Container>
+          <App />
+        </Container>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

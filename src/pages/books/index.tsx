@@ -17,6 +17,9 @@ import { getPublishers } from '@/api/publishers.ts'
 import { getGenres } from '@/api/genres.ts'
 import Navbar from '@/components/Navbar.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
+import { addBookToCollection } from '@/api/collections.ts'
+import toast from 'react-hot-toast'
 
 type FormState = {
   title: string
@@ -47,7 +50,7 @@ export default function NewBookPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const MAX_ISBN_LENGTH = 17
-  const MAX_TITLE_LENGTH = 50
+  const MAX_TITLE_LENGTH = 100
   const MAX_PUBLISHER_NAME = 50
   const MAX_AUTHOR_NAME = 50
   const MAX_LANGUAGE_LENGTH = 50
@@ -209,6 +212,8 @@ export default function NewBookPage() {
           genreIds: [parseInt(form.genreId)],
           bookPicture: 'https://placehold.co/300x450?text=Book'
         })
+        await addBookToCollection(bookId)
+        toast.success('Buku berhasil ditambahkan ke koleksi!')
         navigate(`/books/${bookId}`)
       } catch (err) {
         if (err instanceof ApiError) setApiMessage(err.message)
@@ -222,116 +227,114 @@ export default function NewBookPage() {
 
   return (
   <PrivateRoute>
-    <div className="max-w-7xl mx-auto px-4">
-      <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Tambah Buku Baru</h1>
-          {apiMessage && <Alert message={apiMessage} onClose={() => setApiMessage('')} />}
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <Navbar />
+      <InnerContainer>
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Tambah Buku Baru</h1>
+        {apiMessage && <Alert message={apiMessage} onClose={() => setApiMessage('')} />}
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+          <TextInput
+            label="Judul"
+            name="title"
+            value={form.title}
+            onChange={handleChange('title')}
+            placeholder="Masukkan judul buku"
+            hasError={!!errors.title}
+            validation={errors.title && <TextInputError message={errors.title} />}
+          />
+
+          <TextInput
+            label="ISBN"
+            name="isbn"
+            value={form.isbn}
+            onChange={handleIsbnChange}
+            placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-7)"
+            hasError={!!errors.isbn}
+            validation={errors.isbn && <TextInputError message={errors.isbn} />}
+          />
+
+          <TextArea
+            label="Sinopsis"
+            name="synopsis"
+            value={form.synopsis}
+            onChange={handleChange('synopsis')}
+            placeholder="Ringkas sinopsis buku"
+            hasError={!!errors.synopsis}
+            validation={errors.synopsis && <TextInputError message={errors.synopsis} />}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
             <TextInput
-              label="Judul"
-              name="title"
-              value={form.title}
-              onChange={handleChange('title')}
-              placeholder="Masukkan judul buku"
-              hasError={!!errors.title}
-              validation={errors.title && <TextInputError message={errors.title} />}
+              label="Jumlah halaman"
+              name="totalPages"
+              value={form.totalPages}
+              onChange={handleChange('totalPages')}
+              placeholder="(misal: 100)"
+              hasError={!!errors.totalPages}
+              validation={errors.totalPages && <TextInputError message={errors.totalPages} />}
             />
-
             <TextInput
-              label="ISBN"
-              name="isbn"
-              value={form.isbn}
-              onChange={handleIsbnChange}
-              placeholder="Masukkan ISBN buku (contoh: 978-1-23-456789-7)"
-              hasError={!!errors.isbn}
-              validation={errors.isbn && <TextInputError message={errors.isbn} />}
+              label="Tahun terbit"
+              name="publishedYear"
+              value={form.publishedYear}
+              onChange={handleChange('publishedYear')}
+              placeholder="(misal: 2025)"
+              hasError={!!errors.publishedYear}
+              validation={errors.publishedYear && <TextInputError message={errors.publishedYear} />}
             />
+          </div>
 
-            <TextArea
-              label="Sinopsis"
-              name="synopsis"
-              value={form.synopsis}
-              onChange={handleChange('synopsis')}
-              placeholder="Ringkas sinopsis buku"
-              hasError={!!errors.synopsis}
-              validation={errors.synopsis && <TextInputError message={errors.synopsis} />}
-            />
+          <AutocompleteInput
+            label="Bahasa"
+            name="language"
+            value={form.language}
+            onChange={value => handleChange('language')({ target: { name: 'language', value } } as React.ChangeEvent<HTMLInputElement>)}
+            fetchSuggestions={getLanguages}
+            placeholder="Masukkan bahasa buku (misal: Indonesia)"
+            hasError={!!errors.language}
+            validation={errors.language && <TextInputError message={errors.language} />}
+          />
 
-            <div className="grid grid-cols-2 gap-4">
-              <TextInput
-                label="Jumlah halaman"
-                name="totalPages"
-                value={form.totalPages}
-                onChange={handleChange('totalPages')}
-                placeholder="(misal: 100)"
-                hasError={!!errors.totalPages}
-                validation={errors.totalPages && <TextInputError message={errors.totalPages} />}
-              />
-              <TextInput
-                label="Tahun terbit"
-                name="publishedYear"
-                value={form.publishedYear}
-                onChange={handleChange('publishedYear')}
-                placeholder="(misal: 2025)"
-                hasError={!!errors.publishedYear}
-                validation={errors.publishedYear && <TextInputError message={errors.publishedYear} />}
-              />
-            </div>
+          <AutocompleteInput
+            label="Penerbit"
+            name="publisherName"
+            value={form.publisherName}
+            onChange={value => handleChange('publisherName')({ target: { name: 'publisherName', value } } as React.ChangeEvent<HTMLInputElement>)}
+            fetchSuggestions={getPublishers}
+            placeholder="Masukkan nama penerbit"
+            hasError={!!errors.publisherName}
+            validation={errors.publisherName && <TextInputError message={errors.publisherName} />}
+          />
 
-            <AutocompleteInput
-              label="Bahasa"
-              name="language"
-              value={form.language}
-              onChange={value => handleChange('language')({ target: { name: 'language', value } } as React.ChangeEvent<HTMLInputElement>)}
-              fetchSuggestions={getLanguages}
-              placeholder="Masukkan bahasa buku (misal: Indonesia)"
-              hasError={!!errors.language}
-              validation={errors.language && <TextInputError message={errors.language} />}
-            />
+          <AutocompleteInput
+            label={<div className="flex items-center"><span>Penulis</span><Tooltip message="Jika lebih dari satu, pisahkan dengan koma"><Info size={12} className="ml-1 text-gray-500"/></Tooltip></div>}
+            name="authorNames"
+            multi
+            value={form.authorNames}
+            onChange={value => handleChange('authorNames')({ target: { name: 'authorNames', value } } as React.ChangeEvent<HTMLInputElement>)}
+            fetchSuggestions={getAuthors}
+            placeholder="Masukkan nama penulis, pisahkan dengan koma"
+            hasError={!!errors.authorNames}
+            validation={errors.authorNames && <TextInputError message={errors.authorNames} />}
+          />
 
-            <AutocompleteInput
-              label="Penerbit"
-              name="publisherName"
-              value={form.publisherName}
-              onChange={value => handleChange('publisherName')({ target: { name: 'publisherName', value } } as React.ChangeEvent<HTMLInputElement>)}
-              fetchSuggestions={getPublishers}
-              placeholder="Masukkan nama penerbit"
-              hasError={!!errors.publisherName}
-              validation={errors.publisherName && <TextInputError message={errors.publisherName} />}
-            />
+          <SelectGenre
+            label="Genre"
+            name="genreId"
+            value={form.genreId}
+            onChange={handleChange('genreId')}
+            placeholder="Pilih genre"
+            fetchOptions={getGenres}
+            hasError={!!errors.genreId}
+            validation={errors.genreId && <TextInputError message={errors.genreId} />}
+          />
 
-            <AutocompleteInput
-              label={<div className="flex items-center"><span>Penulis</span><Tooltip message="Jika lebih dari satu, pisahkan dengan koma"><Info size={12} className="ml-1 text-gray-500"/></Tooltip></div>}
-              name="authorNames"
-              multi
-              value={form.authorNames}
-              onChange={value => handleChange('authorNames')({ target: { name: 'authorNames', value } } as React.ChangeEvent<HTMLInputElement>)}
-              fetchSuggestions={getAuthors}
-              placeholder="Masukkan nama penulis, pisahkan dengan koma"
-              hasError={!!errors.authorNames}
-              validation={errors.authorNames && <TextInputError message={errors.authorNames} />}
-            />
-
-            <SelectGenre
-              label="Genre"
-              name="genreId"
-              value={form.genreId}
-              onChange={handleChange('genreId')}
-              placeholder="Pilih genre"
-              fetchOptions={getGenres}
-              hasError={!!errors.genreId}
-              validation={errors.genreId && <TextInputError message={errors.genreId} />}
-            />
-
-            <div className="flex justify-end">
-              <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
-                Simpan buku
-              </SubmitButton>
-            </div>
-          </form>
-        </div>
-      </div>
+          <div className="flex justify-end">
+            <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading}>
+              Simpan buku
+            </SubmitButton>
+          </div>
+        </form>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

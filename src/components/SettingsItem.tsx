@@ -29,7 +29,7 @@ export default function SettingsItem({ title, description, icon, to, onClick, da
           </p>
         </div>
       </div>
-      <ChevronRight className="w-4 h-4 text-gray-400" />
+      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
     </div>
   )
 

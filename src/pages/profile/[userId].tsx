@@ -54,7 +54,7 @@ function UserProfilePage() {
   }
 
   useEffect(() => {
-    fetchUserRanking(currentPage, 10)
+    fetchUserRanking(currentPage, 8)
       .then((res) => {
         setRanking(res.data)
         setPageInfo(res.pageInfo)
@@ -157,10 +157,10 @@ function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="px-4 min-h-screen">
+      <>
         <Navbar />
         <UserProfilePageSkeleton />
-      </div>
+      </>
     )
   }
 
@@ -168,9 +168,9 @@ function UserProfilePage() {
   if (!profile || !userId) return <p>User profile tidak ditemukan.</p>
 
   return (
-    <div className="px-4 min-h-screen">
+    <>
       <Navbar/>
-      <div className="flex flex-col lg:flex-row gap-4 max-w-7xl w-full mx-auto">
+      <div className="flex flex-col lg:flex-row gap-4 max-w-7xl w-full mx-auto mb-6 min-h-[85vh]">
         <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
           <div className={`flex flex-col md:flex-row gap-8 items-center ${profile.bio ? 'md:items-start' : ''}`}>
             <img
@@ -283,33 +283,31 @@ function UserProfilePage() {
         />
         <div className="w-full lg:w-80 mt-4 lg:mt-0 rounded-3xl shadow-lg overflow-y-auto bg-white">
           <div className="sticky top-0 bg-white z-10 p-6 border-b">
-            <div className="sticky top-0 bg-white z-10 p-6 border-b">
-              <div className="flex items-center justify-between">
-                <button
-                  className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50"
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                  disabled={currentPage <= 1}
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-700" />
-                </button>
+            <div className="flex items-center justify-between">
+              <button
+                className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:bg-gray-100 disabled:cursor-not-allowed"
+                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={currentPage <= 1}
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-700" />
+              </button>
 
-                <div className="text-center flex-1">
-                  <h2 className="text-xl font-semibold">Peringkat</h2>
-                  <p className="text-gray-500 text-sm">
-                    Halaman {pageInfo?.currentPage} dari {pageInfo?.totalPages}
-                  </p>
-                </div>
-
-                <button
-                  className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50"
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  disabled={pageInfo && currentPage >= pageInfo.totalPages}
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-700" />
-                </button>
+              <div className="text-center flex-1">
+                <h2 className="text-xl font-semibold">Peringkat</h2>
+                <p className="text-gray-500 text-sm">
+                  Halaman {pageInfo?.currentPage} dari {pageInfo?.totalPages}
+                </p>
               </div>
+
+              <button
+                className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:bg-gray-100 disabled:cursor-not-allowed"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={pageInfo && currentPage >= pageInfo.totalPages}
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700" />
+              </button>
             </div>
-              </div>
+          </div>
           <div className="p-6 pt-4">
             <ul className="space-y-4">
               {ranking.map((user, index) => (
@@ -336,7 +334,7 @@ function UserProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -344,7 +342,7 @@ export default UserProfilePage
 
 function UserProfilePageSkeleton() {
   return (
-    <div className="flex h-[85vh] w-screen gap-4 max-w-7xl mx-auto bg-gray-50 animate-pulse">
+    <div className="flex max-h-[85vh] w-screen gap-4 max-w-7xl mx-auto bg-gray-50 animate-pulse">
       <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
           <div className="rounded-full w-36 h-36 bg-gray-200"/>

@@ -12,6 +12,7 @@ import { authPassword } from '@/api/authPassword.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
 import type { UpdatePasswordRequest } from '@/dto/UpdatePasswordRequest.ts'
 import SettingsHeader from '@/components/SettingsHeader.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 function SettingsSecurityPasswordPage() {
   const { token } = useAuth()
@@ -116,91 +117,89 @@ function SettingsSecurityPasswordPage() {
   
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <Navbar />
-          <div className="max-w-4xl mx-auto py-8">
-            <SettingsHeader to="/settings/security">
-              Ubah Kata Sandi
-            </SettingsHeader>
-
-            {apiMessage && (
-              <Alert
-                message={apiMessage}
-                type="error"
-                onClose={() => setApiMessage('')}
-              />
-            )}
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <PasswordInput
-                label="Kata sandi saat ini"
-                name="currentPassword"
-                placeholder="Masukkan kata sandi saat ini"
-                value={form.currentPassword}
-                onChange={handleChange('currentPassword')}
-                hasError={!!errors.currentPassword}
-                validation={errors.currentPassword && <TextInputError message={errors.currentPassword} />}
-              />
-              <PasswordInput
-                label="Kata sandi baru"
-                name="newPassword"
-                placeholder="Minimal 8 karakter, kombinasi huruf & angka"
-                value={form.newPassword}
-                onChange={handleChange('newPassword')}
-                hasError={!!errors.newPassword}
-                validation={ showPasswordRules && (
-                  <ul className="text-xs mt-3 space-y-1">
-                    <li className="flex items-start gap-2">
+      <Navbar />
+      <InnerContainer>
+        <SettingsHeader to="/settings/security">
+          Ubah Kata Sandi
+        </SettingsHeader>
+        {apiMessage && (
+          <Alert
+            message={apiMessage}
+            type="error"
+            onClose={() => setApiMessage('')}
+          />
+        )}
+        <div className="max-w-md">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <PasswordInput
+              label="Kata sandi saat ini"
+              name="currentPassword"
+              placeholder="Masukkan kata sandi saat ini"
+              value={form.currentPassword}
+              onChange={handleChange('currentPassword')}
+              hasError={!!errors.currentPassword}
+              validation={errors.currentPassword && <TextInputError message={errors.currentPassword}/>}
+            />
+            <PasswordInput
+              label="Kata sandi baru"
+              name="newPassword"
+              placeholder="Minimal 8 karakter, kombinasi huruf & angka"
+              value={form.newPassword}
+              onChange={handleChange('newPassword')}
+              hasError={!!errors.newPassword}
+              validation={showPasswordRules && (
+                <ul className="text-xs mt-3 space-y-1">
+                  <li className="flex items-start gap-2">
                       <span
                         className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${form.currentPassword !== form.newPassword ? 'bg-green-600' : 'bg-red-500'}`}></span>
-                      <span className={`${form.currentPassword !== form.newPassword ? 'text-green-600' : 'text-red-500'}`}>Kata sandi baru harus berbeda dengan kata sandi saat ini</span>
-                    </li>
-                    <li className="flex items-start gap-2">
+                    <span
+                      className={`${form.currentPassword !== form.newPassword ? 'text-green-600' : 'text-red-500'}`}>Kata sandi baru harus berbeda dengan kata sandi saat ini</span>
+                  </li>
+                  <li className="flex items-start gap-2">
                       <span
                         className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${form.newPassword ? 'bg-green-600' : 'bg-red-500'}`}></span>
-                      <span className={`${form.newPassword ? 'text-green-600' : 'text-red-500'}`}>Kata sandi tidak boleh kosong</span>
-                    </li>
-                    <li className="flex items-start gap-2">
+                    <span className={`${form.newPassword ? 'text-green-600' : 'text-red-500'}`}>Kata sandi tidak boleh kosong</span>
+                  </li>
+                  <li className="flex items-start gap-2">
                       <span
                         className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${length ? 'bg-green-600' : 'bg-red-500'}`}></span>
-                      <span
-                        className={`${length ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus 8-72 karakter</span>
-                    </li>
-                    <li className="flex items-start gap-2">
+                    <span
+                      className={`${length ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus 8-72 karakter</span>
+                  </li>
+                  <li className="flex items-start gap-2">
                       <span
                         className={`mt-[7px] inline-block w-[3px] h-[3px] rounded-full ${pattern ? 'bg-green-600' : 'bg-red-500'}`}></span>
-                      <div className="flex items-center">
-                        <span className={`${pattern ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus mengandung huruf dan angka</span>
-                        <ToolTip message="Dapat menggunakan simbol @#$%^&+=!_-"><Info size={12}
-                                                                                      className={`ml-1 ${pattern ? 'text-green-600' : 'text-red-500'}`}/></ToolTip>
-                      </div>
-                    </li>
-                  </ul>
-                )}
-              />
+                    <div className="flex items-center">
+                      <span className={`${pattern ? 'text-green-600' : 'text-red-500'}`}>Kata sandi harus mengandung huruf dan angka</span>
+                      <ToolTip message="Dapat menggunakan simbol @#$%^&+=!_-"><Info size={12}
+                                                                                    className={`ml-1 ${pattern ? 'text-green-600' : 'text-red-500'}`}/></ToolTip>
+                    </div>
+                  </li>
+                </ul>
+              )}
+            />
 
-              <PasswordInput
-                label="Konfirmasi kata sandi"
-                name="confirmPassword"
-                placeholder="Ulangi kata sandi yang sama"
-                value={form.confirmNewPassword}
-                onChange={handleChange('confirmNewPassword')}
-                hasError={!!errors.confirmNewPassword}
-                validation={errors.confirmNewPassword && <TextInputError message={errors.confirmNewPassword} />}
-              />
+            <PasswordInput
+              label="Konfirmasi kata sandi"
+              name="confirmPassword"
+              placeholder="Ulangi kata sandi yang sama"
+              value={form.confirmNewPassword}
+              onChange={handleChange('confirmNewPassword')}
+              hasError={!!errors.confirmNewPassword}
+              validation={errors.confirmNewPassword && <TextInputError message={errors.confirmNewPassword}/>}
+            />
 
-              <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading || isSuccess}>
-                {!isSuccess ? 'Ubah kata sandi' : 'Tersimpan'}
-              </SubmitButton>
-            </form>
+            <SubmitButton type="submit" isLoading={isLoading} disabled={isLoading || isSuccess}>
+              {!isSuccess ? 'Ubah kata sandi' : 'Tersimpan'}
+            </SubmitButton>
+          </form>
 
-            <p className="mt-4 text-gray-600 text-sm italic">
-              Dengan mengganti kata sandi, pastikan Anda mengingat kata sandi baru.
-              Ganti kata sandi secara berkala untuk menjaga keamanan akun Anda.
-            </p>
-          </div>
-          </div>
+          <p className="mt-4 text-gray-600 text-sm italic">
+            Dengan mengganti kata sandi, pastikan Anda mengingat kata sandi baru.
+            Ganti kata sandi secara berkala untuk menjaga keamanan akun Anda.
+          </p>
         </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

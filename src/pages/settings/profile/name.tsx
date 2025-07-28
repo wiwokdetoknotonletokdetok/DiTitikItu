@@ -9,6 +9,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import Alert from '@/components/Alert.tsx'
 import { patchUsersMe } from '@/api/usersMe.ts'
 import { ApiError } from '@/exception/ApiError.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function SettingsProfileNamePage() {
   const { token, updateUser } = useAuth()
@@ -68,45 +69,40 @@ export default function SettingsProfileNamePage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-
-        <div className="max-w-4xl mx-auto py-8">
-          <UpdateFieldForm
-            to="/settings/profile"
-            isSuccess={isSuccess}
-            onSubmit={handleSubmit}
-            buttonText="Simpan"
-            title="Edit Nama"
-            isLoading={isLoading}
-            isValid={isValid}
-            info={
-              <p className="text-xs text-gray-500 mt-1">
-                Nama Anda akan terlihat oleh pengguna lain, pastikan sesuai dengan yang diinginkan.
-              </p>
-            }
-          >
-            {apiMessage && (
-              <Alert
-                type="error"
-                message={apiMessage}
-                onClose={() => setApiMessage('')}
-              />
-            )}
-            <TextInput
-              name="name"
-              label="Nama"
-              placeholder=""
-              value={name}
-              onChange={handleChange}
-              hasError={!!errorMessage}
-              validation={errorMessage && <TextInputError message={errorMessage} />}
+      <Navbar />
+      <InnerContainer>
+        <UpdateFieldForm
+          to="/settings/profile"
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          title="Edit Nama"
+          isLoading={isLoading}
+          isValid={isValid}
+          info={
+            <p className="text-xs text-gray-500 mt-1">
+              Nama Anda akan terlihat oleh pengguna lain, pastikan sesuai dengan yang diinginkan.
+            </p>
+          }
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
             />
-          </UpdateFieldForm>
-        </div>
-      </div>
-      </div>
+          )}
+          <TextInput
+            name="name"
+            label="Nama"
+            placeholder=""
+            value={name}
+            onChange={handleChange}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
+          />
+        </UpdateFieldForm>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

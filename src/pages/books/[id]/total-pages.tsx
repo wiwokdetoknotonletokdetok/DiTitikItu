@@ -9,6 +9,7 @@ import TextInput from '@/components/TextInput.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
 import Alert from '@/components/Alert.tsx'
 import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function BookUpdateTotalPagesPage() {
   const { id } = useParams()
@@ -77,11 +78,8 @@ export default function BookUpdateTotalPagesPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-
+      <Navbar />
+      <InnerContainer>
         <UpdateFieldForm
           to={`/books/${id}`}
           isSuccess={isSuccess}
@@ -108,9 +106,7 @@ export default function BookUpdateTotalPagesPage() {
             validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
-      </div>
-      </div>
-      </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

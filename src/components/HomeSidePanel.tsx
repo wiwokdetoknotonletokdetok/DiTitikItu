@@ -34,9 +34,11 @@ type Props = {
   onSaveAddLocation?: () => void
   onUpdateReviews: () => void
   onUpdateLocations: () => void
+  isLoading: boolean
 }
 
-export default function HomeSidePanel({ 
+export default function HomeSidePanel({
+  isLoading,
   onUpdateReviews,
   newMarkerPosition, 
   onAddLocationClick, 
@@ -121,8 +123,10 @@ export default function HomeSidePanel({
     }
   }
 
+  if (isLoading) return <HomeSidePanelSkeleton />
+
   return (
-    <div className="relative lg:w-[30%]">
+    <div className="relative">
       <div className="absolute top-2 right-2 z-10">
         <Tooltip message="Edit buku ini">
           <button
@@ -150,8 +154,7 @@ export default function HomeSidePanel({
       </div>
 
       <div
-        className="transition-all duration-500 transform translate-x-0 opacity-100 bg-white rounded p-4 shadow relative"
-        style={{maxHeight: '85vh', overflowY: 'auto'}}
+        className="transition-all duration-500 transform translate-x-0 opacity-100 bg-white rounded p-4 shadow relative h-[85vh] overflow-y-auto"
       >
         <div className="relative group w-full mb-4 rounded overflow-hidden">
           <img
@@ -300,6 +303,29 @@ export default function HomeSidePanel({
           </Modal>
         </>
       )}
+    </div>
+  )
+}
+
+function HomeSidePanelSkeleton() {
+  return (
+    <div className="animate-pulse bg-white rounded p-4 shadow relative h-[85vh] overflow-y-auto">
+      <div className="w-full h-[240px] bg-gray-200 rounded mb-4" />
+
+      <div className="flex items-center justify-between mb-2">
+        <div className="h-5 bg-gray-200 rounded w-2/3" />
+        <div className="h-5 bg-gray-200 rounded w-8" />
+      </div>
+
+      <div className="space-y-2 mb-4">
+        <div className="h-4 bg-gray-200 rounded w-1/2" />
+        <div className="h-4 bg-gray-200 rounded w-2/3" />
+        <div className="h-4 bg-gray-200 rounded w-1/3" />
+        <div className="h-4 bg-gray-200 rounded w-1/2" />
+        <div className="h-4 bg-gray-200 rounded w-1/4" />
+      </div>
+
+      <div className="h-20 bg-gray-200 rounded mb-4" />
     </div>
   )
 }

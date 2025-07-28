@@ -1,6 +1,7 @@
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO'
 import { Plus } from 'lucide-react'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import Tooltip from '@/components/Tooltip.tsx'
 
 interface Props {
   book: BookSummaryDTO
@@ -58,15 +59,17 @@ export default function BookCard({
       )}
 
       {showRemoveButton && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove?.()
-          }}
-          className="absolute top-0 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
-        >
-            <BookmarkSolid className="w-6 h-6" style={{ transform: 'scaleY(2)'}}/>
-        </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove?.()
+            }}
+            className="absolute top-0 right-2 z-10 text-yellow-500 hover:text-yellow-500 transition-all"
+          >
+            <Tooltip message="Hapus dari koleksi">
+              <BookmarkSolid className="w-6 h-6" style={{transform: 'scaleY(2)'}}/>
+            </Tooltip>
+          </button>
       )}
     </div>
   )

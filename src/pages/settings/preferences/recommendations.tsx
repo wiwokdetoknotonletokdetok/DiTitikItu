@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext.tsx'
 import { ApiError } from '@/exception/ApiError.ts'
 import TextInputError from '@/components/TextInputError.tsx'
 import SettingsHeader from '@/components/SettingsHeader.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 function SettingsPreferencesRecommendationsPage() {
   const { token } = useAuth()
@@ -33,13 +34,12 @@ function SettingsPreferencesRecommendationsPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <SettingsHeader to="/settings/preferences">
-            Reset Rekomendasi
-          </SettingsHeader>
+      <Navbar />
+      <InnerContainer>
+        <SettingsHeader to="/settings/preferences">
+          Reset Rekomendasi
+        </SettingsHeader>
+        <div>
           <p className="text-gray-700 mb-4 text-base">
             Dengan mereset rekomendasi, kami akan menghapus data preferensi dan riwayat aktivitas Anda yang digunakan
             untuk memberikan rekomendasi buku.
@@ -62,10 +62,9 @@ function SettingsPreferencesRecommendationsPage() {
           <p className="mt-3 text-gray-500 italic text-xs">
             Reset rekomendasi tidak akan menghapus koleksi buku Anda.
           </p>
-          <TextInputError message={apiMessage} />
         </div>
-      </div>
-      </div>
+        <TextInputError message={apiMessage}/>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

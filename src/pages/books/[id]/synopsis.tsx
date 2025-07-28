@@ -9,6 +9,7 @@ import TextArea from '@/components/TextArea.tsx'
 import TextInputError from '@/components/TextInputError.tsx'
 import Alert from '@/components/Alert.tsx'
 import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function BookUpdateSynopsisPage() {
   const { id } = useParams()
@@ -76,11 +77,8 @@ export default function BookUpdateSynopsisPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-
+      <Navbar />
+      <InnerContainer>
         <UpdateFieldForm
           to={`/books/${id}`}
           isSuccess={isSuccess}
@@ -107,9 +105,7 @@ export default function BookUpdateSynopsisPage() {
             validation={errorMessage && <TextInputError message={errorMessage} />}
           />
         </UpdateFieldForm>
-      </div>
-      </div>
-      </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

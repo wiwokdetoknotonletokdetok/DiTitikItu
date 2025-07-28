@@ -10,6 +10,7 @@ import type { UserProfileResponse } from '@/dto/UserProfileResponse.ts'
 import SettingsHeader from '@/components/SettingsHeader.tsx'
 import PhotoProfileUploader from '@/components/PhotoProfileUploader'
 import { deleteProfilePicture, uploadProfilePicture } from '@/api/profilePicture'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function SettingsProfilePage() {
   const { user, token } = useAuth()
@@ -89,47 +90,42 @@ export default function SettingsProfilePage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-        <Navbar/>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <SettingsHeader to="/settings">
-            Profil
-          </SettingsHeader>
-          <PhotoProfileUploader
-            initialUrl={user?.profilePicture}
-            onUpload={(file) => setNewImage(file)}
-            onDelete={handleDeletePicture}
-            isUploading={isUploading}
-            isUploaded={isUploaded}
+      <Navbar/>
+      <InnerContainer>
+        <SettingsHeader to="/settings">
+          Profil
+        </SettingsHeader>
+        <PhotoProfileUploader
+          initialUrl={user?.profilePicture}
+          onUpload={(file) => setNewImage(file)}
+          onDelete={handleDeletePicture}
+          isUploading={isUploading}
+          isUploaded={isUploaded}
+        />
+        <div className="rounded-lg overflow-hidden shadow mt-4">
+          <FieldItemWithLoading
+            label="Nama"
+            value={name}
+            to={`/settings/profile/name`}
+            state={{ value: name }}
+            isLoading={loading}
           />
-
-          <div className="rounded-lg overflow-hidden shadow mt-4">
-            <FieldItemWithLoading
-              label="Nama"
-              value={name}
-              to={`/settings/profile/name`}
-              state={{ value: name }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Email"
-              value={email}
-              to={`/settings/profile/email`}
-              state={{ value: email }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Bio"
-              value={bio}
-              to={`/settings/profile/bio`}
-              state={{ value: bio }}
-              isLoading={loading}
-            />
-          </div>
+          <FieldItemWithLoading
+            label="Email"
+            value={email}
+            to={`/settings/profile/email`}
+            state={{ value: email }}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Bio"
+            value={bio}
+            to={`/settings/profile/bio`}
+            state={{ value: bio }}
+            isLoading={loading}
+          />
         </div>
-        </div>
-        </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

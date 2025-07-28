@@ -9,6 +9,7 @@ import TextInputError from '@/components/TextInputError.tsx'
 import { ApiError } from '@/exception/ApiError.ts'
 import { patchUsersMe } from '@/api/usersMe.ts'
 import Alert from '@/components/Alert.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function SettingsProfileEmailPage() {
   const { token } = useAuth()
@@ -74,50 +75,46 @@ export default function SettingsProfileEmailPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-          <UpdateFieldForm
-            to="/settings/profile"
-            isSuccess={isSuccess}
-            onSubmit={handleSubmit}
-            buttonText="Simpan"
-            isLoading={isLoading}
-            isValid={isValid}
-            title="Edit Email"
-            info={
-              <div className="text-xs text-gray-500 mt-1">
-                <p>
-                  Email Anda digunakan untuk login ke akun ini. Setelah mengganti email, Anda akan menggunakan alamat baru
-                  untuk login ke akun.
-                </p>
-                <p className="mt-1">
-                  Pengguna lain tidak akan dapat melihat email Anda.
-                </p>
-              </div>
-            }
-          >
-            {apiMessage && (
-              <Alert
-                type="error"
-                message={apiMessage}
-                onClose={() => setApiMessage('')}
-              />
-            )}
-            <TextInput
-              label="Alamat email"
-              name="email"
-              placeholder="contoh: email@domain.com"
-              value={email}
-              onChange={handleChange}
-              hasError={!!errorMessage}
-              validation={errorMessage && <TextInputError message={errorMessage} />}
+      <Navbar />
+      <InnerContainer>
+        <UpdateFieldForm
+          to="/settings/profile"
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          isLoading={isLoading}
+          isValid={isValid}
+          title="Edit Email"
+          info={
+            <div className="text-xs text-gray-500 mt-1">
+              <p>
+                Email Anda digunakan untuk login ke akun ini. Setelah mengganti email, Anda akan menggunakan alamat baru
+                untuk login ke akun.
+              </p>
+              <p className="mt-1">
+                Pengguna lain tidak akan dapat melihat email Anda.
+              </p>
+            </div>
+          }
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
             />
-          </UpdateFieldForm>
-        </div>
-      </div>
-      </div>
+          )}
+          <TextInput
+            label="Alamat email"
+            name="email"
+            placeholder="contoh: email@domain.com"
+            value={email}
+            onChange={handleChange}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
+          />
+        </UpdateFieldForm>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

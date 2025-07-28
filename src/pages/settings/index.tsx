@@ -12,6 +12,7 @@ import { ApiError } from '@/exception/ApiError.ts'
 import { useNavigate } from 'react-router-dom'
 import PrivateRoute from '@/PrivateRoute.tsx'
 import SettingsHeader from '@/components/SettingsHeader.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 function SettingsPage() {
   const { token, logout } = useAuth()
@@ -33,48 +34,42 @@ function SettingsPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <SettingsHeader>
-            Pengaturan
-          </SettingsHeader>
-          <div className="space-y-4">
+      <Navbar/>
+      <InnerContainer>
+        <SettingsHeader>
+          Pengaturan
+        </SettingsHeader>
+        <div className="space-y-4">
+          <SettingsItem
+            title="Profil"
+            description="Lihat dan ubah informasi profil kamu"
+            icon={<User className="w-5 h-5 text-gray-500"/>}
+            to="/settings/profile"
+          />
 
-            <SettingsItem
-              title="Profil"
-              description="Lihat dan ubah informasi profil kamu"
-              icon={<User className="w-5 h-5 text-gray-500" />}
-              to="/settings/profile"
-            />
+          <SettingsItem
+            title="Keamanan"
+            description="Ganti kata sandi dan keamanan akun"
+            icon={<Lock className="w-5 h-5 text-gray-500"/>}
+            to="/settings/security"
+          />
 
-            <SettingsItem
-              title="Keamanan"
-              description="Ganti kata sandi dan keamanan akun"
-              icon={<Lock className="w-5 h-5 text-gray-500" />}
-              to="/settings/security"
-            />
+          <SettingsItem
+            title="Preferensi"
+            description="Atur preferensi dan pengaturan personalisasi akun"
+            icon={<SlidersHorizontal className="w-5 h-5 text-gray-500"/>}
+            to="/settings/preferences"
+          />
 
-            <SettingsItem
-              title="Preferensi"
-              description="Atur preferensi dan pengaturan personalisasi akun"
-              icon={<SlidersHorizontal className="w-5 h-5 text-gray-500" />}
-              to="/settings/preferences"
-            />
-
-            <SettingsItem
-              title="Keluar"
-              description="Keluar dari akun kamu"
-              icon={<LogOut className="w-5 h-5 text-red-500" />}
-              danger={true}
-              onClick={() => handleLogout()}
-            />
-
-          </div>
+          <SettingsItem
+            title="Keluar"
+            description="Keluar dari akun kamu"
+            icon={<LogOut className="w-5 h-5 text-red-500"/>}
+            danger={true}
+            onClick={() => handleLogout()}
+          />
         </div>
-        </div>
-      </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

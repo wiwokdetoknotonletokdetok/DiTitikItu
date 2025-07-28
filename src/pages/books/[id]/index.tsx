@@ -9,6 +9,7 @@ import PrivateRoute from '@/PrivateRoute.tsx'
 import { FieldItemWithLoading } from '@/components/FieldItem.tsx'
 import type { GenreResponse } from '@/dto/GenreResponse.ts'
 import { uploadBookPicture } from '@/api/uploadBookPicture.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function BookUpdatePage() {
   const { id: id } = useParams()
@@ -99,89 +100,85 @@ export default function BookUpdatePage() {
 
   return (
     <PrivateRoute>
-      <>
-      <div className="max-w-7xl mx-auto px-4">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Buku</h1>
-          {!loading && (
-            <BookImageUploader
-              onUpload={(file) => setNewImage(file)}
-              initialUrl={form.bookPicture}
-              isUploading={isUploading}
-              isUploaded={isUploaded}
-            />
-          )}
-          <div className="rounded-lg overflow-hidden shadow mt-4">
-            <FieldItemWithLoading
-              label="Judul buku"
-              value={form.title}
-              to={`/books/${id}/title`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="ISBN"
-              value={formatISBN(isbn)}
-              to={`/books/${id}/isbn`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Sinopsis"
-              value={form.synopsis}
-              to={`/books/${id}/synopsis`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Jumlah halaman"
-              value={form.totalPages.toString()}
-              to={`/books/${id}/total-pages`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Tahun terbit"
-              value={form.publishedYear.toString()}
-              to={`/books/${id}/published-year`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Bahasa"
-              value={language}
-              to={`/books/${id}/language`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Penerbit"
-              value={publisherName}
-              to={`/books/${id}/publisher`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-            <FieldItemWithLoading
-              label="Penulis"
-              value={authorNames}
-              to={`/books/${id}/authors`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
+      <Navbar/>
+      <InnerContainer>
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Buku</h1>
+        {!loading && (
+          <BookImageUploader
+            onUpload={(file) => setNewImage(file)}
+            initialUrl={form.bookPicture}
+            isUploading={isUploading}
+            isUploaded={isUploaded}
+          />
+        )}
+        <div className="rounded-lg overflow-hidden shadow mt-4">
+          <FieldItemWithLoading
+            label="Judul buku"
+            value={form.title}
+            to={`/books/${id}/title`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="ISBN"
+            value={formatISBN(isbn)}
+            to={`/books/${id}/isbn`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Sinopsis"
+            value={form.synopsis}
+            to={`/books/${id}/synopsis`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Jumlah halaman"
+            value={form.totalPages.toString()}
+            to={`/books/${id}/total-pages`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Tahun terbit"
+            value={form.publishedYear.toString()}
+            to={`/books/${id}/published-year`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Bahasa"
+            value={language}
+            to={`/books/${id}/language`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Penerbit"
+            value={publisherName}
+            to={`/books/${id}/publisher`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
+          <FieldItemWithLoading
+            label="Penulis"
+            value={authorNames}
+            to={`/books/${id}/authors`}
+            state={{value: bookRequest}}
+            isLoading={loading}
 
-            />
-            <FieldItemWithLoading
-              label="Genre"
-              value={genre?.genreName || ''}
-              to={`/books/${id}/genres`}
-              state={{ value: bookRequest }}
-              isLoading={loading}
-            />
-      </div>
-          </div>
+          />
+          <FieldItemWithLoading
+            label="Genre"
+            value={genre?.genreName || ''}
+            to={`/books/${id}/genres`}
+            state={{value: bookRequest}}
+            isLoading={loading}
+          />
         </div>
-      </>
-    </PrivateRoute>
+    </InnerContainer>
+  </PrivateRoute>
   )
 }
 

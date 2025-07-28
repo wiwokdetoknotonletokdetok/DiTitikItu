@@ -15,7 +15,7 @@ interface UpdateFieldFormProps {
 
 const UpdateFieldForm = ({ to, isValid = true, isSuccess, isLoading, children, title, onSubmit, buttonText, info }: UpdateFieldFormProps) => {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <>
       <SettingsHeader to={to}>
         {title}
       </SettingsHeader>
@@ -28,7 +28,7 @@ const UpdateFieldForm = ({ to, isValid = true, isSuccess, isLoading, children, t
           {!isSuccess ? buttonText : 'Tersimpan'}
         </SubmitButton>
       </form>
-    </div>
+    </>
   )
 }
 

@@ -12,6 +12,7 @@ import { getAuthors } from '@/api/authors.ts'
 import TextInputError from '@/components/TextInputError.tsx'
 import Alert from '@/components/Alert.tsx'
 import type { UpdateBookRequest } from '@/dto/UpdateBookRequest.ts'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 const MAX_AUTHOR_NAME = 50
 
@@ -85,11 +86,8 @@ export default function BookUpdateAuthorsPage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-
+      <Navbar />
+      <InnerContainer>
         <UpdateFieldForm
           to={`/books/${id}`}
           isSuccess={isSuccess}
@@ -125,9 +123,7 @@ export default function BookUpdateAuthorsPage() {
             multi
           />
         </UpdateFieldForm>
-      </div>
-      </div>
-      </div>
+      </InnerContainer>
     </PrivateRoute>
   )
 }

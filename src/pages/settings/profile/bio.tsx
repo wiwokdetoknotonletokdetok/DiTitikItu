@@ -9,6 +9,7 @@ import { patchUsersMe } from '@/api/usersMe.ts'
 import { ApiError } from '@/exception/ApiError.ts'
 import TextInputError from '@/components/TextInputError.tsx'
 import Alert from '@/components/Alert.tsx'
+import InnerContainer from '@/components/InnerContainer.tsx'
 
 export default function SettingsProfileNamePage() {
   const { token } = useAuth()
@@ -66,46 +67,42 @@ export default function SettingsProfileNamePage() {
 
   return (
     <PrivateRoute>
-      <div className="px-4 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-8">
-          <UpdateFieldForm
-            to="/settings/profile"
-            isSuccess={isSuccess}
-            onSubmit={handleSubmit}
-            buttonText="Simpan"
-            isLoading={isLoading}
-            isValid={isValid}
-            title="Edit Bio"
-            info={
-              <p className="text-xs text-gray-500 mt-1">
-                Bio Anda akan terlihat oleh pengguna lain. Jangan memasukkan informasi yang tidak relevan atau tidak
-                pantas.
-              </p>
-            }
-          >
-            {apiMessage && (
-              <Alert
-                type="error"
-                message={apiMessage}
-                onClose={() => setApiMessage('')}
-              />
-            )}
-            <TextArea
-              heightClassName="h-20"
-              name="bio"
-              label="Bio"
-              placeholder=""
-              value={bio}
-              onChange={handleChange}
-              hasError={!!errorMessage}
-              validation={errorMessage && <TextInputError message={errorMessage} />}
+      <Navbar />
+      <InnerContainer>
+        <UpdateFieldForm
+          to="/settings/profile"
+          isSuccess={isSuccess}
+          onSubmit={handleSubmit}
+          buttonText="Simpan"
+          isLoading={isLoading}
+          isValid={isValid}
+          title="Edit Bio"
+          info={
+            <p className="text-xs text-gray-500 mt-1">
+              Bio Anda akan terlihat oleh pengguna lain. Jangan memasukkan informasi yang tidak relevan atau tidak
+              pantas.
+            </p>
+          }
+        >
+          {apiMessage && (
+            <Alert
+              type="error"
+              message={apiMessage}
+              onClose={() => setApiMessage('')}
             />
-          </UpdateFieldForm>
-        </div>
-      </div>
-      </div>
+          )}
+          <TextArea
+            heightClassName="h-20"
+            name="bio"
+            label="Bio"
+            placeholder=""
+            value={bio}
+            onChange={handleChange}
+            hasError={!!errorMessage}
+            validation={errorMessage && <TextInputError message={errorMessage} />}
+          />
+        </UpdateFieldForm>
+      </InnerContainer>
     </PrivateRoute>
   )
 }
