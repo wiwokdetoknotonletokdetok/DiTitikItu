@@ -1,17 +1,19 @@
 import { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
+import { useSelector } from 'react-redux'
+import type { RootState } from '@/store'
 
 interface FlyToLocationProps {
-  latitude: number
-  longitude: number
-  trigger: number
+  trigger: boolean
 }
 
-export default function FlyToLocation({ latitude, longitude, trigger }: FlyToLocationProps) {
+export default function FlyToLocation({ trigger }: FlyToLocationProps) {
   const map = useMap()
+  const flyToLocation = useSelector((state: RootState) => state.flyToLocation)
 
   useEffect(() => {
-    map.flyTo([latitude, longitude], 18, {
+    if (flyToLocation)
+    map.flyTo([flyToLocation.latitude, flyToLocation.longitude], flyToLocation?.zoom, {
       duration: 1.5
     })
   }, [trigger, map])

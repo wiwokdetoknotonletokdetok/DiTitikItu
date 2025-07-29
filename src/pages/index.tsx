@@ -1,55 +1,71 @@
-import { useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 import { getUserIPLocation } from '@/api/getUserIPLocation'
 import { getBooksId } from '@/api/getBooksId'
-import { booksIdLocations, postBooksIdLocations } from '@/api/booksIdLocations.ts'
+import { booksIdLocations } from '@/api/booksIdLocations.ts'
 import { fetchReviewsWithUser } from '@/api/reviewsWithUser'
-import type { UserPosition } from '@/dto/UserPosition'
-import type { BookResponseDTO } from '@/dto/BookResponseDTO'
-import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import { ApiError } from '@/exception/ApiError'
 import ToContentButton from '@/components/ToContentButton'
 import MapsView from '@/components/MapView'
 import HomeSidePanel from '@/components/HomeSidePanel'
 import HomeContent from '@/components/HomeContent'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '@/components/Navbar.tsx'
-import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import Modal from '@/components/Modal.tsx'
 import BookToolbar from '@/components/BookToolbar.tsx'
-import LocateMeButton from '@/components/LocateMebutton.tsx'
+import LocateMeButton from '@/components/LocateMeButton.tsx'
 import { fetchBookLocations } from '@/api/bookLocation.ts'
 import LocationForm from '@/components/LocationForm.tsx'
 import { Check, X } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
 import { useAuth } from '@/context/AuthContext.tsx'
 import LoginPromptContent from '@/components/LoginPromptContent'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserPosition } from '@/store/actions/userPositionActions.ts'
+import { setSelectedBook } from '@/store/actions/selectedBookActions.ts'
+import type { RootState } from '@/store'
+import { setSelectedBookLocations } from '@/store/actions/selectedBookLocationsActions.ts'
+import { setSelectedBookReviews } from '@/store/actions/selectedBookReviewsActions.ts'
+import { resetNewMarkerPosition } from '@/store/actions/newMarkerPositionActions.ts'
+import { setFlyToLocation } from '@/store/actions/flyToLocationActions.ts'
+import OnboardingTour from '@/components/OnboardingTour.tsx'
+
+export const ONBOARDING_VERSION = 'v1'
 
 export default function Home() {
+  const [onboardingStep, setOnboardingStep] = useState(() => {
+    const hasSeen = localStorage.getItem('onboardingVersion')
+    return hasSeen === ONBOARDING_VERSION ? -1 : 0
+  })
+
   const { id: bookId } = useParams<{ id: string }>()
   const { isLoggedIn, token } = useAuth()
-  const [userPosition, setUserPosition] = useState<UserPosition>()
   const navigate = useNavigate()
-  const [selectedBook, setSelectedBook] = useState<BookResponseDTO | null>(null)
-  const [selectedBookLocations, setSelectedBookLocations] = useState<BookLocationResponse[]>([])
+  const location = useLocation()
   const [loadingBook, setLoadingBook] = useState(false)
-  const [flyToLocation, setFlyToLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [reviews, setReviews] = useState<ReviewWithUserDTO[]>([])
-  const topRef = useRef<HTMLDivElement>(null)
+  const sidePanelRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const [newMarkerPosition, setNewMarkerPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const locateMeRef = useRef<HTMLButtonElement>(null)
+  const searchBarRef = useRef<HTMLDivElement>(null)
+  const addBookRef = useRef<HTMLButtonElement>(null)
+  const mapRef = useRef<HTMLDivElement>(null)
   const [locationName, setLocationName] = useState('')
-  const [flyTrigger, setFlyTrigger] = useState(0)
+  const [flyTrigger, setFlyTrigger] = useState(false)
+  const dispatch = useDispatch()
+  const userPosition = useSelector((state: RootState) => state.userPosition)
+  const selectedBook = useSelector((state: RootState) => state.selectedBook)
+  const newMarkerPosition = useSelector((state: RootState)=> state.newMarkerPosition)
 
   useEffect(() => {
-    if (!token && isLoggedIn()) return
-    if (bookId && (!selectedBook || selectedBook.id !== bookId)) {
+    if (isLoggedIn() && !token) return
+    scrollTo(sidePanelRef)
+    if (bookId && (!selectedBook || bookId !== selectedBook.id)) {
       handleSelectBook(bookId)
     }
-  }, [bookId, token])
+  }, [bookId, token, location.state])
 
   function handleFlyTo() {
-    setFlyTrigger(prev => prev + 1)
+    setFlyTrigger(!flyTrigger)
   }
 
   useEffect(() => {
@@ -62,20 +78,20 @@ export default function Home() {
     return () => { if (target) observer.unobserve(target) }
   }, [])
 
-  useEffect(() => {
-    const fallbackToIPLocation = async () => {
-      try {
-        const res = await getUserIPLocation()
-        setUserPosition({ latitude: res.data.latitude, longitude: res.data.longitude })
-      } catch (err) {
-        if (err instanceof ApiError) console.error('API error:', err.message)
-        else console.error('Terjadi kesalahan.')
-      }
+  const fallbackToIPLocation = async () => {
+    try {
+      const res = await getUserIPLocation()
+      dispatch(setUserPosition({latitude: res.data.latitude, longitude: res.data.longitude, gps: false, zoom: 12}))
+    } catch (err) {
+      if (err instanceof ApiError) console.error('API error:', err.message)
+      else console.error('Terjadi kesalahan.')
     }
+  }
 
+  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        pos => setUserPosition({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        pos => dispatch(setUserPosition({latitude: pos.coords.latitude, longitude: pos.coords.longitude, gps: true, zoom: 18})),
         () => fallbackToIPLocation()
       )
     } else {
@@ -84,29 +100,23 @@ export default function Home() {
   }, [])
 
   const handleSelectBook = async (bookId: string) => {
-    if (window.location.pathname !== `/${bookId}`) {
-      navigate(`/${bookId}`)
-    }
-
-    if (topRef.current) {
-      const offset = 68
-      const elementPosition = topRef.current.getBoundingClientRect().top + window.scrollY
-      const offsetPosition = elementPosition - offset
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      })
-    }
-
     setLoadingBook(true)
     try {
       const bookDetail = await getBooksId(bookId, token)
-      setSelectedBook(bookDetail.data)
+      dispatch(setSelectedBook(bookDetail.data))
 
-      if (userPosition) {
+      if (userPosition.longitude && userPosition.longitude) {
         const locationRes = await booksIdLocations(bookId, userPosition.latitude, userPosition.longitude)
-        setSelectedBookLocations(locationRes.data)
+        dispatch(setSelectedBookLocations(locationRes.data))
+        if (locationRes.data.length > 0) {
+          const nearestBook = locationRes.data[0]
+          dispatch(setFlyToLocation({
+            latitude: nearestBook.coordinates[0],
+            longitude: nearestBook.coordinates[1],
+            zoom: 18
+          }))
+          handleFlyTo()
+        }
       }
 
       await refreshBookAndReviews(bookId)
@@ -123,41 +133,17 @@ export default function Home() {
         getBooksId(bookId, null),
         fetchReviewsWithUser(bookId),
       ])
-      setSelectedBook(bookDetail.data)
-      setReviews(reviewDataWithUser)
+      dispatch(setSelectedBook(bookDetail.data))
+      dispatch(setSelectedBookReviews(reviewDataWithUser))
     } catch (err) {
       console.error('Gagal fetch data:', err)
-    }
-  }
-
-  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-
-    try {
-      await postBooksIdLocations(selectedBook!.id, {
-        locationName: locationName,
-        latitude: newMarkerPosition!.lat,
-        longitude: newMarkerPosition!.lng
-      })
-      navigate(-1)
-      setLocationName('')
-      await refreshLocations(selectedBook!.id)
-      setNewMarkerPosition(null)
-    } catch (err) {
-      setLocationName('')
-      setNewMarkerPosition(null)
-      if (err instanceof ApiError && err.statusCode === 401) {
-        console.log(err.message)
-      } else {
-        console.log('Terjadi kesalahan. Silakan coba lagi.')
-      }
     }
   }
 
   const refreshLocations = async (bookId: string) => {
     if (!userPosition) return
     const data = await fetchBookLocations(bookId, userPosition.latitude, userPosition.longitude)
-    setSelectedBookLocations(data)
+    dispatch(setSelectedBookLocations(data))
   }
 
   useEffect(() => {
@@ -166,36 +152,55 @@ export default function Home() {
     }
   }, [selectedBook?.id])
 
+  function scrollTo<T extends HTMLElement>(ref: RefObject<T | null>) {
+    if (ref.current) {
+      const offset = 68
+      const elementPosition = ref.current.getBoundingClientRect().top + window.scrollY
+      const offsetPosition = elementPosition - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      })
+    }
+  }
+
+  function scrollToIfNotPassed(
+    ref: RefObject<HTMLElement | null>,
+    fallbackRef: RefObject<HTMLElement | null>
+  ) {
+    if (!ref.current) return
+
+    const rect = ref.current.getBoundingClientRect()
+
+    if (rect.top > 69 && fallbackRef.current) {
+      scrollTo(ref)
+    } else {
+      scrollTo(fallbackRef)
+    }
+  }
+
   return (
     <>
+      <OnboardingTour
+        step={onboardingStep}
+        setStep={setOnboardingStep}
+        locateMeRef={locateMeRef}
+        addBookRef={addBookRef}
+        searchBarRef={searchBarRef}
+      />
+
       {!isVisible && (
         <ToContentButton
-          onClick={() => {
-            if (contentRef.current) {
-              const offset = 68
-              const elementPosition = contentRef.current.getBoundingClientRect().top + window.scrollY
-              const offsetPosition = elementPosition - offset
-
-              window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth',
-              })
-            }
-          }}
+          onClick={() => scrollToIfNotPassed(sidePanelRef, contentRef)}
         />
       )}
       <Navbar />
 
-      <div className={`mb-6 flex flex-col lg:flex-row ${selectedBook ? 'gap-4' : 'gap-0'}`}>
+      <div ref={mapRef} className={`mb-6 flex flex-col lg:flex-row ${selectedBook ? 'gap-4' : 'gap-0'}`}>
         <div className={`transition-all duration-500 ${selectedBook ? 'lg:w-[70%]' : 'lg:w-full'}`}>
           <MapsView
-            selectedBook={selectedBook}
-            userPosition={userPosition}
-            bookLocations={selectedBookLocations}
-            flyToLocation={flyToLocation}
             flyToTrigger={flyTrigger}
-            newMarkerPosition={newMarkerPosition}
-            onUpdateNewMarkerPosition={(pos) => setNewMarkerPosition(pos)}
             onRefreshLocations={() => {
               if (selectedBook?.id) {
                 refreshLocations(selectedBook.id)
@@ -203,16 +208,19 @@ export default function Home() {
             }}
           >
             <>
-              <BookToolbar onSelectBook={handleSelectBook} />
+              <BookToolbar
+                addBookRef={addBookRef}
+                searchBarRef={searchBarRef}
+              />
               <LocateMeButton
+                ref={locateMeRef}
                 onClick={() => {
-                  if (userPosition) {
-                    setFlyToLocation({
-                      latitude: userPosition.latitude,
-                      longitude: userPosition.longitude
-                    })
-                    handleFlyTo()
-                  }
+                  dispatch(setFlyToLocation({
+                    latitude: userPosition.latitude,
+                    longitude: userPosition.longitude,
+                    zoom: userPosition.zoom
+                  }))
+                  handleFlyTo()
                 }}
               />
               {newMarkerPosition && (
@@ -230,7 +238,7 @@ export default function Home() {
                     <Tooltip message="Batalkan">
                       <button
                         onClick={() => {
-                          setNewMarkerPosition(null)
+                          dispatch(resetNewMarkerPosition())
                           setLocationName('')
                         }}
                         className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white shadow-md flex items-center justify-center border border-gray-300 transition-colors"
@@ -245,38 +253,16 @@ export default function Home() {
           </MapsView>
         </div>
 
-        <div className={`${selectedBook ? 'lg:w-[30%]' : ''}`} ref={topRef}>
+        <div
+          ref={sidePanelRef}
+          className={`${selectedBook ? 'lg:w-[30%]' : ''}`}
+        >
           {selectedBook && (
             <HomeSidePanel
               isLoading={loadingBook}
-              book={selectedBook}
-              locations={selectedBookLocations}
-              reviews={reviews}
-              onClose={() => {
-                setSelectedBook(null)
-                setSelectedBookLocations([])
-                navigate('/')
-              }}
-              onAddLocationClick={() => {
-                if (userPosition) {
-                  setNewMarkerPosition({lat: userPosition.latitude, lng: userPosition.longitude})
-                  setFlyToLocation({latitude: userPosition.latitude, longitude: userPosition.longitude})
-                  handleFlyTo()
-                }
-              }}
-              newMarkerPosition={newMarkerPosition}
-              onCancelAddLocation={() => {
-                setNewMarkerPosition(null)
-                setLocationName('')
-              }}
-              onSaveAddLocation={() => navigate('#locations')}
-              onFlyTo={(lat, lng) => {
-                setFlyToLocation({ latitude: lat, longitude: lng })
-                handleFlyTo()
-              }}
-              onUpdate={() => refreshBookAndReviews(selectedBook.id)}
-              onUpdateReviews={() => refreshBookAndReviews(selectedBook.id)}
-              onUpdateLocations={() => refreshLocations(selectedBook?.id)}
+              handleFlyTo={handleFlyTo}
+              scrollTo={scrollTo}
+              mapRef={mapRef}
             />
           )}
         </div>
@@ -284,14 +270,12 @@ export default function Home() {
 
       <div className="mb-6">
         <HomeContent
-          onSelectBook={handleSelectBook}
           contentRef={contentRef}
         />
       </div>
       <Modal hash="#locations">
         {isLoggedIn() ? (
           <LocationForm
-            onSubmit={handleNewLocation}
             locationName={locationName}
             setLocationName={setLocationName}
           />

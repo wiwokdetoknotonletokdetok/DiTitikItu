@@ -1,12 +1,9 @@
-import type { BookResponseDTO } from '@/dto/BookResponseDTO'
-import type { BookLocationResponse } from '@/dto/BookLocationResponse'
 import BookReviewForm from '@/components/AddBookReviewForm'
 import { Tab, TabButton, TabPanel } from '@/components/Tab'
 import BookReviewList from '@/components/BookReviewList'
-import type { ReviewWithUserDTO } from '@/dto/ReviewWithUserDTO'
 import { ChevronRight, MapPinPlus, Pencil } from 'lucide-react'
 import Tooltip from '@/components/Tooltip.tsx'
-import { useEffect, useState } from 'react'
+import { type RefObject, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { StarRating } from '@/components/StarRating'
 import { useNavigate } from 'react-router-dom'
@@ -16,42 +13,46 @@ import toast from 'react-hot-toast'
 import { addBookToCollection, fetchUserBooks, removeBookFromUser } from '@/api/collections'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
 import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { resetSelectedBook } from '@/store/actions/selectedBookActions.ts'
+import { resetSelectedBookLocations } from '@/store/actions/selectedBookLocationsActions.ts'
+import { setNewMarkerPosition } from '@/store/actions/newMarkerPositionActions.ts'
+import { setFlyToLocation } from '@/store/actions/flyToLocationActions.ts'
+import ActionButton from '@/components/ActionButton.tsx'
 
 function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`
 }
 
 type Props = {
-  book: BookResponseDTO
-  locations: BookLocationResponse[]
-  reviews: ReviewWithUserDTO[]
-  onClose: () => void
-  onFlyTo: (lat: number, lng: number) => void
-  onUpdate: () => void
-  onAddLocationClick: () => void
-  newMarkerPosition?: { lat: number; lng: number } | null
-  onCancelAddLocation?: () => void
-  onSaveAddLocation?: () => void
-  onUpdateReviews: () => void
-  onUpdateLocations: () => void
   isLoading: boolean
+  handleFlyTo: () => void
+  mapRef: RefObject<HTMLDivElement | null>
+  scrollTo: (ref: RefObject<HTMLDivElement | null>) => void
+}
+
+const selectSelectedBook = (state: RootState) => {
+  const book = state.selectedBook
+  if (!book) throw new Error('Buku tidak ditemukan di state')
+  return book
 }
 
 export default function HomeSidePanel({
+  mapRef,
+  scrollTo,
   isLoading,
-  onUpdateReviews,
-  newMarkerPosition, 
-  onAddLocationClick, 
-  book, 
-  locations, 
-  reviews, 
-  onClose, 
-  onFlyTo 
+  handleFlyTo,
 }: Props) {
   const [isExpanded, setIsExpanded] = useState(false)
-
+  const book = useSelector(selectSelectedBook)
+  const locations = useSelector((state: RootState) => state.selectedBookLocations)
+  const reviews = useSelector((state: RootState) => state.selectedBookReviews)
+  const newMarkerPosition = useSelector((state: RootState) => state.newMarkerPosition)
+  const userPosition = useSelector((state: RootState) => state.userPosition)
   const { token, isLoggedIn, user } = useAuth()
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [isSaved, setIsSaved] = useState(false)
   const [hasUserReviewed, setHasUserReviewed] = useState(false)
 
@@ -82,7 +83,14 @@ export default function HomeSidePanel({
       const reviewed = reviews.some((r) => r.userId === user.id)
       setHasUserReviewed(reviewed)
   }, [reviews, user, isLoggedIn])
-      
+
+  useEffect(() => {
+    if (newMarkerPosition) {
+      scrollTo(mapRef)
+    }
+  }, [newMarkerPosition])
+
+
   const handleEdit = () => {
     if (isLoggedIn()) {
       navigate(`/books/${book.id}`);
@@ -127,24 +135,14 @@ export default function HomeSidePanel({
 
   return (
     <div className="relative">
-      <div className="absolute top-2 right-2 z-10">
-        <Tooltip message="Edit buku ini">
-          <button
-            onClick={handleEdit}
-            className="p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
-            aria-label="Edit buku"
-          >
-            <Pencil size={16} className="text-gray-600" />
-          </button>
-        </Tooltip>
-      </div>
-      
       <div className="z-[1000] absolute -left-5 top-1/2 -translate-y-1/2">
         <Tooltip message="Tutup panel samping">
           <button
             onClick={() => {
-              onClose()
+              dispatch(resetSelectedBook())
+              dispatch(resetSelectedBookLocations())
               setIsExpanded(false)
+              navigate('/')
             }}
             className="bg-white text-gray-500 py-4 shadow rounded-l-lg"
           >
@@ -179,70 +177,78 @@ export default function HomeSidePanel({
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
-          <Tooltip message={isSaved ? "Sudah disimpan" : "Simpan buku"}>
-            <button
-              onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
-              className="ml-2 p-2 bg-white border border-gray-300 rounded-full shadow hover:bg-gray-100 transition"
-              aria-label="Simpan buku"
-            >
-              {isSaved ? (
-                <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors"/>
-              ) : (
-                <BookmarkOutline className="w-5 h-5 text-gray-600 transition-colors"/>
-              )}
-            </button>
-          </Tooltip>
-        </div>
+        <h2 className="mb-4 text-xl font-bold text-[#1C2C4C]">{book.title}</h2>
 
-        <div className="text-sm text-gray-700 mb-4">
-          <p><span className="font-medium">Penulis:</span> {book.authorNames.join(', ')}</p>
-          <p><span className="font-medium">Penerbit:</span> {book.publisherName}</p>
-          <p><span className="font-medium">Tahun Terbit:</span> {book.publishedYear}</p>
-          <p><span className="font-medium">Bahasa:</span> {book.language}</p>
-          <p><span className="font-medium">Halaman:</span> {book.totalPages}</p>
+        <div className="flex justify-evenly mb-6">
+          <ActionButton
+            icon={<MapPinPlus className="text-white" size={20}/>}
+            disabled={!!newMarkerPosition}
+            onClick={() => {
+              if (!isLoggedIn()) {
+                navigate('#locations')
+              } else {
+                dispatch(setNewMarkerPosition({latitude: userPosition.latitude, longitude: userPosition.longitude}))
+                dispatch(setFlyToLocation({
+                  latitude: userPosition.latitude,
+                  longitude: userPosition.longitude,
+                  zoom: userPosition.zoom
+                }))
+                handleFlyTo()
+              }
+            }}
+            label="Tambah lokasi"
+            className="bg-[#1E497C] hover:bg-[#5C8BC1] disabled:bg-[#5C8BC1]"
+            tooltip="Tambah lokasi buku ini"
+          />
+          <ActionButton
+            icon={isSaved ? (
+              <BookmarkSolid className="w-5 h-5 text-yellow-500 transition-colors"/>
+            ) : (
+              <BookmarkOutline className="w-5 h-5 text-gray-500 transition-colors [stroke-width:2]"/>
+            )}
+            onClick={isSaved ? handleRemoveFromCollection : handleAddToCollection}
+            label="Simpan"
+            className="bg-white hover:bg-gray-100 border border-gray-200"
+            tooltip={isSaved ? 'Buku ini sudah tersimpan di koleksi' : 'Simpan buku ke koleksi'}
+          />
+          <ActionButton
+            icon={<Pencil className="text-gray-500" size={20}/>}
+            onClick={handleEdit}
+            label="Edit"
+            className="bg-white hover:bg-gray-100 border border-gray-200"
+            tooltip="Edit buku ini"
+          />
         </div>
-
-        <div className="mb-4 text-sm text-gray-600 whitespace-pre-wrap">
-          {book.synopsis}
-        </div>
-
-        <div className="mb-4">
-          <p className="text-sm text-gray-700"><span className="font-medium">Genre:</span></p>
-          <div className="flex flex-wrap mt-1 gap-1">
-            {book.genres.map((genre) => (
-              <span key={genre.id} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                {genre.genreName}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {!newMarkerPosition && (
-          <div className="flex justify-center mb-6">
-            <div className="block">
-              <button
-                onClick={() => {
-                  if (!isLoggedIn()) {
-                    navigate('#locations')
-                  } else {
-                    onAddLocationClick()
-                  }
-                }}
-                className="px-4 h-[42px] w-full bg-[#1E497C] font-semibold text-white rounded-full shadow-md flex items-center justify-center hover:bg-[#5C8BC1] transition-colors"
-                aria-label="Tambah lokasi"
-              >
-                <MapPinPlus size={20}/>
-                <span className="ml-2">Tambah lokasi</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         <Tab defaultTab="locations">
           <TabButton id="locations">Lokasi</TabButton>
+          <TabButton id="detail">Rincian</TabButton>
           <TabButton id="reviews">Ulasan</TabButton>
+
+          <TabPanel id="detail">
+            <div className="text-sm text-gray-700 mb-4">
+              <p><span className="font-medium">Penulis:</span> {book.authorNames.join(', ')}</p>
+              <p><span className="font-medium">Penerbit:</span> {book.publisherName}</p>
+              <p><span className="font-medium">Tahun Terbit:</span> {book.publishedYear}</p>
+              <p><span className="font-medium">Bahasa:</span> {book.language}</p>
+              <p><span className="font-medium">Halaman:</span> {book.totalPages}</p>
+            </div>
+
+            <div className="mb-4 text-sm text-gray-600 whitespace-pre-wrap">
+              {book.synopsis}
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-700"><span className="font-medium">Genre:</span></p>
+              <div className="flex flex-wrap mt-1 gap-1">
+                {book.genres.map((genre) => (
+                  <span key={genre.id} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                {genre.genreName}
+              </span>
+                ))}
+              </div>
+            </div>
+          </TabPanel>
 
           <TabPanel id="locations">
             {locations.length > 0 ? (
@@ -251,7 +257,15 @@ export default function HomeSidePanel({
                   <li
                     key={loc.id}
                     className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
-                    onClick={() => onFlyTo(loc.coordinates[0], loc.coordinates[1])}
+                    onClick={() => {
+                      dispatch(setFlyToLocation({
+                        latitude: loc.coordinates[0],
+                        longitude: loc.coordinates[1],
+                        zoom: 18
+                      }))
+                      handleFlyTo()
+                      scrollTo(mapRef)
+                    }}
                   >
                     <p className="font-semibold text-gray-800">{loc.locationName}</p>
                     <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
@@ -272,14 +286,14 @@ export default function HomeSidePanel({
               </div>
 
               <div className="mb-4">
-                <BookReviewForm bookId={book.id} onUpdateReviews={onUpdateReviews} isDisabled={hasUserReviewed}/>
+                <BookReviewForm bookId={book.id} isDisabled={hasUserReviewed}/>
               </div>
 
               <div className="flex flex-col">
                 {reviews.length > 0 && (
                   <>
                     <hr className="border-t border-gray-300 mb-4"/>
-                    <BookReviewList reviews={reviews} bookId={book.id} onUpdateReviews={onUpdateReviews}/>
+                    <BookReviewList reviews={reviews} bookId={book.id}/>
                   </>
                 )}
               </div>
@@ -310,22 +324,22 @@ export default function HomeSidePanel({
 function HomeSidePanelSkeleton() {
   return (
     <div className="animate-pulse bg-white rounded p-4 shadow relative h-[85vh] overflow-y-auto">
-      <div className="w-full h-[240px] bg-gray-200 rounded mb-4" />
+      <div className="w-full h-[240px] bg-gray-200 rounded mb-4"/>
 
       <div className="flex items-center justify-between mb-2">
-        <div className="h-5 bg-gray-200 rounded w-2/3" />
-        <div className="h-5 bg-gray-200 rounded w-8" />
+        <div className="h-5 bg-gray-200 rounded w-2/3"/>
+        <div className="h-5 bg-gray-200 rounded w-8"/>
       </div>
 
       <div className="space-y-2 mb-4">
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
-        <div className="h-4 bg-gray-200 rounded w-2/3" />
-        <div className="h-4 bg-gray-200 rounded w-1/3" />
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
-        <div className="h-4 bg-gray-200 rounded w-1/4" />
+        <div className="h-4 bg-gray-200 rounded w-1/2"/>
+        <div className="h-4 bg-gray-200 rounded w-2/3"/>
+        <div className="h-4 bg-gray-200 rounded w-1/3"/>
+        <div className="h-4 bg-gray-200 rounded w-1/2"/>
+        <div className="h-4 bg-gray-200 rounded w-1/4"/>
       </div>
 
-      <div className="h-20 bg-gray-200 rounded mb-4" />
+      <div className="h-20 bg-gray-200 rounded mb-4"/>
     </div>
   )
 }

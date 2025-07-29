@@ -2,16 +2,28 @@ import { useCallback, useMemo, useState } from 'react'
 import TextInput from '@/components/TextInput'
 import SubmitButton from '@/components/SubmitButton'
 import TextInputError from '@/components/TextInputError'
+import { postBooksIdLocations } from '@/api/booksIdLocations.ts'
+import { resetNewMarkerPosition } from '@/store/actions/newMarkerPositionActions.ts'
+import { ApiError } from '@/exception/ApiError.ts'
+import { fetchBookLocations } from '@/api/bookLocation.ts'
+import { setSelectedBookLocations } from '@/store/actions/selectedBookLocationsActions.ts'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
 
 type LocationFormProps = {
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   locationName: string
   setLocationName: (name: string) => void
 }
 
 const MAX_LOCATION_LENGTH = 50
 
-export default function LocationForm({ onSubmit, locationName, setLocationName}: LocationFormProps) {
+export default function LocationForm({ locationName, setLocationName }: LocationFormProps) {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const userPosition = useSelector((state: RootState) => state.userPosition)
+  const selectedBook = useSelector((state: RootState)=> state.selectedBook)
+  const newMarkerPosition = useSelector((state: RootState) => state.newMarkerPosition)
   const [touched, setTouched] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -38,7 +50,7 @@ export default function LocationForm({ onSubmit, locationName, setLocationName}:
     setTouched(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleNewLocation(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSubmitAttempted(true)
 
@@ -48,14 +60,36 @@ export default function LocationForm({ onSubmit, locationName, setLocationName}:
 
     setLoading(true)
     try {
-      await onSubmit(e)
+      await postBooksIdLocations(selectedBook!.id, {
+        locationName: locationName,
+        latitude: newMarkerPosition!.latitude,
+        longitude: newMarkerPosition!.longitude
+      })
+      navigate(-1)
+      setLocationName('')
+      await refreshLocations(selectedBook!.id)
+      dispatch(resetNewMarkerPosition())
+    } catch (err) {
+      setLocationName('')
+      dispatch(resetNewMarkerPosition())
+      if (err instanceof ApiError && err.statusCode === 401) {
+        console.log(err.message)
+      } else {
+        console.log('Terjadi kesalahan. Silakan coba lagi.')
+      }
     } finally {
       setLoading(false)
     }
   }
 
+  const refreshLocations = async (bookId: string) => {
+    if (!userPosition) return
+    const data = await fetchBookLocations(bookId, userPosition.latitude, userPosition.longitude)
+    dispatch(setSelectedBookLocations(data))
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleNewLocation} className="space-y-4">
       <TextInput
         label="Nama lokasi"
         name="location"

@@ -1,22 +1,25 @@
-import {MapContainer, Marker, Popup, TileLayer, useMap} from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { useEffect, useRef, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
-import type { UserPosition } from '@/dto/UserPosition.ts'
 import type { BookLocationResponse } from '@/dto/BookLocationResponse.ts'
 import FlyToLocation from '@/components/FlyToLocation.tsx'
-import { Plus, Minus } from 'lucide-react'
-import {ApiError} from "@/exception/ApiError.ts";
-import {deleteBookLocation, updateBookLocation} from "@/api/bookLocation.ts";
-import type {BookResponseDTO} from "@/dto/BookResponseDTO.ts";
+import { Minus, Plus } from 'lucide-react'
+import { ApiError } from '@/exception/ApiError.ts'
+import { deleteBookLocation, updateBookLocation } from '@/api/bookLocation.ts'
 import { useAuth } from '@/context/AuthContext'
 import L from 'leaflet'
-import type { LatLngTuple } from 'leaflet'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setNewMarkerPosition } from '@/store/actions/newMarkerPositionActions.ts'
+import type { UserPosition } from '@/dto/UserPosition.ts'
 
-function SetViewTo({ position }: { position: LatLngTuple }) {
+function SetViewTo({ userPosition } : { userPosition: UserPosition }) {
   const map = useMap()
   useEffect(() => {
-    if (position) {
-      map.setView(position, 16)
+    if (userPosition && userPosition.gps) {
+      map.setView([userPosition.latitude, userPosition.longitude], 16)
+    } else {
+      map.setView([userPosition.latitude, userPosition.longitude], 12)
     }
   }, [])
   return null
@@ -54,20 +57,19 @@ function CustomZoomControl() {
 
 
 interface MapViewProps {
-  selectedBook: BookResponseDTO | null
-  bookLocations: BookLocationResponse[]
-  userPosition: UserPosition | undefined
-  flyToLocation?: { latitude: number, longitude: number } | null
-  flyToTrigger: number
+  flyToTrigger: boolean
   children?: React.ReactNode
-  newMarkerPosition?: { lat: number; lng: number } | null
-  onUpdateNewMarkerPosition?: (pos: { lat: number; lng: number }) => void
   onRefreshLocations: () => void
 }
 
-export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition, onUpdateNewMarkerPosition, children, bookLocations, userPosition, flyToLocation, onRefreshLocations }: MapViewProps) {
-  const center: [number, number] = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
+export default function MapView({ flyToTrigger, children, onRefreshLocations }: MapViewProps) {
   const { token } = useAuth()
+  const dispatch = useDispatch()
+  const userPosition = useSelector((state: RootState) => state.userPosition)
+  const selectedBook = useSelector((state: RootState) => state.selectedBook)
+  const bookLocations = useSelector((state: RootState) => state.selectedBookLocations)
+  const newMarkerPosition = useSelector((state: RootState) => state.newMarkerPosition)
+  const center: [number, number] = userPosition ? [userPosition.latitude, userPosition.longitude] : [0, 0]
   const [editingLocationId, setEditingLocationId] = useState<number | null>(null)
   const [editedPosition, setEditedPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [editedLocationName, setEditedLocationName] = useState("")
@@ -128,7 +130,7 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
     <div style={{ position: 'relative' }}>
       <MapContainer
         center={center}
-        zoom={userPosition ? 16 : 2}
+        zoom={2}
         style={{ height: '85vh', width: '100%' }}
         zoomControl={false}
       >
@@ -140,13 +142,13 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
         {newMarkerPosition && (
           <Marker
             ref={markerRef}
-            position={[newMarkerPosition.lat, newMarkerPosition.lng]}
+            position={[newMarkerPosition.latitude, newMarkerPosition.longitude]}
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
                 const marker = e.target
                 const position = marker.getLatLng()
-                onUpdateNewMarkerPosition?.({ lat: position.lat, lng: position.lng })
+                dispatch(setNewMarkerPosition({ latitude: position.lat, longitude: position.lng}))
               }
             }}
           >
@@ -157,21 +159,23 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
           </Marker>
         )}
 
-        {userPosition && (
+        {userPosition.latitude && userPosition.longitude && (
           <>
-            <Marker
-              position={[userPosition.latitude, userPosition.longitude]}
-              icon={redIcon}
-            >
-              <Popup>Lokasi Anda</Popup>
-            </Marker>
-            <SetViewTo position={[userPosition.latitude, userPosition.longitude]} />
+            {userPosition.gps && (
+              <Marker
+                position={[userPosition.latitude, userPosition.longitude]}
+                icon={redIcon}
+              >
+                <Popup>Lokasi Anda</Popup>
+              </Marker>
+            )}
+            <SetViewTo userPosition={userPosition} />
           </>
         )}
 
         {localLocations
           .filter(location => location.coordinates[0] !== undefined && location.coordinates[1] !== undefined)
-          .map(location => (
+          .map((location) => (
             <Marker
               key={location.id}
               position={
@@ -195,7 +199,6 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
               <Popup>
                 <div>
                   <p className="font-semibold">Lokasi: {location.locationName}</p>
-
                   {token && (
                     <>
                       {editingLocationId === location.id ? (
@@ -236,16 +239,11 @@ export default function MapView({ flyToTrigger, selectedBook, newMarkerPosition,
                 </div>
               </Popup>
             </Marker>
-
         ))}
 
-        {flyToLocation && (
-          <FlyToLocation
-            latitude={flyToLocation.latitude}
-            longitude={flyToLocation.longitude}
-            trigger={flyToTrigger}
-          />
-        )}
+        <FlyToLocation
+          trigger={flyToTrigger}
+        />
         <CustomZoomControl />
       </MapContainer>
       {children}

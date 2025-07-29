@@ -3,16 +3,17 @@ import BookCard from '@/components/BookCard'
 import { useEffect, useState } from 'react'
 import { getRecommendationsBooks } from '@/api/recommendationsBooks.ts'
 import { useAuth } from '@/context/AuthContext.tsx'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
-  onSelectBook: (id: string) => void
-  contentRef: React.RefObject<HTMLDivElement | null> 
+  contentRef: React.RefObject<HTMLDivElement | null>
 }
 
-export default function HomeContent({ onSelectBook, contentRef }: Props) {
+export default function HomeContent({ contentRef }: Props) {
   const [recommendations, setRecommendations] = useState<BookSummaryDTO[]>([])
   const [loading, setLoading] = useState(false)
   const { token, isLoggedIn } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!token && isLoggedIn()) return
@@ -42,7 +43,7 @@ export default function HomeContent({ onSelectBook, contentRef }: Props) {
           <BookCard
             key={book.id}
             book={book}
-            onClick={() => onSelectBook(book.id)}
+            onClick={() => navigate(`/${book.id}`, {state: { reload: Date.now() }})}
           />
         ))
       )}

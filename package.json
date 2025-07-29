@@ -20,8 +20,10 @@
     "react-hook-form": "^7.60.0",
     "react-hot-toast": "^2.5.2",
     "react-leaflet": "^5.0.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
     "react-toastify": "^11.0.5",
+    "redux": "^5.0.1",
     "vite-plugin-pages": "^0.33.1"
   },
   "devDependencies": {

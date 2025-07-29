@@ -6,15 +6,17 @@ import { ApiError } from '@/exception/ApiError'
 import { useAuth } from '@/context/AuthContext.tsx'
 import { Link } from 'react-router-dom'
 import { useRef } from 'react'
+import { useDispatch } from 'react-redux'
+import { fetchReviewsWithUser } from '@/api/reviewsWithUser.ts'
+import { setSelectedBookReviews } from '@/store/actions/selectedBookReviewsActions.ts'
 
 
 interface BookReviewListProps {
   reviews: ReviewWithUserDTO[]
   bookId: string
-  onUpdateReviews: () => void
 }
 
-export default function BookReviewList({ reviews, bookId, onUpdateReviews }: BookReviewListProps) {
+export default function BookReviewList({ reviews, bookId }: BookReviewListProps) {
   const { user } = useAuth()
   const myReview = reviews.find((r) => r.userId === user?.id)
   const otherReviews = reviews.filter((r) => r.userId !== user?.id)
@@ -33,11 +35,13 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
   const [error, setError] = useState<string | null>(null)
   const [previewUser, setPreviewUser] = useState<ReviewWithUserDTO | null>(null)
   const [modalPosition, setModalPosition] = useState<{ x: number; y: number } | null>(null)
+  const dispatch = useDispatch()
 
   const handleDelete = async () => {
     try {
       await deleteReview(bookId, myReview!.userId)
-      onUpdateReviews()
+      const response = await fetchReviewsWithUser(bookId)
+      dispatch(setSelectedBookReviews(response))
     } catch (err) {
       if (err instanceof ApiError) {
         console.error('Gagal menghapus review:', err)
@@ -54,7 +58,8 @@ export default function BookReviewList({ reviews, bookId, onUpdateReviews }: Boo
         rating: editRating
       })
       setEditing(false)
-      onUpdateReviews()
+      const response = await fetchReviewsWithUser(bookId)
+      dispatch(setSelectedBookReviews(response))
     } catch (err) {
       if (err instanceof ApiError) {
         console.error('Gagal menghapus review:', err)

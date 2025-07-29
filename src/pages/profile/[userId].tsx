@@ -281,8 +281,8 @@ function UserProfilePage() {
           onConfirm={handleRemove}
           onCancel={() => setPendingDelete(null)}
         />
-        <div className="w-full lg:w-80 mt-4 lg:mt-0 rounded-3xl shadow-lg overflow-y-auto bg-white">
-          <div className="sticky top-0 bg-white z-10 p-6 border-b">
+        <div className="w-full lg:w-80 rounded-3xl shadow-lg overflow-y-auto bg-white">
+          <div className="bg-white z-10 p-6 border-b">
             <div className="flex items-center justify-between">
               <button
                 className="p-2 rounded bg-gray-100 hover:bg-gray-200 hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:bg-gray-100 disabled:cursor-not-allowed"
@@ -342,8 +342,8 @@ export default UserProfilePage
 
 function UserProfilePageSkeleton() {
   return (
-    <div className="flex max-h-[85vh] w-screen gap-4 max-w-7xl mx-auto bg-gray-50 animate-pulse">
-      <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto">
+    <div className="flex flex-col lg:flex-row mb-6 gap-4 max-w-7xl mx-auto bg-gray-50 animate-pulse">
+      <div className="flex-1 p-8 bg-white rounded-3xl shadow-lg overflow-auto min-h-[85vh]">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
           <div className="rounded-full w-36 h-36 bg-gray-200"/>
           <div className="flex-1 text-center md:text-left space-y-4">
@@ -368,11 +368,36 @@ function UserProfilePageSkeleton() {
           </div>
         </div>
       </div>
-      <div className="w-80 rounded-3xl shadow-lg overflow-y-auto bg-white p-6 space-y-4">
-        <div className="h-6 w-3/4 bg-gray-200 rounded"/>
-        <div className="h-4 w-full bg-gray-100 rounded"/>
-        <div className="h-4 w-5/6 bg-gray-100 rounded"/>
-        <div className="h-4 w-2/3 bg-gray-100 rounded"/>
+      <div className="w-full lg:w-80 rounded-3xl shadow-lg overflow-y-auto bg-white">
+        <div className="bg-white z-10 p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 bg-gray-100 rounded"/>
+            <div className="text-center flex-1 space-y-2">
+              <div className="h-6 w-24 bg-gray-200 mx-auto rounded"/>
+              <div className="h-4 w-32 bg-gray-100 mx-auto rounded"/>
+            </div>
+            <div className="w-9 h-9 bg-gray-100 rounded"/>
+          </div>
+        </div>
+        <div className="p-6 pt-4">
+          <ul className="space-y-4">
+            {Array.from({length: 8}).map((_, idx) => (
+              <li
+                key={idx}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition"
+              >
+              <span className="text-gray-300 w-5 text-right">
+                <div className="w-4 h-4 bg-gray-200 rounded"/>
+              </span>
+                <div className="w-10 h-10 bg-gray-200 rounded-full"/>
+                <div className="flex-1 space-y-1">
+                  <div className="h-4 w-3/4 bg-gray-200 rounded"/>
+                  <div className="h-3 w-1/2 bg-gray-100 rounded"/>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   )

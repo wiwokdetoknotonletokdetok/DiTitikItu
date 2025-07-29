@@ -8,19 +8,22 @@ import Modal from '@/components/Modal.tsx'
 import LoginPromptContent from '@/components/LoginPromptContent'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { fetchReviewsWithUser } from '@/api/reviewsWithUser.ts'
+import { useDispatch } from 'react-redux'
+import { setSelectedBookReviews } from '@/store/actions/selectedBookReviewsActions.ts'
 
 interface AddBookReviewFormProps {
   bookId: string
-  onUpdateReviews: () => void
   isDisabled?: boolean
 }
 
-export default function BookReviewForm({ bookId, onUpdateReviews, isDisabled }: AddBookReviewFormProps) {
+export default function BookReviewForm({ bookId, isDisabled }: AddBookReviewFormProps) {
   const [message, setMessage] = useState('')
   const [rating, setRating] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,7 +33,10 @@ export default function BookReviewForm({ bookId, onUpdateReviews, isDisabled }: 
       await postReview(bookId, { message: message.trim(), rating })
       setMessage('')
       setRating(0)
-      onUpdateReviews()
+
+      const response = await fetchReviewsWithUser(bookId)
+      dispatch(setSelectedBookReviews(response))
+
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || err.errors?.[0] || 'Terjadi kesalahan.')

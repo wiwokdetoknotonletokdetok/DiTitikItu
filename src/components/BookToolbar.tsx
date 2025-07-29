@@ -5,12 +5,14 @@ import { BookPlus } from 'lucide-react'
 import Modal from '@/components/Modal.tsx'
 import { useAuth } from '@/context/AuthContext.tsx'
 import LoginPromptContent from '@/components/LoginPromptContent.tsx'
+import type { RefObject } from 'react'
 
 interface BookToolbarProps {
-  onSelectBook: (bookId: string) => void
+  searchBarRef: RefObject<HTMLDivElement | null>
+  addBookRef: RefObject<HTMLButtonElement | null>
 }
 
-export default function BookToolbar({ onSelectBook }: BookToolbarProps) {
+export default function BookToolbar({ searchBarRef, addBookRef }: BookToolbarProps) {
   const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
 
@@ -26,10 +28,11 @@ export default function BookToolbar({ onSelectBook }: BookToolbarProps) {
     <div className="absolute z-[2001] top-2.5 left-2.5 max-w-md w-full">
       <div className="flex items-center space-x-2">
         <div className="flex-1 z-[2001]">
-          <LiveSearch onSelectBook={onSelectBook}/>
+          <LiveSearch onBoardingRef={searchBarRef} />
         </div>
         <Tooltip message="Tambah buku baru">
           <button
+            ref={addBookRef}
             onClick={handleAddBookClick}
             className="w-[46px] h-[46px] rounded-full text-gray-500 bg-white border border-gray-300 shadow-md flex items-center justify-center"
             aria-label="Tambah buku"

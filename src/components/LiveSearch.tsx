@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 import { getBooksSemantic } from '@/api/BooksSemantic.ts'
 import type { BookSummaryDTO } from '@/dto/BookSummaryDTO.ts'
 import Tooltip from '@/components/Tooltip.tsx'
 import { Search, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getBooksKeyword } from '@/api/BooksKeyword.ts'
 
 interface LiveSearchProps {
-  onSelectBook: (bookId: string) => void
+  onBoardingRef: RefObject<HTMLDivElement | null>
 }
 
-export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
+export default function LiveSearch({ onBoardingRef }: LiveSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<BookSummaryDTO[]>([])
   const [loading, setLoading] = useState(false)
@@ -18,6 +18,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [isTyping, setIsTyping] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     let typingTimeout: NodeJS.Timeout
@@ -83,7 +84,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
 
   return (
     <div className="relative" ref={containerRef}>
-      <div className="relative">
+      <div className="relative" ref={onBoardingRef}>
         <button
           type="button"
           onClick={() => inputRef.current?.focus()}
@@ -143,7 +144,7 @@ export default function LiveSearch({ onSelectBook }: LiveSearchProps) {
                 <li
                   key={i}
                   className="flex items-center space-x-4 p-3 hover:bg-gray-100 cursor-pointer transition"
-                  onClick={() => onSelectBook(book.id)}
+                  onClick={() => navigate(`/${book.id}`, {state: { reload: Date.now() }})}
                 >
                   <img
                     src={book.bookPicture}

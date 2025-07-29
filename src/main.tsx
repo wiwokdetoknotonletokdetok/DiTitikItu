@@ -6,6 +6,8 @@ import { AuthProvider } from '@/context/AuthContext.tsx'
 import './index.css'
 import L from 'leaflet'
 import Container from '@/components/Container.tsx'
+import { Provider } from 'react-redux'
+import store from '@/store'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 
@@ -19,11 +21,13 @@ L.Icon.Default.mergeOptions({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <Container>
-          <App />
-        </Container>
-      </AuthProvider>
+      <Provider store={store}>
+        <AuthProvider>
+          <Container>
+            <App />
+          </Container>
+        </AuthProvider>
+      </Provider>
     </BrowserRouter>
   </StrictMode>,
 )
