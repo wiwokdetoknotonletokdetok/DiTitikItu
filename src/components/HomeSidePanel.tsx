@@ -11,7 +11,7 @@ import Modal from '@/components/Modal'
 import LoginPromptContent from '@/components/LoginPromptContent'
 import toast from 'react-hot-toast'
 import { addBookToCollection, fetchUserBooks, removeBookFromUser } from '@/api/collections'
-import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import { BookmarkIcon as BookmarkSolid, MapPinIcon } from '@heroicons/react/24/solid'
 import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState } from '@/store'
@@ -252,11 +252,11 @@ export default function HomeSidePanel({
 
           <TabPanel id="locations">
             {locations.length > 0 ? (
-              <ul className="space-y-2 text-sm text-gray-600">
-                {locations.map((loc) => (
+              <ul className="text-sm text-gray-600">
+                {locations.map((loc, index) => (
                   <li
                     key={loc.id}
-                    className="border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-50 transition"
+                    className="rounded cursor-pointer hover:bg-gray-50 transition"
                     onClick={() => {
                       dispatch(setFlyToLocation({
                         latitude: loc.coordinates[0],
@@ -267,8 +267,18 @@ export default function HomeSidePanel({
                       scrollTo(mapRef)
                     }}
                   >
-                    <p className="font-semibold text-gray-800">{loc.locationName}</p>
-                    <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
+                    <div className="flex gap-4 items-center p-2">
+                      <div className="bg-[#1E497C] p-1 rounded-full">
+                        <MapPinIcon className="flex-shrink-0 text-white w-4 h-4"/>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-800 truncate">{loc.locationName}</p>
+                        <p className="text-gray-800">{formatDistance(loc.distanceMeters)}</p>
+                      </div>
+                    </div>
+                    {index !== locations.length - 1 && (
+                      <div className="ml-12 border-t border-gray-200"/>
+                    )}
                   </li>
                 ))}
               </ul>

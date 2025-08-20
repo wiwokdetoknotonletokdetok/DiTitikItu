@@ -81,7 +81,7 @@ export default function Home() {
   const fallbackToIPLocation = async () => {
     try {
       const res = await getUserIPLocation()
-      dispatch(setUserPosition({latitude: res.data.latitude, longitude: res.data.longitude, gps: false, zoom: 12}))
+      dispatch(setUserPosition({latitude: res.data.latitude, longitude: res.data.longitude, gps: false, zoom: 13}))
     } catch (err) {
       if (err instanceof ApiError) console.error('API error:', err.message)
       else console.error('Terjadi kesalahan.')

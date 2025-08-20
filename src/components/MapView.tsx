@@ -16,10 +16,8 @@ import type { UserPosition } from '@/dto/UserPosition.ts'
 function SetViewTo({ userPosition } : { userPosition: UserPosition }) {
   const map = useMap()
   useEffect(() => {
-    if (userPosition && userPosition.gps) {
-      map.setView([userPosition.latitude, userPosition.longitude], 16)
-    } else {
-      map.setView([userPosition.latitude, userPosition.longitude], 12)
+    if (userPosition) {
+      map.setView([userPosition.latitude, userPosition.longitude], userPosition.zoom)
     }
   }, [])
   return null
